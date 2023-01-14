@@ -438,7 +438,7 @@ a:focus {
 	border-radius: 20px;
 	margin: 30px auto;
 	position: relative;
-	width: 980px;
+	width: 100vw;
 	z-index: 2;
 }
 #branding {
@@ -573,7 +573,7 @@ a:focus {
 #colophon {
 	margin:  0 auto;
 	padding: 0;
-	width: 980px;
+	width: 100vw;
 }
 #sidebar {
 	float: left;
@@ -602,7 +602,7 @@ body.search #content {
 	padding: 0;
 	position: relative;
 	visibility: hidden;
-	width: 980px;
+	width: 100vw;
 }
 .featured-post-header {
 	background: url(/web/20210210145712im_/https://matefizica.wpcomstaging.com/wp-content/themes/selecta/images/title-swish-bg.png) no-repeat left bottom;
@@ -613,7 +613,7 @@ body.search #content {
     width: 680px;
 }
 .featured-posts .one-sticky {
-	width: 980px !important;
+	width: 100vw !important;
 }
 .featured-posts div.featured-post-content {
 	background: #fff;
@@ -702,7 +702,7 @@ body.search #content {
 	border-bottom: 1px dotted #d8eaf9;
 	margin:  0 auto 30px;
 	padding: 0 0 20px;
-	width: 980px;
+	width: 100vw;
 }
 .latest-posts-header {
 	font-size: 30px;
@@ -836,7 +836,7 @@ span.bg {
 }
 .single-title-wrap {
 	margin: 0 auto;
-	width: 980px;
+	width: 100vw;
 }
 .single-title {
 	font-size: 30px;
@@ -1598,7 +1598,7 @@ td.recentcommentsavatartop {
 	background: #000;
 	border-radius: 20px;
 	margin: 0 auto 20px;
-	width: 980px;
+	width: 100vw;
 }
 #footer-widget-area .widget-area {
 	float: left;
