@@ -269,7 +269,10 @@ body.search #content {
 .single-title a {
 	color: #000;
 }
-
+.credits-by{
+	text-align: center;
+	color: #fff;
+}
 
 /* =In-Post Formatting
 -------------------------------------------------------------- */
