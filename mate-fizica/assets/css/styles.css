@@ -294,16 +294,17 @@ body.search #content {
 .entry h6 {
 	font-size: 12px;
 }
-/*.entry p {
+.entry p {
+	font-size: 16px;
 	font-weight: 550;
-}*/
+}
 .entry p,
 .entry ul,
 .entry ol,
 .entry dd,
 .entry pre,
 .entry address {
-	margin-bottom: 15px;
+	margin-bottom: 12px;
 }
 .entry ul ul,
 .entry ol ol,
