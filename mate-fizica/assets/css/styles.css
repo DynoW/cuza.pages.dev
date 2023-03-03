@@ -57,7 +57,6 @@ body {
 a {
 	color: #3c96df;
 	text-decoration: none;
-	font-weight: 550;
 }
 a:hover {
 	color: #111;
@@ -295,9 +294,9 @@ body.search #content {
 .entry h6 {
 	font-size: 12px;
 }
-.entry p {
+/*.entry p {
 	font-weight: 550;
-}
+}*/
 .entry p,
 .entry ul,
 .entry ol,
