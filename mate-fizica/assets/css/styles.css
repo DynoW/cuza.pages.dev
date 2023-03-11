@@ -362,6 +362,9 @@ a {
     margin-bottom: 5px;
     text-align: center;
   }
+  #single-header {
+    padding: 60px 0 10px;
+  }
 }
 
 @media screen and (max-width: 800px) {
