@@ -365,6 +365,11 @@ a {
   #single-header {
     padding: 60px 0 10px;
   }
+  #credits-by {
+    font-size: 10px;
+    text-align: center;
+    color: #fff;
+  }
 }
 
 @media screen and (max-width: 800px) {
