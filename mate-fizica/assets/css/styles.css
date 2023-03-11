@@ -132,7 +132,7 @@ a {
   display: block;
   line-height: 2em;
   margin: 0 1px 0 0;
-  padding: 0.1em 1em 0;
+  padding: 0.1em 0.5em 0;
   text-decoration: none;
 }
 
@@ -142,7 +142,7 @@ a {
 }
 
 #access ul {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: bold;
   list-style: none;
   margin: 0;
@@ -383,14 +383,14 @@ a {
     display: block;
     line-height: 2em;
     margin: 0 1px 0 0;
-    padding: 0.1em 0.4em 0;
+    padding: 0.1em 0.5em 0;
     text-decoration: none;
   }
 
   #branding {
     float: left;
     padding: 0 15px;
-    width: 25%;
+    width: auto;
   }
 
   a img {
@@ -400,22 +400,6 @@ a {
 
   #content {
     float: right;
-  }
-}
-
-@media screen and (max-width: 1000px) {
-  #branding {
-    float: left;
-    padding: 0 15px;
-    width: auto;
-  }
-
-  #access a {
-    display: block;
-    line-height: 2em;
-    margin: 0 1px 0 0;
-    padding: 0.1em 10px 0;
-    text-decoration: none;
   }
 }
 
