@@ -167,7 +167,7 @@ ul {
 }
 
 #header-image {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   text-align: center;
 }
 
@@ -354,10 +354,13 @@ a {
     padding-right: 10px;
     margin-bottom: -50px;
   }
-
   .entry p {
     font-size: 16px;
     font-weight: 550;
+  }
+  #header-image {
+    margin-bottom: 5px;
+    text-align: center;
   }
 }
 
@@ -367,6 +370,10 @@ a {
     padding-left: 10px;
     padding-right: 10px;
     margin-bottom: -25px;
+  }
+  #header-image {
+    margin-bottom: 10px;
+    text-align: center;
   }
 }
 
