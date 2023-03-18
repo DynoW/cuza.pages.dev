@@ -76,7 +76,7 @@ body {
   background: #7dbaea;
   font: 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
   user-select: none;
-
+  overflow: overlay;
 }
 
 #header {
