@@ -1,3 +1,6 @@
+User-agent: Googlebot
+Disallow: /mate-fizica/files/
+
 User-agent: *
 Allow: /
 Disallow: /cdn-cgi/
