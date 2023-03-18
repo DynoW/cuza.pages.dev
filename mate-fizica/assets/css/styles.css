@@ -386,7 +386,7 @@ a {
     padding-left: 10px;
     padding-right: 10px;
     margin-bottom: -25px;
-    max-width: calc(100vw - 40px);
+    max-width: calc(100vw - 20px);
   }
   #header-image {
     margin-bottom: 10px;
