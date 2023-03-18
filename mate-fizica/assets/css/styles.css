@@ -386,11 +386,9 @@ a {
     padding-left: 10px;
     padding-right: 10px;
     margin-bottom: -25px;
-    max-width: calc(100vw - 20px);
   }
   #header-image {
     margin-bottom: 10px;
-    text-align: center;
   }
 }
 
@@ -400,6 +398,7 @@ a {
     padding-left: 5px;
     padding-right: 5px;
     margin-bottom: -40px;
+    max-width: calc(100vw - 20px);
   }
   .entry p {
     font-size: 16px;
@@ -407,7 +406,6 @@ a {
   }
   #header-image {
     margin-bottom: 5px;
-    text-align: center;
   }
   #single-header {
     padding: 60px 0 10px;
