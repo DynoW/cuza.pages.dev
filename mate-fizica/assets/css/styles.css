@@ -347,44 +347,6 @@ a {
   }
 }
 
-@media screen and (max-width: 500px) {
-  a img {
-    margin-top: -50px;
-    padding-left: 10px;
-    padding-right: 10px;
-    margin-bottom: -50px;
-  }
-  .entry p {
-    font-size: 16px;
-    font-weight: 550;
-  }
-  #header-image {
-    margin-bottom: 5px;
-    text-align: center;
-  }
-  #single-header {
-    padding: 60px 0 10px;
-  }
-  #credits-by {
-    font-size: 12px;
-    text-align: center;
-    color: #fff;
-  }
-}
-
-@media screen and (max-width: 800px) {
-  a img {
-    margin-top: -25px;
-    padding-left: 10px;
-    padding-right: 10px;
-    margin-bottom: -25px;
-  }
-  #header-image {
-    margin-bottom: 10px;
-    text-align: center;
-  }
-}
-
 @media screen and (max-width: 1000px) {
   #access {
     float: left;
@@ -418,6 +380,77 @@ a {
   }
 }
 
+@media screen and (max-width: 800px) {
+  a img {
+    margin-top: -25px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: -25px;
+  }
+  #header-image {
+    margin-bottom: 10px;
+    text-align: center;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  a img {
+    margin-top: -50px;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-bottom: -50px;
+  }
+  .entry p {
+    font-size: 16px;
+    font-weight: 550;
+  }
+  #header-image {
+    margin-bottom: 5px;
+    text-align: center;
+  }
+  #single-header {
+    padding: 60px 0 10px;
+  }
+  #credits-by {
+    font-size: 12px;
+    text-align: center;
+    color: #fff;
+  }
+}
+/*
+@media screen and (max-width: 1000px) {
+  #access {
+    float: left;
+    list-style-type: none;
+    margin-top: 0px;
+    padding: 10px 5px;
+    width: auto;
+  }
+
+  #access a {
+    display: block;
+    line-height: 2em;
+    margin: 0 1px 0 0;
+    padding: 0.1em 1.3em 0;
+    text-decoration: none;
+  }
+
+  #branding {
+    float: left;
+    padding: 0 15px;
+    width: auto;
+  }
+
+  a img {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  #content {
+    float: right;
+  }
+}
+*/
 @media screen and (max-width: 950px) {
   #sidebar,
   #content {
