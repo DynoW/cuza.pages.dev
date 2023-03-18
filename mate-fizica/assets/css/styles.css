@@ -173,7 +173,7 @@ ul {
 
 a img {
   border: none;
-  max-width: calc(100vw - 20px);
+  max-width: calc(100vw - 40px);
   height: 150px;
   object-fit: contain;
 }
@@ -386,6 +386,7 @@ a {
     padding-left: 10px;
     padding-right: 10px;
     margin-bottom: -25px;
+    max-width: calc(100vw - 40px);
   }
   #header-image {
     margin-bottom: 10px;
@@ -417,40 +418,7 @@ a {
     color: #fff;
   }
 }
-/*
-@media screen and (max-width: 1000px) {
-  #access {
-    float: left;
-    list-style-type: none;
-    margin-top: 0px;
-    padding: 10px 5px;
-    width: auto;
-  }
 
-  #access a {
-    display: block;
-    line-height: 2em;
-    margin: 0 1px 0 0;
-    padding: 0.1em 1.3em 0;
-    text-decoration: none;
-  }
-
-  #branding {
-    float: left;
-    padding: 0 15px;
-    width: auto;
-  }
-
-  a img {
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-
-  #content {
-    float: right;
-  }
-}
-*/
 @media screen and (max-width: 950px) {
   #sidebar,
   #content {
