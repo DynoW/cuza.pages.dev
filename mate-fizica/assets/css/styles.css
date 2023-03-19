@@ -128,11 +128,14 @@ a {
   width: 65%;
 }
 
-#access a {
+#access a,
+#access p {
   display: block;
   line-height: 2em;
   margin: 0 1px 0 0;
   padding: 0.1em 0.5em 0;
+  text-decoration: none;
+  color: #3c96df;
   text-decoration: none;
 }
 
