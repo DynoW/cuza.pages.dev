@@ -112,7 +112,6 @@ body {
 a {
   color: #3c96df;
   text-decoration: none;
-  cursor: pointer;
 }
 
 #site-description {
@@ -138,6 +137,7 @@ a {
   text-decoration: none;
   color: #3c96df;
   text-decoration: none;
+  cursor: pointer;
 }
 
 #content {
