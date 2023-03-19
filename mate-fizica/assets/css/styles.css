@@ -112,9 +112,6 @@ body {
 a {
   color: #3c96df;
   text-decoration: none;
-}
-
-a:hover {
   cursor: pointer;
 }
 
