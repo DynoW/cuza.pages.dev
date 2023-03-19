@@ -353,25 +353,16 @@ a {
 @media screen and (max-width: 1000px) {
   #access {
     float: left;
-    list-style-type: none;
     margin-top: 0px;
-    padding: 10px 5px;
     width: auto;
   }
 
   #access a,
   #access p {
-    display: block;
-    line-height: 2em;
-    margin: 0 1px 0 0;
     padding: 0.1em 1.3em 0;
-    text-decoration: none;
-    color: #3c96df;
-    text-decoration: none;
   }
 
   #branding {
-    float: left;
     padding: 0 15px;
     width: auto;
   }
