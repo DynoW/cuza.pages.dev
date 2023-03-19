@@ -114,6 +114,10 @@ a {
   text-decoration: none;
 }
 
+a:hover {
+  cursor: pointer;
+}
+
 #site-description {
   color: #7dbaea;
   font-size: 13px;
