@@ -171,7 +171,7 @@ ul {
   text-align: center;
 }
 
-a img {
+#image {
   border: none;
   max-width: calc(100vw - 40px);
   height: 150px;
@@ -370,7 +370,7 @@ a {
     width: auto;
   }
 
-  a img {
+  #image {
     padding-left: 10px;
     padding-right: 10px;
   }
@@ -381,7 +381,7 @@ a {
 }
 
 @media screen and (max-width: 800px) {
-  a img {
+  #image {
     margin-top: -25px;
     padding-left: 10px;
     padding-right: 10px;
@@ -393,7 +393,7 @@ a {
 }
 
 @media screen and (max-width: 500px) {
-  a img {
+  #image {
     margin-top: -40px;
     padding-left: 5px;
     padding-right: 5px;
