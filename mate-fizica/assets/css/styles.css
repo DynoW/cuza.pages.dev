@@ -356,7 +356,8 @@ a {
     width: auto;
   }
 
-  #access a {
+  #access a,
+  #access p {
     display: block;
     line-height: 2em;
     margin: 0 1px 0 0;
