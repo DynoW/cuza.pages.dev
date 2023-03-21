@@ -67,6 +67,18 @@ td {
   vertical-align: baseline;
 }
 
+:root {
+  --font-headings: unset;
+  --font-base: unset;
+  --font-headings-default: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  --font-base-default: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+html, body {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
 html {
   height: 100%;
   overflow-y: scroll;
