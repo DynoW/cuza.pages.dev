@@ -33,8 +33,8 @@
      "purpose": "any maskable"
     },
     {
-    "src": "/mate-fizica/assets/img/app-icon/atom250x250w.png",
-    "sizes": "250x250",
+    "src": "/mate-fizica/assets/img/app-icon/atom256x256w.png",
+    "sizes": "256x256",
     "type": "image/png",
     "purpose": "any maskable"
     },
@@ -45,15 +45,15 @@
     "purpose": "any maskable"
     },
     {
-    "src": "/mate-fizica/assets/img/app-icon/atom500x500w.png",
-    "sizes": "500x500",
+    "src": "/mate-fizica/assets/img/app-icon/atom512x512w.png",
+    "sizes": "512x512",
     "type": "image/png",
     "purpose": "any maskable"
     }
    ],
     "start_url": "https://dynoshop.tk/mate-fizica/",
     "display": "standalone",
-    "theme_color": "#000000",
-    "background_color": "#ffffff"
+    "theme_color": "#3c96df",
+    "background_color": "#7dbaea"
 }
   
