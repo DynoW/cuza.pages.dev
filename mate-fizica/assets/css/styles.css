@@ -126,6 +126,14 @@ a {
   text-decoration: none;
 }
 
+a:hover {
+	color: #111;
+}
+
+a:focus {
+	color: #004a59;
+}
+
 #site-description {
   color: #7dbaea;
   font-size: 13px;
