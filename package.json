@@ -1,7 +1,9 @@
 {
-  "name": "",
+  "name": "mate-fizica",
+  "description": "Archive bac",
+  "version": "1.0.0",
+  "homepage": "https://cuza.pages.dev",
   "type": "module",
-  "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -10,6 +12,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^3.0.12"
+    "@astrojs/sitemap": "^3.0.0",
+    "astro": "^3.0.12",
+    "sitemap": "^7.1.1"
   }
 }
