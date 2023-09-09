@@ -6,17 +6,17 @@ import Footer from "../components/Footer.astro";
 
 <Layout>
     <section
-        class="text-center d-lg-flex d-xl-flex flex-column align-items-lg-center align-items-xl-center py-4">
-        <div class="container banner-container">
-            <div class="row" style="margin: 0px 12px;">
-                <div class="col-md-6 col-xl-4 text-start">
+        class="text-center flex flex-col items-center py-6">
+        <div class="container bg-zinc-950/90 rounded-3xl  py-5 max-w-screen-lg">
+            <div class="row mx-3">
+                <div class="md:basis-1/2 xl:basis-1/3 text-left">
                     <div class="row">
                         <div class="col">
                             <a
-                                class="navbar-brand d-flex align-items-center"
+                                class="text-white hover:text-white no-underline flex align-items-center"
                                 href="/"
                                 ><span
-                                    class="bs-icon-sm bs-icon-circle bs-icon-primary shadow d-flex justify-content-center align-items-center me-2 bs-icon hover-rotate"
+                                    class="shadow flex justify-center items-center me-2 hover-rotate"
                                     ><img
                                         src="assets/img/logo/atom-w.svg"
                                         width="32"
@@ -24,11 +24,11 @@ import Footer from "../components/Footer.astro";
                                         alt="logo"
                                     /></span
                                 >
-                                <h1 class="container site-name">CuzaLearn</h1>
+                                <h1 class="container no-underline whitespace-nowrap italic font-bold m-0 text-3xl">CuzaLearn</h1>
                             </a>
                             <div class="row">
                                 <div class="col">
-                                    <h2 class="brand-description">
+                                    <h2 class="text-blue-300 text-xs mb-2">
                                         Subiecte de bac din anii anteriori la
                                         fizică și matematică pentru liceeni si
                                         profesori.
@@ -38,43 +38,43 @@ import Footer from "../components/Footer.astro";
                         </div>
                     </div>
                 </div>
-                <div class="col nav-col">
+                <div class="col my-2">
                     <nav>
-                        <ul class="nav nav-tabs mx-auto">
-                            <li class="nav-item active">
-                                <a class="nav-link active" href="/"
+                        <ul class="flex flex-wrap pl-0 mb-0 list-none border-none mx-auto">
+                            <li>
+                                <a class="text-lg font-bold py-2 px-4 hover:text-lime-400 text-lime-400" href="/"
                                     >Prima pagină</a
                                 >
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="antrenament"
+                            <li>
+                                <a class="text-lg font-bold py-2 px-4 hover:text-lime-400 text-blue-500" href="antrenament"
                                     >Teste de antrenament</a
                                 >
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Matematică</a>
+                            <li>
+                                <a class="text-lg font-bold py-2 px-4 hover:text-lime-400 text-blue-500" href="#">Matematică</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Bac</a>
+                            <li>
+                                <a class="text-lg font-bold py-2 px-4 hover:text-lime-400 text-blue-500" href="#">Bac</a>
                             </li>
                         </ul>
                     </nav>
                 </div>
             </div>
             <div class="row">
-                <div class="col">
+                <div class="col p-0">
                     <div class="banner"></div>
                 </div>
             </div>
         </div>
     </section>
     <div
-        class="container d-xl-flex justify-content-xl-center align-items-xl-start content-container">
+        class="container flex items-start max-w-screen-lg mx-auto p-0">
         <div
-            class="col-10 col-sm-6 col-md-5 col-lg-4 col-xl-4 altele-container link-alb">
-            <div style="margin: 0px 20px;">
-                <span class="altele-text">Altele</span>
-                <ul class="link-altele">
+            class="bg-zinc-950/90 rounded-3xl py-5 mb-2.5">
+            <div class="mx-5">
+                <span class="text-lg font-bold text-white">Altele</span>
+                <ul class="text-slate-600">
                     <li>
                         <a href="files/Culegere_9_Chirita.pdf" target="_blank"
                             >Culegere_9_Chirita.pdf</a
@@ -121,8 +121,8 @@ import Footer from "../components/Footer.astro";
                 </ul>
             </div>
         </div>
-        <div class="col-xl-1"></div>
-        <div class="col-12 col-xl-7 article-container">
+        <div class=""></div>
+        <div class="font-['Inter'] bg-white rounded-3xl p-5 pl-2.5 mb-12 break-words">
             <article>
                 <p>2023</p>
                 <p>
