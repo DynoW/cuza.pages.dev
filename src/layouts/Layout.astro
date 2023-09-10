@@ -70,12 +70,6 @@
             sizes="512x512"
             href="assets/img/logo/atoms_512px.png"
         />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@700&family=Poppins:wght@500&display=swap"
-            rel="stylesheet"
-        />
         <link rel="manifest" href="manifest.json" />
         <link
             rel="shortcut icon"
@@ -106,6 +100,14 @@
 <style is:global>
     @tailwind base;
     @layer base {
+        @font-face {
+            font-family: Poppins;
+            src: url('/assets/font/Poppins-Medium.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: Inter;
+            src: url('/assets/font/Inter-Bold.ttf') format('truetype');
+        }
         :root {
             --bs-gutter-x: 1.5rem;
             --bs-gutter-y: 0;
