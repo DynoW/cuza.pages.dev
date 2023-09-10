@@ -12,7 +12,7 @@ interface CustomDataFile {
 }
 
 const data = await Astro.glob<CustomDataFile>(
-    "../../public/files/fizica/**/*.pdf",
+    "/public/files/fizica/**/*.pdf",
 );
 
 const files: string[] = [];
