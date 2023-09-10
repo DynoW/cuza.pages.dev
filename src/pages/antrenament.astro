@@ -11,7 +11,7 @@ interface CustomDataFile {
     default: Record<string, any>;
 }
 
-const data = await Astro.glob<CustomDataFile>(
+const data = await import.meta.glob<CustomDataFile>(
     "/public/files/fizica/**/*.pdf",
 );
 
@@ -21,9 +21,9 @@ const fbac: string[] = [];
 const bac: string[][] = [];
 const fteste: string[] = [];
 const teste: string[][] = [];
-
-data.forEach((file) => {
-    const filePath = file["default"].replace("/public/files/fizica/", "");
+for (const file in data) {
+    data[file]();
+    const filePath = file.replace("/public/files/fizica/", "");
     const pathParts = filePath.split("/");
 
     if (pathParts[0] === "altele") {
@@ -39,8 +39,7 @@ data.forEach((file) => {
         }
         teste.push(pathParts);
     }
-});
-
+}
 fbac.reverse();
 fteste.reverse();
 ---
@@ -95,13 +94,13 @@ fteste.reverse();
         <CenterContainer />
         <RightContainer>
             {
-                fteste.map((date: any) => (
+                fbac.map((date: any) => (
                     <li>
                         <p>{date}</p>
-                        <ul class="flex flex-col space-y-4">
-                            {teste.map((file: any) =>
+                        <ul class="flex flex-col">
+                            {bac.map((file: any) =>
                                 file[1] === date ? (
-                                    <li>
+                                    <li class="pt-4">
                                         <a
                                             href={
                                                 "files/fizica/bac/" +
