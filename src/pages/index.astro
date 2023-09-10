@@ -97,11 +97,11 @@ fteste.reverse();
                 fbac.map((date: any) => (
                     <li>
                         <p>{date}</p>
-                        <ul class="flex flex-col">
+                        <ul class="flex flex-col text-slate-600">
                             {bac.map((file: any) =>
                                 file[1] === date ? (
                                     <li class="pt-4">
-                                        <a
+                                        <a class="hover:text-slate-900 focus:text-slate-900"
                                             href={
                                                 "files/fizica/bac/" +
                                                 date +
