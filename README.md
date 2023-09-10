@@ -1,4 +1,3 @@
-# Fisiere site : (cuza.pages.dev)[https://cuza.pages.dev]
+## Fisiere site : https://cuza.pages.dev
 
-## Editare documente:
-- public > fizica 
+### Editare documente: `public/assests/fizica`
