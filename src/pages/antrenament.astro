@@ -1,6 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Navbar from "../components/Navbar.astro";
+import Navbar from "../layouts/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import Content from "../layouts/Content.astro";
 import LeftContainer from "../layouts/LeftContainer.astro";
@@ -9,7 +9,35 @@ import RightContainer from "../layouts/RightContainer.astro";
 ---
 
 <Layout>
-    <Navbar />
+    <Navbar>
+        <ul
+            class="flex flex-wrap !pl-0 !mb-0 list-none border-none mx-auto">
+            <li class="px-2 py-1 xl:px-4 xl:py-2">
+                <a
+                    class="text-lg font-bold hover:text-lime-400 text-blue-500"
+                    href="/">Prima pagină</a
+                >
+            </li>
+            <li class="px-2 py-1 xl:px-4 xl:py-2">
+                <a
+                    class="text-lg font-bold hover:text-lime-400 text-lime-400"
+                    href="antrenament">Teste de antrenament</a
+                >
+            </li>
+            <li class="px-2 py-1 xl:px-4 xl:py-2">
+                <a
+                    class="text-lg font-bold hover:text-lime-400 text-blue-500"
+                    href="#">Matematică</a
+                >
+            </li>
+            <li class="px-2 py-1 xl:px-4 xl:py-2">
+                <a
+                    class="text-lg font-bold hover:text-lime-400 text-blue-500"
+                    href="#">Bac</a
+                >
+            </li>
+        </ul>
+    </Navbar>
     <Content>
         <LeftContainer>
             <span class="text-lg font-bold text-white">Altele</span>
