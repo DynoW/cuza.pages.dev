@@ -11,8 +11,9 @@ import RightContainer from "../layouts/RightContainer.astro";
 <Layout>
     <Navbar />
     <Content>
-        <LeftContainer><span class="text-lg font-bold text-white">Altele</span>
-            <ul class="text-slate-500">
+        <LeftContainer>
+            <span class="text-lg font-bold text-white">Altele</span>
+            <ul class="text-slate-500 flex flex-col space-y-1">
                 <li>
                     <a
                         class="hover:text-slate-300"
@@ -69,9 +70,11 @@ import RightContainer from "../layouts/RightContainer.astro";
                         target="_blank">100-variante-optica.pdf</a
                     >
                 </li>
-            </ul></LeftContainer>
+            </ul>
+        </LeftContainer>
         <CenterContainer />
-        <RightContainer><p>2023</p>
+        <RightContainer>
+            <p>2023</p>
             <p>
                 <a
                     href="files/H_Hulubei_regionala_SUBIECT_clasa_XII_real_2023.pdf"
@@ -1205,7 +1208,8 @@ import RightContainer from "../layouts/RightContainer.astro";
                 <a href="files/proba_e_d_fizica_barem_10.pdf" target="_blank"
                     >Proba_E_d_Fizica_barem_10</a
                 >
-            </p></RightContainer>
+            </p>
+        </RightContainer>
     </Content>
     <Footer />
 </Layout>
