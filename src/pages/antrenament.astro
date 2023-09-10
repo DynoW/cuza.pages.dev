@@ -6,12 +6,48 @@ import Content from "../layouts/Content.astro";
 import LeftContainer from "../layouts/LeftContainer.astro";
 import CenterContainer from "../components/CenterContainer.astro";
 import RightContainer from "../layouts/RightContainer.astro";
+
+interface CustomDataFile {
+    default: Record<string, any>;
+}
+
+const data = await Astro.glob<CustomDataFile>(
+    "../../public/files/fizica/**/*.pdf",
+);
+
+const files: string[] = [];
+const altele: string[] = [];
+const fbac: string[] = [];
+const bac: string[][] = [];
+const fteste: string[] = [];
+const teste: string[][] = [];
+
+data.forEach((file) => {
+    const filePath = file["default"].replace("/public/files/fizica/", "");
+    const pathParts = filePath.split("/");
+
+    if (pathParts[0] === "altele") {
+        altele.push(pathParts);
+    } else if (pathParts[0] === "bac") {
+        if (fbac.indexOf(pathParts[1]) === -1) {
+            fbac.push(pathParts[1]);
+        }
+        bac.push(pathParts);
+    } else {
+        if (fteste.indexOf(pathParts[1]) === -1) {
+            fteste.push(pathParts[1]);
+        }
+        teste.push(pathParts);
+    }
+});
+
+fbac.reverse();
+fteste.reverse();
 ---
 
 <Layout>
     <Navbar>
-        <ul
-            class="flex flex-wrap !pl-0 !mb-0 list-none border-none mx-auto">
+        <ul class="flex flex-wrap !pl-0 !mb-0 list-none border-none mx-auto">
             <li class="px-2 py-1 xl:px-4 xl:py-2">
                 <a
                     class="text-lg font-bold hover:text-lime-400 text-blue-500"
@@ -42,790 +78,47 @@ import RightContainer from "../layouts/RightContainer.astro";
         <LeftContainer>
             <span class="text-lg font-bold text-white">Altele</span>
             <ul class="text-slate-500 flex flex-col space-y-2 lg:space-y-1">
-                <li>
-                    <a
-                        class="hover:text-slate-300"
-                        href="files/fizica/altele/Culegere_9_Chirita.pdf"
-                        target="_blank">Culegere_9_Chirita.pdf</a
-                    >
-                </li>
-                <li>
-                    <a
-                        class="hover:text-slate-300"
-                        href="files/fizica/altele/Culegere_9_Nicoara.pdf"
-                        target="_blank">Culegere_9_Nicoara.pdf</a
-                    >
-                </li>
-                <li>
-                    <a
-                        class="hover:text-slate-300"
-                        href="files/fizica/altele/Culegere_10_Chirita.pdf"
-                        target="_blank">Culegere_10_Chirita.pdf</a
-                    >
-                </li>
-                <li>
-                    <a
-                        class="hover:text-slate-300"
-                        href="files/fizica/altele/Culegere_10_Nicoara.pdf"
-                        target="_blank">Culegere_10_Nicoara.pdf</a
-                    >
-                </li>
-                <li>
-                    <a
-                        class="hover:text-slate-300"
-                        href="files/fizica/altele/100-variante-mecanica.pdf"
-                        target="_blank">100-variante-mecanica.pdf</a
-                    >
-                </li>
-                <li>
-                    <a
-                        class="hover:text-slate-300"
-                        href="files/fizica/altele/100-variante-termodinamica.pdf"
-                        target="_blank">100-variante-termodinamica.pdf</a
-                    >
-                </li>
-                <li>
-                    <a
-                        class="hover:text-slate-300"
-                        href="files/fizica/altele/100-variante-electricitate.pdf"
-                        target="_blank">100-variante-electricitate.pdf</a
-                    >
-                </li>
-                <li>
-                    <a
-                        class="hover:text-slate-300"
-                        href="files/fizica/altele/100-variante-optica.pdf"
-                        target="_blank">100-variante-optica.pdf</a
-                    >
-                </li>
+                {
+                    altele.map((file: any) => (
+                        <li>
+                            <a
+                                class="hover:text-slate-300"
+                                href="files/fizica/altele/Culegere_9_Chirita.pdf"
+                                target="_blank">
+                                {file[1]}
+                            </a>
+                        </li>
+                    ))
+                }
             </ul>
         </LeftContainer>
         <CenterContainer />
         <RightContainer>
-            <p>Sesiunea IULIE BAC 2023 (rezerva):</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2023_var_01.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2023_var_01</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2023_bar_01.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2023_bar_01</a
-                >
-            </p>
-            <p>Sesiunea IULIE BAC 2023:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2023_var_05.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2023_var_05</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2023_bar_05.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2023_bar_05</a
-                >
-            </p>
-            <p>Sesiunea specială BAC 2023:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2023_var_06.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2023_var_06</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2023_bar_06.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2023_bar_06</a
-                >
-            </p>
-            <p>Simulare BAC 2023:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2023_var_simulare_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2023_var_simulare</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2023_bar_simulare_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2023_bar_simulare</a
-                >
-            </p>
-            <p>Modelul oficial edu BAC 2023:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2023_var_model.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2023_var_model</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2023_bar_model.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2023_bar_model</a
-                >
-            </p>
-            <p>Sesiunea AUGUST BAC 2022:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2022_var_05_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2022_var_05</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2022_bar_05_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2022_bar_05</a
-                >
-            </p>
-            <p>Sesiunea IUNIE BAC 2022:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2022_var_01_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic-vocational_2022_var_01</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2022_bar_01_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic-vocational_2022_bar_01</a
-                >
-            </p>
-            <p>Sesiunea specială BAC 2022:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2022_var_04_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2022_var_04</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2022_bar_04_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2022_bar_04</a
-                >
-            </p>
-            <p>Model EDU BAC 2022:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2022_var_model.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2022_var_model</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2022_bar_model.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2022_bar_model</a
-                >
-            </p>
-            <p>Sesiunea AUGUST BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_var_04_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_var_04</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_bar_04_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_bar_04</a
-                >
-            </p>
-            <p>Sesiunea IUNIE-IULIE BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_var_01_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_var_01</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_bar_01_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_bar_01</a
-                >
-            </p>
-            <p>SERIA 12 BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_Test_12.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_Test_12</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_Bar_12.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_Bar_12</a
-                >
-            </p>
-            <p>SERIA 11 BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_Test_11.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_Test_11</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_Bar_11.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_Bar_11</a
-                >
-            </p>
-
-            <p>Sesiunea SPECIALĂ BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_var_07.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_var_07</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_bar_07.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_bar_07</a
-                >
-            </p>
-            <p>SERIA 10 BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_Test_10.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_Test_10</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_Bar_10.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_Bar_10</a
-                >
-            </p>
-            <p>SERIA 9 BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_test_09.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_test_09</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_bar_09.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_bar_09</a
-                >
-            </p>
-            <p>SERIA 8 BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_test_08.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_test_08</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_bar_08.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_bar_08</a
-                >
-            </p>
-            <p>SERIA 7 BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_test_07.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_test_07</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_bar_07.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_bar_07</a
-                >
-            </p>
-            <p>SERIA 6 BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_test_06.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_test_06</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_bar_06.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_bar_06</a
-                >
-            </p>
-            <p>SERIA 5 BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_test_05.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_test_05</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_bar_05.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_bar_05</a
-                >
-            </p>
-            <p>Simulare BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_var_Simulare_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_var_Simulare</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_bar_Simulare_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_bar_Simulare</a
-                >
-            </p>
-            <p>SERIA 4 BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_test_04.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_test_04</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_bar_04.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_bar_04</a
-                >
-            </p>
-            <p>SERIA 3 BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_test_03.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_test_03</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_bar_03.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_bar_03</a
-                >
-            </p>
-            <p>SERIA 2 BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_test_02.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_test_02</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_bar_02.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_bar_02</a
-                >
-            </p>
-            <p>SERIA 1 BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_test_01.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_test_01</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_bar_01.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2021_bar_01</a
-                >
-            </p>
-            <p>Model noiembrie edu BAC 2021:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_var_model.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_BAC2021_var_model</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2021_bar_model.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_BAC2021_bar_model</a
-                >
-            </p>
-            <p>Subiecte Sesiunea AUGUST-SEPTEMBRIE BAC 2020:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_var_05_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_var_05</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_bar_05_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_bar_05</a
-                >
-            </p>
-            <p>Subiecte Sesiunea SPECIALĂ BAC 2020:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_var_02_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_var_02</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_bar_02_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_bar_02</a
-                >
-            </p>
-            <p>Subiecte Sesiunea IUNIE BAC 2020:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_var_06_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_var_06</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_bar_06_LRO.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_bar_06</a
-                >
-            </p>
-            <p>Setul 8:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_20.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_20</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_20.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_20</a
-                >
-            </p>
-            <p>Setul 7:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_19.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_19</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_19.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_19</a
-                >
-            </p>
-            <p>Setul 6:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_18.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_18</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_18.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_18</a
-                >
-            </p>
-            <p>Setul 5:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_17.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_17</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_17.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_17</a
-                >
-            </p>
-            <p>Setul 4:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_16.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_16</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_16.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_16</a
-                >
-            </p>
-            <p>Setul 3:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_11.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_11</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_11.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_11</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_12.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_12</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_12.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_12</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_13.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_13</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_13.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_13</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_14.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_14</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_14.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_14</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_15.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_15</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_15.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_15</a
-                >
-            </p>
-            <p>Setul 2:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_06.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_06</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_06.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_06</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_07.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_07</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_07.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_07</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_08.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_08</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_08.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_08</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_09.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_09</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_09.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_09</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_10.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_10</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_10.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_10</a
-                >
-            </p>
-            <p>Setul 1:</p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_01.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_01</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_01.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_01</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_02.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_02</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_02.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_02</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_03.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_03</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_03.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_03</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_04.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_04</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_04.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_04</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Test_05.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Test_05</a
-                >
-            </p>
-            <p>
-                <a
-                    href="antrenament/E_d_fizica_teoretic_vocational_2020_Bar_05.pdf"
-                    target="_blank"
-                    >E_d_fizica_teoretic_vocational_2020_Bar_05</a
-                >
-            </p>
+            {
+                fteste.map((date: any) => (
+                    <li>
+                        <p>{date}</p>
+                        <ul class="flex flex-col space-y-4">
+                            {teste.map((file: any) =>
+                                file[1] === date ? (
+                                    <li>
+                                        <a
+                                            href={
+                                                "files/fizica/bac/" +
+                                                date +
+                                                "/" +
+                                                file[2]
+                                            }
+                                            target="_blank">
+                                            {file[2]}
+                                        </a>
+                                    </li>
+                                ) : null,
+                            )}
+                        </ul>
+                    </li>
+                ))
+            }
         </RightContainer>
     </Content>
     <Footer />

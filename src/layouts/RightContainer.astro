@@ -1,6 +1,8 @@
-<div class="bg-gray-100/90 rounded-3xl p-5 pr-2.5 mb-12 basis-7/12 max-w-full">
+<div class="bg-gray-100/90 rounded-3xl p-5 pr-2.5 mb-12 basis-7/12 min-w-full md:min-w-fit max-w-full">
     <article
-        class="flex flex-col space-y-4 font-['Inter'] break-words text-base font-bold text-left not p:text-red-500">
-        <slot />
+        class="font-['Inter'] break-words text-base font-bold text-left not p:text-red-500">
+        <ul class="flex flex-col space-y-4">    
+            <slot />
+        </ul>
     </article>
 </div>
