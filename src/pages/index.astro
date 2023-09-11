@@ -96,7 +96,7 @@ fteste.reverse();
             {
                 fbac.map((date: any) => (
                     <li>
-                        <p>{date}</p>
+                        <p>{date.replace("-", " ")+":"}</p>
                         <ul class="flex flex-col text-slate-600">
                             {bac.map((file: any) =>
                                 file[1] === date ? (
