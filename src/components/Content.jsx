@@ -5,7 +5,6 @@ const data = await import.meta.glob(
     "/public/files/fizica/**/*.pdf"
 );
 
-
 const categories = {};
 
 for (const file in data) {
@@ -31,22 +30,7 @@ for (const file in data) {
     currentCategory = pathParts;
 }
 
-const altele = [];
-var bac = [];
-var teste = [];
-
-for (var key in categories) {
-    if (key == "altele") {
-        for (key in categories["altele"]) {
-            altele.push(categories["altele"][key])
-        }
-    }
-    if (key == "bac") {
-        bac = categories["bac"]
-    }
-}
-var index = 0
-class MyComponent extends React.Component {
+class Content extends React.Component {
     listDir(dict) {
         if (typeof dict !== 'object' || dict === null || Array.isArray(dict)) {
             return
@@ -71,8 +55,8 @@ class MyComponent extends React.Component {
     }
 
     render() {
-        return this.listDir(bac);
+        return this.listDir(categories[this.props.page]);
     }
 }
 
-export default MyComponent;
+export default Content;

@@ -2,46 +2,11 @@
 import Layout from "../layouts/Layout.astro";
 import Navbar from "../layouts/Navbar.astro";
 import Footer from "../components/Footer.astro";
-import Content from "../layouts/Content.astro";
+import MainContainer from "../layouts/MainContainer.astro";
 import LeftContainer from "../layouts/LeftContainer.astro";
 import CenterContainer from "../components/CenterContainer.astro";
 import RightContainer from "../layouts/RightContainer.astro";
-
-interface CustomDataFile {
-    default: Record<string, any>;
-}
-
-const data = await import.meta.glob<CustomDataFile>(
-    "/public/files/fizica/**/*.pdf",
-);
-
-const files: string[] = [];
-const altele: string[][] = [];
-const fbac: string[] = [];
-const bac: string[][] = [];
-const fteste: string[] = [];
-const teste: string[][] = [];
-for (const file in data) {
-    data[file]();
-    const filePath = file.replace("/public/files/fizica/", "");
-    const pathParts = filePath.split("/");
-
-    if (pathParts[0] === "altele") {
-        altele.push(pathParts);
-    } else if (pathParts[0] === "bac") {
-        if (fbac.indexOf(pathParts[1]) === -1) {
-            fbac.push(pathParts[1]);
-        }
-        bac.push(pathParts);
-    } else {
-        if (fteste.indexOf(pathParts[1]) === -1) {
-            fteste.push(pathParts[1]);
-        }
-        teste.push(pathParts);
-    }
-}
-fbac.reverse();
-fteste.reverse();
+import Content from "../components/Content.jsx";
 ---
 
 <Layout>
@@ -73,53 +38,17 @@ fteste.reverse();
             </li>
         </ul>
     </Navbar>
-    <Content>
+    <MainContainer>
         <LeftContainer>
             <span class="text-lg font-bold text-white">Altele</span>
             <ul class="text-slate-500 flex flex-col space-y-2 lg:space-y-1">
-                {
-                    altele.map((file: any) => (
-                        <li>
-                            <a
-                                class="hover:text-slate-300"
-                                href="files/fizica/altele/Culegere_9_Chirita.pdf"
-                                target="_blank">
-                                {file[1]}
-                            </a>
-                        </li>
-                    ))
-                }
+                <Content page={"altele"} />
             </ul>
         </LeftContainer>
         <CenterContainer />
         <RightContainer>
-            {
-                fbac.map((date: any) => (
-                    <li>
-                        <p>{date}</p>
-                        <ul class="flex flex-col text-slate-600">
-                            {bac.map((file: any) =>
-                                file[1] === date ? (
-                                    <li class="pt-4">
-                                        <a
-                                            class="hover:text-slate-900 focus:text-slate-900"
-                                            href={
-                                                "files/fizica/bac/" +
-                                                date +
-                                                "/" +
-                                                file[2]
-                                            }
-                                            target="_blank">
-                                            {file[2]}
-                                        </a>
-                                    </li>
-                                ) : null,
-                            )}
-                        </ul>
-                    </li>
-                ))
-            }
+            <Content page={"teste"} />
         </RightContainer>
-    </Content>
+    </MainContainer>
     <Footer />
 </Layout>

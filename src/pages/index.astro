@@ -2,11 +2,11 @@
 import Layout from "../layouts/Layout.astro";
 import Navbar from "../layouts/Navbar.astro";
 import Footer from "../components/Footer.astro";
-import Content from "../layouts/Content.astro";
+import MainContainer from "../layouts/MainContainer.astro";
 import LeftContainer from "../layouts/LeftContainer.astro";
 import CenterContainer from "../components/CenterContainer.astro";
 import RightContainer from "../layouts/RightContainer.astro";
-import MyReactComponent from '../components/MyReactComponent.jsx';
+import Content from '../components/Content.jsx';
 
 
 
@@ -41,29 +41,17 @@ import MyReactComponent from '../components/MyReactComponent.jsx';
             </li>
         </ul>
     </Navbar>
-    <Content>
+    <MainContainer>
         <LeftContainer>
             <span class="text-lg font-bold text-white">Altele</span>
             <ul class="text-slate-500 flex flex-col space-y-2 lg:space-y-1">
-                <!-- {
-                    altele.map((file: any) => (
-                        <li>
-                            <a
-                                class="hover:text-slate-300"
-                                href={"files/fizica/"+file.join("/")}
-                                target="_blank">
-                                {file[file.length - 1]}
-                            </a>
-                        </li>
-                    ))
-                } -->
+                <Content page={"altele"} />
             </ul>
         </LeftContainer>
         <CenterContainer />
         <RightContainer>
-            
-            <MyReactComponent />
+            <Content page={"bac"} />
         </RightContainer>
-    </Content>
+    </MainContainer>
     <Footer />
 </Layout>
