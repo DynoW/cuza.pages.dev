@@ -19,7 +19,8 @@ for (const file in data) {
         if (!currentCategory[subDirectory]) {
             if (index === pathParts.length - 1) {
                 currentCategory[subDirectory] = pathParts;
-            } else {
+            }
+            else {
                 currentCategory[subDirectory] = {};
             }
         }
@@ -44,23 +45,28 @@ for (var key in categories) {
         bac = categories["bac"]
     }
 }
-
+var index = 0
 class MyComponent extends React.Component {
     listDir(dict) {
         if (typeof dict !== 'object' || dict === null || Array.isArray(dict)) {
             return
         }
-
         return (
-            <div>
+            <ul class="flex flex-col my-2 space-y-4"> 
                 {Object.entries(dict).map(([key, value]) => (
-                    <div key={key}>
-                        <p>{key}</p>
-
+                    (typeof value !== 'object' || value === null || Array.isArray(value)) ?
+                (
+                    <li>
+                        <a href={"/public/files/fizica/" + value.join("/")}>{value[value.length-1]}</a>
+                    </li>
+                ):(
+                    <li key={key}>
+                        <p>{key}:</p>
                         {this.listDir(value)}
-                    </div>
+                    </li>
+                )
                 ))}
-            </div>
+            </ul>
         );
     }
 
