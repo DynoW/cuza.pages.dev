@@ -44,7 +44,7 @@ class Content extends React.Component {
                                 <a className={(this.props.page == "altele") ? "altele-link" : "content-link"} href={"/files/fizica/" + value.join("/")} target="_blank">{value[value.length - 1]}</a>
                             </li>
                         ) : (
-                            <li key={key}>
+                            <li>
                                 <p className={(this.props.page == "altele") ? "altele-text" : "content-text"}>{key.replace("-", " ") + ":"}</p>
                                 {this.listDir(value)}
                             </li>
