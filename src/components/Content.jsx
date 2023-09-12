@@ -36,16 +36,16 @@ class Content extends React.Component {
             return
         }
         return (
-            <ul class="flex flex-col my-2 space-y-4 text-slate-600">
+            <ul className={(this.props.page == "altele") ? "altele-list" : "content-list"}>
                 {Object.entries(dict).map(([key, value]) => (
                     (typeof value !== 'object' || value === null || Array.isArray(value)) ?
                         (
-                            <li className='hover:text-slate-900 focus:text-slate-900'>
-                                <a href={"/public/files/fizica/" + value.join("/")}>{value[value.length - 1]}</a>
+                            <li>
+                                <a className={(this.props.page == "altele") ? "altele-link" : "content-link"} href={"/files/fizica/" + value.join("/")} target="_blank">{value[value.length - 1]}</a>
                             </li>
                         ) : (
                             <li key={key}>
-                                <p className='text-black'>{key.replace("-", " ") + ":"}</p>
+                                <p className={(this.props.page == "altele") ? "altele-text" : "content-text"}>{key.replace("-", " ") + ":"}</p>
                                 {this.listDir(value)}
                             </li>
                         )

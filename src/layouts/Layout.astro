@@ -85,8 +85,8 @@
     </body>
 </html>
 <style is:global>
-    @tailwind base;
-    @layer base {
+    @tailwind utilities;
+    @layer utilities {
         @font-face {
             font-family: Poppins;
             src: url('/assets/font/Poppins-Medium.ttf') format('truetype');
@@ -144,6 +144,24 @@
             transition: 10s;
             max-width: 100%;
             max-height: 150px;
+        }
+        .altele-list {
+            @apply flex flex-col space-y-2 lg:space-y-1 text-slate-500;
+        }
+        .altele-link {
+            @apply hover:text-slate-300;
+        }
+        .altele-text {
+            @apply text-white;
+        }
+        .content-list {
+            @apply my-2 space-y-4 text-slate-600;
+        }
+        .content-link {
+            @apply hover:text-slate-900 focus:text-slate-900;
+        }
+        .content-text {
+            @apply text-gray-900;
         }
     }
 </style>
