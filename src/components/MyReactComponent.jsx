@@ -61,7 +61,7 @@ class MyComponent extends React.Component {
                     </li>
                 ):(
                     <li key={key}>
-                        <p>{key}:</p>
+                                <p>{key.replace("-", " ") + ":"}</p>
                         {this.listDir(value)}
                     </li>
                 )
