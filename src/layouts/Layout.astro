@@ -38,43 +38,43 @@ const {title} = Astro.props;
             rel="apple-touch-icon"
             type="image/png"
             sizes="180x180"
-            href="assets/img/logo/atoms_180px.png"
+            href="/assets/img/logo/atoms_180px.png"
         />
         <link
             rel="icon"
             type="image/png"
             sizes="16x16"
-            href="assets/img/logo/atoms_16px.png"
+            href="/assets/img/logo/atoms_16px.png"
         />
         <link
             rel="icon"
             type="image/png"
             sizes="32x32"
-            href="assets/img/logo/atoms_32px.png"
+            href="/assets/img/logo/atoms_32px.png"
         />
         <link
             rel="icon"
             type="image/png"
             sizes="180x180"
-            href="assets/img/logo/atoms_180px.png"
+            href="/assets/img/logo/atoms_180px.png"
         />
         <link
             rel="icon"
             type="image/png"
             sizes="192x192"
-            href="assets/img/logo/atoms_192px.png"
+            href="/assets/img/logo/atoms_192px.png"
         />
         <link
             rel="icon"
             type="image/png"
             sizes="512x512"
-            href="assets/img/logo/atoms_512px.png"
+            href="/assets/img/logo/atoms_512px.png"
         />
         <link rel="/manifest" href="manifest.json" />
         <link
             rel="shortcut icon"
             type="image/png"
-            href="assets/img/logo/atoms_32px.png"
+            href="/assets/img/logo/atoms_32px.png"
         />
         <meta name="theme-color" content="#0e1720"/>
         <link rel="sitemap" type="application/xml" href="sitemap-index.xml" />
@@ -163,5 +163,33 @@ const {title} = Astro.props;
         .content-text {
             @apply text-gray-900;
         }
+        .dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  @apply border rounded-lg border-blue-950;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  
+  z-index: 1;
+}
+
+.dropdown-content a {
+    @apply border-2 bg-zinc-950/70 border-blue-950;
+    padding: 4px 12px;
+}
+
+.dropdown:hover .dropdown-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown .dropdown-content a:hover {
+    @apply bg-zinc-950/80;
+}
     }
 </style>

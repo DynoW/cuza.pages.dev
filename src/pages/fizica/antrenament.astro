@@ -1,6 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import Navbar from "../../layouts/Navbar.astro";
+import Navbar from "../../components/Navbar.astro";
 import Footer from "../../components/Footer.astro";
 import MainContainer from "../../layouts/MainContainer.astro";
 import LeftContainer from "../../layouts/LeftContainer.astro";
@@ -11,32 +11,7 @@ import Content from "../../components/Content.jsx";
 
 <Layout title="antrenament | cuza.pages.dev">
     <Navbar>
-        <ul class="flex flex-wrap !pl-0 !mb-0 list-none border-none mx-auto">
-            <li class="px-2 py-1 xl:px-4 xl:py-2">
-                <a
-                    class="text-lg font-bold hover:text-lime-400 text-blue-500"
-                    href="/fizica">Prima pagină</a
-                >
-            </li>
-            <li class="px-2 py-1 xl:px-4 xl:py-2">
-                <a
-                    class="text-lg font-bold hover:text-lime-400 text-lime-400"
-                    href="/fizica/antrenament">Teste de antrenament</a
-                >
-            </li>
-            <li class="px-2 py-1 xl:px-4 xl:py-2">
-                <a
-                    class="text-lg font-bold hover:text-lime-400 text-blue-500"
-                    href="#">Matematică</a
-                >
-            </li>
-            <li class="px-2 py-1 xl:px-4 xl:py-2">
-                <a
-                    class="text-lg font-bold hover:text-lime-400 text-blue-500"
-                    href="#">Bac</a
-                >
-            </li>
-        </ul>
+        <Navbar />
     </Navbar>
     <MainContainer>
         <LeftContainer>
