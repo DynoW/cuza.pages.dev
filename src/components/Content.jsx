@@ -40,11 +40,11 @@ class Content extends React.Component {
                 {Object.entries(dict).map(([key, value]) => (
                     (typeof value !== 'object' || value === null || Array.isArray(value)) ?
                         (
-                            <li>
+                            <li key={value[value.length - 1]}>
                                 <a className={(this.props.page == "altele") ? "altele-link" : "content-link"} href={"/files/fizica/" + value.join("/")} target="_blank">{value[value.length - 1]}</a>
                             </li>
                         ) : (
-                            <li>
+                            <li key={key.replace("-", " ")}>
                                 <p className={(this.props.page == "altele") ? "altele-text" : "content-text"}>{key.replace("-", " ") + ":"}</p>
                                 {this.listDir(value)}
                             </li>
