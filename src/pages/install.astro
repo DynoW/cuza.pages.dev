@@ -1,4 +1,7 @@
-<body>
+---
+import Layout from "../layouts/Layout.astro";
+---
+<Layout title="mate-fizica | cuza.pages.dev">
     <button id="installBtn" onclick="
     instalar()
     " disabled>
@@ -26,4 +29,4 @@
             if (beforeInstallPrompt) beforeInstallPrompt.prompt();
         }
     </script>
-</body>
+</Layout>
