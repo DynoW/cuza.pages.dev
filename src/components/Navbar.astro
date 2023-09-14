@@ -56,21 +56,20 @@ const currentPath = pathname.slice(1);
                             <p
                                 class={currentPath.split("/")[0] === "fizica"
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
-                                    : "text-lg font-bold hover:text-lime-400 text-blue-500"}
-                                >Fizică</p
-                            >
+                                    : "text-lg font-bold hover:text-lime-400 text-blue-500"}>
+                                Fizică
+                            </p>
                             <div class="dropdown-content">
                                 <a
                                     class={currentPath === "/fizica"
-                                    ? "text-lg font-bold hover:text-lime-400 text-lime-400"
-                                    : "text-lg font-bold hover:text-lime-400 text-blue-500"}
-                                    href="/fizica"
-                                    >Acasă</a
+                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                    href="/fizica">Acasă</a
                                 >
                                 <a
                                     class={currentPath === "/fizica/antrenament"
-                                    ? "text-lg font-bold hover:text-lime-400 text-lime-400"
-                                    : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                     href="/fizica/antrenament"
                                     >Teste de antrenament</a
                                 >
@@ -91,6 +90,13 @@ const currentPath = pathname.slice(1);
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                 href="#">Admitere</a
                             >
+                        </li>
+                        <li class="px-2 py-1 xl:px-4 xl:py-2">
+                            <div id="installContainer" class="!hidden">
+                                <button id="butInstall" type="button"
+                                    >Install</button
+                                >
+                            </div>
                         </li>
                     </ul>
                 </nav>
