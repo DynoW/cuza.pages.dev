@@ -1,6 +1,6 @@
 ---
 const pathname = new URL(Astro.request.url).pathname;
-const currentPath: any = pathname.split("/");
+const currentPath: any = pathname.replace(".html", "").split("/");
 ---
 
 <section class="text-center flex flex-col items-center py-6">
@@ -64,7 +64,7 @@ const currentPath: any = pathname.split("/");
                                     class={currentPath[1] === "fizica" && currentPath[2] !== "antrenament"
                                         ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                         : "text-lg font-bold hover:text-lime-400 text-blue-500"}
-                                    href="/fizica">{currentPath}</a
+                                    href="/fizica">Acasă</a
                                 >
                                 <a
                                     class={currentPath[1] === "fizica" && currentPath[2] === "antrenament"
