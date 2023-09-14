@@ -1,13 +1,20 @@
 ---
 import Layout from "../layouts/Layout.astro";
 ---
+
 <Layout title="mate-fizica | cuza.pages.dev">
-    <button id="installBtn" onclick="
-    instalar()
-    " disabled>
-        Instalar PWA
-    </button>
-    <script>
+    <div class="installBtnDiv">
+        <button
+            id="installBtn"
+            class="blue-button"
+            onclick="
+            instalar()
+            "
+            disabled>
+            Instalar PWA
+        </button>
+    </div>
+    <script is:inline>
         var beforeInstallPrompt = null;
 
         window.addEventListener(
@@ -29,4 +36,23 @@ import Layout from "../layouts/Layout.astro";
             if (beforeInstallPrompt) beforeInstallPrompt.prompt();
         }
     </script>
+    <style>
+        .installBtnDiv {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .blue-button {
+            background-color: blue;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
 </Layout>

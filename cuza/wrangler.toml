@@ -1,8 +1,0 @@
-name = "cuza"
-main = "src/index.ts"
-compatibility_date = "2023-09-14"
-usage_model = "bundled"
-env = { }
-
-[triggers]
-crons = [ ]
