@@ -54,7 +54,7 @@ const currentPath = pathname.slice(1);
                         </li>
                         <li class="px-2 py-1 xl:px-4 xl:py-2 dropdown">
                             <p
-                                class={currentPath.split("/")[0] === "fizica"
+                                class={currentPath === "/fizica" || currentPath === "/fizica/antrenament"
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}>
                                 Fizică
