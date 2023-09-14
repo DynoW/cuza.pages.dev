@@ -1,6 +1,6 @@
 ---
 const pathname = new URL(Astro.request.url).pathname;
-const currentPath = pathname.slice(1);
+const currentPath: any = pathname.split("/");
 ---
 
 <section class="text-center flex flex-col items-center py-6">
@@ -46,7 +46,7 @@ const currentPath = pathname.slice(1);
                         class="flex flex-wrap !pl-0 !mb-0 list-none border-none mx-auto">
                         <li class="px-2 py-1 xl:px-4 xl:py-2">
                             <a
-                                class={currentPath === ""
+                                class={currentPath[1] === ""
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                 href="/">Prima pagină</a
@@ -54,20 +54,20 @@ const currentPath = pathname.slice(1);
                         </li>
                         <li class="px-2 py-1 xl:px-4 xl:py-2 dropdown">
                             <p
-                                class={currentPath === "/fizica"
+                                class={currentPath[1] === "fizica"
                                         ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                         : "text-lg font-bold hover:text-lime-400 text-blue-500"}>
                                 Fizică
                             </p>
                             <div class="dropdown-content">
                                 <a
-                                    class={currentPath === "/fizica"
+                                    class={currentPath[1] === "fizica" && currentPath[2] !== "antrenament"
                                         ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                         : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                     href="/fizica">Acasă</a
                                 >
                                 <a
-                                    class={currentPath === "/fizica/antrenament"
+                                    class={currentPath[1] === "fizica" && currentPath[2] === "antrenament"
                                         ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                         : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                     href="/fizica/antrenament"
