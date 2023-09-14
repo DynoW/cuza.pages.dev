@@ -2,6 +2,12 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@1,700&display=swap" rel="stylesheet">
+</head>
+
 <Layout title="mate-fizica | cuza.pages.dev">
     <div class="installBtnDiv">
         <button
@@ -11,7 +17,7 @@ import Layout from "../layouts/Layout.astro";
             install()
             "
             disabled>
-            Add to home 
+            Add to home <br> screen &#128512;
         </button>
     </div>
     <script is:inline>
@@ -48,10 +54,12 @@ import Layout from "../layouts/Layout.astro";
         .blue-button {
             background-color: blue;
             color: white;
-            padding: 15px 30px;
+            padding: 30px;
             border: none;
-            border-radius: 5px;
-            font-size: 24px;
+            border-radius: 50%;
+            aspect-ratio: 1 / 1;
+            font-size: 50px;
+            font-family: Chakra Petch;
             cursor: pointer;
         }
     </style>
