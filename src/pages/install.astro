@@ -8,10 +8,10 @@ import Layout from "../layouts/Layout.astro";
             id="installBtn"
             class="blue-button"
             onclick="
-            instalar()
+            install()
             "
             disabled>
-            Instalar PWA
+            Add to home 
         </button>
     </div>
     <script is:inline>
@@ -32,7 +32,7 @@ import Layout from "../layouts/Layout.astro";
             console.log("error: " + event);
         }
 
-        function instalar() {
+        function install() {
             if (beforeInstallPrompt) beforeInstallPrompt.prompt();
         }
     </script>
