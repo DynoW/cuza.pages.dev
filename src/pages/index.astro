@@ -6,19 +6,28 @@ import MainContainer from "../layouts/MainContainer.astro";
 import LeftContainer from "../layouts/LeftContainer.astro";
 import CenterContainer from "../components/CenterContainer.astro";
 import RightContainer from "../layouts/RightContainer.astro";
-import Anunturi from "../content/Anunturi.md"
+import Anunturi from "../content/Anunturi.md";
 ---
 
 <Layout title="mate-fizica | cuza.pages.dev">
     <Navbar />
     <MainContainer>
-        <LeftContainer>
-            <span class="text-md text-white">Scanează codul QR de mai jos pentru a instala aplicația!</span>
-            <img height="200" width="200" class="mx-auto my-4" src="/assets/img/QR/code.png"/>
-        </LeftContainer>
+        <div class="bg-[rgba(10,13,16,.9)] rounded-3xl py-5 mb-2.5 basis-1/3 QR">
+            <div class="mx-5">
+                <span class="text-md text-white"
+                    >Scanează codul QR de mai jos pentru a instala aplicația!</span
+                >
+                <img
+                    height="200"
+                    width="200"
+                    class="mx-auto my-4"
+                    src="/assets/img/QR/code.png"
+                />
+            </div>
+        </div>
         <CenterContainer />
         <RightContainer>
-           <Anunturi />
+            <Anunturi />
         </RightContainer>
     </MainContainer>
     <Footer />

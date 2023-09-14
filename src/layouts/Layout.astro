@@ -191,5 +191,10 @@ const {title} = Astro.props;
         .dropdown .dropdown-content a:hover {
             @apply bg-zinc-950/80;
         }
+        @media all and (display-mode: standalone) {
+            .QR {
+                display: none;
+            }
+        }
     }
 </style>
