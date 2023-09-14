@@ -5,17 +5,17 @@
             "src": "/assets/img/logo/atoms_192px.png",
             "type": "image/png",
             "sizes": "192x192",
-            "purpose": "maskable"
+            "purpose": "any maskable"
         },
         {
             "src": "/assets/img/logo/atoms_512px.png",
             "type": "image/png",
             "sizes": "512x512",
-            "purpose": "maskable"
+            "purpose": "any maskable"
         }
     ],
     "start_url": "index.html",
-    "background_color": "#f9f9f9",
+    "background_color": "#60a5fa",
     "theme_color": "#f9f9f9",
     "display": "standalone"
 }
