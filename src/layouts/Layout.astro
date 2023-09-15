@@ -78,6 +78,7 @@ const {title} = Astro.props;
         />
         <meta name="theme-color" content="#0e1720" />
         <link rel="sitemap" type="application/xml" href="sitemap-index.xml" />
+        
     </head>
     <body
         class="backgroundImage font-['Poppins'] select-none overflow-x-hidden">
@@ -164,28 +165,19 @@ const {title} = Astro.props;
             @apply text-gray-900;
         }
         .dropdown {
-            position: relative;
-            display: inline-block;
+            @apply relative inline-block;
         }
 
         .dropdown-content {
-            display: none;
-            position: absolute;
-            @apply border rounded-lg border-blue-950;
-
-            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-            margin-left: -20px;
-            z-index: 1;
+            @apply hidden absolute border rounded-lg border-blue-950 -ml-5 z-10;
         }
 
         .dropdown-content a {
-            @apply border-2 bg-zinc-950/70 border-blue-950;
-            padding: 4px 12px;
+            @apply border-2 bg-zinc-950/70 border-blue-950 py-1 px-3;
         }
 
         .dropdown:hover .dropdown-content {
-            display: flex;
-            flex-direction: column;
+            @apply flex flex-col;
         }
 
         .dropdown .dropdown-content a:hover {

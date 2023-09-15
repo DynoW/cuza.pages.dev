@@ -49,27 +49,33 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                 class={currentPath[1] === ""
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                rel="prefetch"
                                 href="/">Prima pagină</a
                             >
                         </li>
                         <li class="px-2 py-1 xl:px-4 xl:py-2 dropdown">
-                            <p tabindex="0"
+                            <p
+                                tabindex="0"
                                 class={currentPath[1] === "fizica"
-                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
-                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}>
+                                    ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                    : "text-lg font-bold hover:text-lime-400 text-blue-500"}>
                                 Fizică
                             </p>
                             <div class="dropdown-content">
                                 <a
-                                    class={currentPath[1] === "fizica" && currentPath[2] !== "antrenament"
+                                    class={currentPath[1] === "fizica" &&
+                                    currentPath[2] !== "antrenament"
                                         ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                         : "text-lg font-bold hover:text-lime-400 text-blue-500"}
-                                    href="/fizica">Acasă</a
+                                    rel="prefetch"
+                                    href="/fizica">Bac</a
                                 >
                                 <a
-                                    class={currentPath[1] === "fizica" && currentPath[2] === "antrenament"
+                                    class={currentPath[1] === "fizica" &&
+                                    currentPath[2] === "antrenament"
                                         ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                         : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                    rel="prefetch"
                                     href="/fizica/antrenament"
                                     >Teste de antrenament</a
                                 >
@@ -77,7 +83,7 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                         </li>
                         <li class="px-2 py-1 xl:px-4 xl:py-2">
                             <a
-                                class={currentPath === "/mate"
+                                class={currentPath[1] === "mate"
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                 href="#">Matematică</a
@@ -85,7 +91,7 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                         </li>
                         <li class="px-2 py-1 xl:px-4 xl:py-2">
                             <a
-                                class={currentPath === "/admitere"
+                                class={currentPath[1] === "admitere"
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                 href="#">Admitere</a
