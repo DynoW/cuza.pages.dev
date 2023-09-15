@@ -115,13 +115,13 @@ const {title} = Astro.props;
             @layer utilities {
                 @font-face {
                     font-family: Poppins;
-                    src: url("/assets/font/Poppins-Medium.ttf")
-                        format("truetype");
-                    font-display: fallback;
+                    src:    url('/assets/fonts/poppins-medium.woff2') format('woff2'),
+                            url('/assets/fonts/poppins-medium.woff') format('woff');
+                    font-display: swap;
                 }
                 @font-face {
                     font-family: Inter;
-                    src: url("/assets/font/Inter-Bold.ttf") format("truetype");
+                    src: url("/assets/fonts/Inter-Bold.ttf") format("truetype");
                     font-display: fallback;
                 }
                 :root {
