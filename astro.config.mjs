@@ -9,7 +9,8 @@ export default defineConfig({
   site: 'https://cuza.pages.dev',
   trailingSlash: 'never',
   build: {
-    format: 'file'
+    format: 'file',
+    inlineStylesheets: 'always'
   },
   integrations: [sitemap(), tailwind(), react(), prefetch(), compress()]
 });
