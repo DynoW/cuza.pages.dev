@@ -10,3 +10,6 @@
 ### Location for editing documents at **_physics_**: `public/assests/files/fizica`
 
 ### Location for editing documents at **_math_**: `public/assests/files/mate`
+
+Hi! 😊
+
