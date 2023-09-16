@@ -41,7 +41,7 @@ class Content extends React.Component {
                     (typeof value !== 'object' || value === null || Array.isArray(value)) ?
                         (
                             <li key={value[value.length - 1]}>
-                                <a className={(this.props.page == "altele") ? "altele-link" : "content-link"} href={"/files/" + this.props.subject + "/" + value.join("/")} target="_blank">{value[value.length - 1]}</a>
+                                <a className={(this.props.page == "altele") ? "altele-link" : "content-link"} href={"/files/" + value.join("/")} target="_blank">{value[value.length - 1]}</a>
                             </li>
                         ) : (
                             <li key={key.replace("-", " ")}>
