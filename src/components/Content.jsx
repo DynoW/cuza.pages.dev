@@ -29,7 +29,7 @@ for (const file in data) {
 
     currentCategory = pathParts;
 }
-console.log(categories)
+
 class Content extends React.Component {
     listDir(dict) {
         if (typeof dict !== 'object' || dict === null || Array.isArray(dict)) {
