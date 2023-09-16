@@ -37,7 +37,7 @@ class Content extends React.Component {
         }
         return (
             <ul className={(this.props.page == "altele") ? "altele-list" : "content-list"}>
-                {Object.entries(dict).map(([key, value]) => (
+                {Object.entries(dict).reverse().map(([key, value]) => (
                     (typeof value !== 'object' || value === null || Array.isArray(value)) ?
                         (
                             <li key={value[value.length - 1]}>
