@@ -75,8 +75,12 @@ const {title} = Astro.props;
                     {
                         rel: "sitemap",
                         type: "application/xml",
-                        href: "sitemap-index.xml",
+                        href: "/sitemap-index.xml",
                     },
+                    {
+                        rel: "stylesheet",
+                        href: "/assets/css/github-markdown.css",
+                    }
                 ],
                 meta: [
                     {
@@ -111,6 +115,7 @@ const {title} = Astro.props;
         <slot />
         <style is:global>
             @tailwind utilities;
+
             @layer utilities {
                 @font-face {
                     font-family: Poppins;
