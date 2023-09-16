@@ -2,14 +2,14 @@ import React from 'react';
 
 
 const data = await import.meta.glob(
-    "/public/files/fizica/**/*.pdf"
+    "/public/files/**/*.pdf"
 );
 
 const categories = {};
 
 for (const file in data) {
     data[file]();
-    const filePath = file.replace("/public/files/fizica/", "");
+    const filePath = file.replace("/public/files/", "");
     const pathParts = filePath.split("/");
 
     let currentCategory = categories;
@@ -29,7 +29,7 @@ for (const file in data) {
 
     currentCategory = pathParts;
 }
-
+console.log(categories)
 class Content extends React.Component {
     listDir(dict) {
         if (typeof dict !== 'object' || dict === null || Array.isArray(dict)) {
@@ -41,7 +41,7 @@ class Content extends React.Component {
                     (typeof value !== 'object' || value === null || Array.isArray(value)) ?
                         (
                             <li key={value[value.length - 1]}>
-                                <a className={(this.props.page == "altele") ? "altele-link" : "content-link"} href={"/files/fizica/" + value.join("/")} target="_blank">{value[value.length - 1]}</a>
+                                <a className={(this.props.page == "altele") ? "altele-link" : "content-link"} href={"/files/" + this.props.subject + "/" + value.join("/")} target="_blank">{value[value.length - 1]}</a>
                             </li>
                         ) : (
                             <li key={key.replace("-", " ")}>
@@ -55,7 +55,7 @@ class Content extends React.Component {
     }
 
     render() {
-        return this.listDir(categories[this.props.page]);
+        return this.listDir(categories[this.props.subject][this.props.page]);
     }
 }
 

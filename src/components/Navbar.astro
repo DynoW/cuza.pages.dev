@@ -84,13 +84,36 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                 >
                             </div>
                         </li>
-                        <li class="px-2 py-1 xl:px-4 xl:py-2">
-                            <a
+                        <li class="px-2 py-1 xl:px-4 xl:py-2 dropdown">
+                            <p
+                                tabindex="0"
+                                role="button"
+                                aria-expanded="false"
+                                aria-haspopup="true"
                                 class={currentPath[1] === "mate"
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
-                                    : "text-lg font-bold hover:text-lime-400 text-blue-500"}
-                                href="#">Matematică</a
-                            >
+                                    : "text-lg font-bold hover:text-lime-400 text-blue-500"}>
+                                Matematică
+                            </p>
+                            <div class="dropdown-content">
+                                <a
+                                    class={currentPath[1] === "mate" &&
+                                    currentPath[2] !== "antrenament"
+                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                    rel="prefetch"
+                                    href="/mate">Bac</a
+                                >
+                                <a
+                                    class={currentPath[1] === "mate" &&
+                                    currentPath[2] === "antrenament"
+                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                    rel="prefetch"
+                                    href="/mate/antrenament"
+                                    >Teste de antrenament</a
+                                >
+                            </div>
                         </li>
                         <li class="px-2 py-1 xl:px-4 xl:py-2">
                             <a
