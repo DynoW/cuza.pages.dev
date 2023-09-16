@@ -19,17 +19,25 @@ It's easyer to contibute if you know them, but you can still and impovements if 
 
 ## First steps:
 Check out the site's GitHub Page (click the logo of the site).
+![logo of the site](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-1.png)
 
 Make an account 🧑‍🔬:
+![sing up](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-2.png)
 
 Star ⭐ and fork 🍴 the repository:
-
-Press . to open project in VSC browser 💻:
+![logo of the site](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-3.png)
 
 Make your changes ✨✨!
 
-Create a pull request and wait for our approval 👍:
+![logo of the site](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-5.png)
 
+(Tip press . to open project in VSC browser 💻 or use Github's interface)
+
+Create a pull request:
+![pull request](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-8.png)
+
+and wait for our approval 👍:
+![approval](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-9.png)
 ## Important locations:
 
 `/public` - here are document files stored
