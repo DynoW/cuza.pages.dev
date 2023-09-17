@@ -3,9 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import MainContainer from "../layouts/MainContainer.astro";
-import LeftContainer from "../layouts/LeftContainer.astro";
 import CenterContainer from "../components/CenterContainer.astro";
-import RightContainer from "../layouts/RightContainer.astro";
 import Anunturi from "../../README.md";
 ---
 
@@ -13,14 +11,14 @@ import Anunturi from "../../README.md";
     <Navbar />
     <MainContainer>
         <div
-            class="bg-[rgba(10,13,16,.9)] rounded-3xl py-5 mb-2.5 basis-1/3 QR">
+            class="bg-[rgba(10,13,16,.9)] rounded-3xl py-5 mb-2.5 basis-1/4 QR">
             <div class="mx-5">
                 <span class="text-md text-white"
                     >Scanează codul QR de mai jos pentru a instala aplicația!</span
                 >
                 <img
-                    height="200"
-                    width="200"
+                    height="150"
+                    width="150"
                     class="mx-auto my-4"
                     src="/assets/img/QR/code.png"
                 />
@@ -28,7 +26,7 @@ import Anunturi from "../../README.md";
         </div>
         <CenterContainer />
         <div
-            class="bg-[#0d1117] rounded-3xl p-5 pr-2.5 mb-12 basis-7/12">
+            class="bg-[#0d1117] rounded-3xl p-5 pr-2.5 mb-12 basis-4/6">
             <article
                 class="markdown-body">
                 <Anunturi />

@@ -50,7 +50,7 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                 rel="prefetch"
-                                href="/">Prima pagină</a
+                                href="/">Acasă</a
                             >
                         </li>
                         <li class="px-2 py-1 xl:px-4 xl:py-2 dropdown">
@@ -116,11 +116,19 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                             </div>
                         </li>
                         <li class="px-2 py-1 xl:px-4 xl:py-2">
-                            <a
+                            <button
+                                class={currentPath[1] === "informatica"
+                                    ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                    : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                onclick="alert('Coming SOON!')">Informatică</button
+                            >
+                        </li>
+                        <li class="px-2 py-1 xl:px-4 xl:py-2">
+                            <button
                                 class={currentPath[1] === "admitere"
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}
-                                href="#">Admitere</a
+                                onclick="alert('Coming SOON!')">Admitere</button
                             >
                         </li>
                     </ul>
