@@ -106,6 +106,15 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                 >
                                 <a
                                     class={currentPath[1] === "mate" &&
+                                    currentPath[2] === "variante"
+                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                    rel="prefetch"
+                                    href="/mate/variante"
+                                    >Variante</a
+                                >
+                                <a
+                                    class={currentPath[1] === "mate" &&
                                     currentPath[2] === "antrenament"
                                         ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                         : "text-lg font-bold hover:text-lime-400 text-blue-500"}
