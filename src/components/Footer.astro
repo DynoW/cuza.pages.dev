@@ -26,6 +26,7 @@ async function fetchData() {
 
     const contributorAlias: Record<string, string | null | undefined> = {
         Naffets0: "",
+        DynoW: "",
     };
     const contributors: Record<string, any | null> = {};
 
@@ -161,6 +162,7 @@ const dict = await fetchData();
                     </div>
                     <div class="row">
                         <div class="text-slate-600 col">
+                            <div class="flex flex-row flex-wrap">
                             {
                                 Object.entries(dict).map(([key, value]) =>
                                     key != Object.keys(dict).pop() ? (
@@ -179,7 +181,7 @@ const dict = await fetchData();
                                         </a>
                                     ),
                                 )
-                            }
+                            }</div>
                         </div>
                     </div>
                 </div>
