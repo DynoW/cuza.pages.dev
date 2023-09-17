@@ -67,11 +67,20 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                             <div class="dropdown-content">
                                 <a
                                     class={currentPath[1] === "fizica" &&
-                                    currentPath[2] !== "antrenament"
+                                    currentPath[2] == undefined
                                         ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                         : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                     rel="prefetch"
                                     href="/fizica">Bac</a
+                                >
+                                <a
+                                    class={currentPath[1] === "fizica" &&
+                                    currentPath[2] === "variante"
+                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                    rel="prefetch"
+                                    href="/fizica/variante"
+                                    >Variante</a
                                 >
                                 <a
                                     class={currentPath[1] === "fizica" &&
@@ -103,15 +112,6 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                         : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                     rel="prefetch"
                                     href="/mate">Bac</a
-                                >
-                                <a
-                                    class={currentPath[1] === "mate" &&
-                                    currentPath[2] === "variante"
-                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
-                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}
-                                    rel="prefetch"
-                                    href="/mate/variante"
-                                    >Variante</a
                                 >
                                 <a
                                     class={currentPath[1] === "mate" &&
