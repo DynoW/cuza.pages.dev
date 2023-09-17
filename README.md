@@ -34,7 +34,7 @@ Make your changes ✨✨!
 
 ![logo of the site](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-5.png)
 
-(Tip press . to open project in VSC browser 💻 or use Github's interface)
+(Tip press . to open project in VSC browser 💻 or use GitHub's interface)
 
 Create a pull request:
 
@@ -91,4 +91,4 @@ Submit the issue:
 
 - Try to be open 🤗 to changes of your code at push commits (most of the time they aren't needed).
 
-- You can specify the alias you want for contribuing (at the bottom of pages) 😊.
+- You can specify the alias you want for contribuing, instead of your GitHub username (at the bottom of pages) 😊. (Tip: you can add an instagram link in your GitHub profile and it will be referenced as a link in the footer)
