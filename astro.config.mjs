@@ -12,5 +12,8 @@ export default defineConfig({
     format: 'file',
     inlineStylesheets: 'always'
   },
+  redirects: {
+    '/': '/acasa'
+  },
   integrations: [sitemap(), tailwind(), react(), prefetch(), compress()]
 });

@@ -46,11 +46,11 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                         class="flex flex-wrap !pl-0 !mb-0 list-none border-none mx-auto">
                         <li class="px-2 py-1 xl:px-4 xl:py-2">
                             <a
-                                class={currentPath[1] === ""
+                                class={currentPath[1] === "acasa"
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                 rel="prefetch"
-                                href="/">Acasă</a
+                                href="/acasa">Acasă</a
                             >
                         </li>
                         <li class="px-2 py-1 xl:px-4 xl:py-2 dropdown">
@@ -120,7 +120,7 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                 class={currentPath[1] === "informatica"
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}
-                                onclick="alert('Coming SOON!')">Informatică</button
+                                onclick="alert('În curând!')">Informatică</button
                             >
                         </li>
                         <li class="px-2 py-1 xl:px-4 xl:py-2">
@@ -128,7 +128,7 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                 class={currentPath[1] === "admitere"
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}
-                                onclick="alert('Coming SOON!')">Admitere</button
+                                onclick="alert('În curând!')">Admitere</button
                             >
                         </li>
                     </ul>
