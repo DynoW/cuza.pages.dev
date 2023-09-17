@@ -1,0 +1,66 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@1,700&display=swap" rel="stylesheet">
+</head>
+
+<Layout title="mate-fizica | cuza.pages.dev">
+    <div class="installBtnDiv">
+        <button
+            id="installBtn"
+            class="blue-button"
+            onclick="
+            install()
+            "
+            disabled>
+            Add to home <br> screen &#128512;
+        </button>
+    </div>
+    <script is:inline>
+        var beforeInstallPrompt = null;
+
+        window.addEventListener(
+            "beforeinstallprompt",
+            eventHandler,
+            errorHandler,
+        );
+
+        function eventHandler(event) {
+            beforeInstallPrompt = event;
+            document.getElementById("installBtn").removeAttribute("disabled");
+        }
+
+        function errorHandler(event) {
+            console.log("error: " + event);
+        }
+
+        function install() {
+            if (beforeInstallPrompt) beforeInstallPrompt.prompt();
+        }
+    </script>
+    <style>
+        .installBtnDiv {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 90vh;
+            margin: 0;
+        }
+
+        .blue-button {
+            background-color: blue;
+            color: white;
+            padding: 30px;
+            border: none;
+            border-radius: 50%;
+            aspect-ratio: 1 / 1;
+            font-size: 50px;
+            font-family: Chakra Petch;
+            cursor: pointer;
+        }
+    </style>
+</Layout>
