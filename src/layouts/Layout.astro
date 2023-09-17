@@ -97,7 +97,7 @@ const {title} = Astro.props;
                     {
                         rel: "stylesheet",
                         href: "/assets/css/github-markdown.css",
-                    }
+                    },
                 ],
                 meta: [
                     {
@@ -126,9 +126,22 @@ const {title} = Astro.props;
                 ],
             }}
         />
+        <!-- Google tag (gtag.js) -->
+        <script
+            async
+            src="https://www.googletagmanager.com/gtag/js?id=G-PS1EBGH4HS"
+        ></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+
+            gtag("config", "G-PS1EBGH4HS");
+        </script>
     </head>
-    <body
-        class="backgroundImage font-serif select-none overflow-x-hidden">
+    <body class="backgroundImage font-serif select-none overflow-x-hidden">
         <slot />
         <style is:global>
             @tailwind utilities;
@@ -136,14 +149,17 @@ const {title} = Astro.props;
             @layer utilities {
                 @font-face {
                     font-family: Poppins;
-                    src:    url('/assets/fonts/poppins-medium.woff2') format('woff2'),
-                            url('/assets/fonts/poppins-medium.woff') format('woff');
+                    src:
+                        url("/assets/fonts/poppins-medium.woff2")
+                            format("woff2"),
+                        url("/assets/fonts/poppins-medium.woff") format("woff");
                     font-display: swap;
                 }
                 @font-face {
                     font-family: Inter;
-                    src:    url('/assets/fonts/inter-medium.woff2') format('woff2'),
-                            url('/assets/fonts/inter-medium.woff') format('woff');
+                    src:
+                        url("/assets/fonts/inter-medium.woff2") format("woff2"),
+                        url("/assets/fonts/inter-medium.woff") format("woff");
                     font-display: swap;
                 }
                 :root {
@@ -224,7 +240,8 @@ const {title} = Astro.props;
                     @apply border-2 bg-zinc-950/70 border-blue-950 py-1 px-3;
                 }
 
-                .dropdown:hover .dropdown-content, .dropdown:focus .dropdown-content {
+                .dropdown:hover .dropdown-content,
+                .dropdown:focus .dropdown-content {
                     @apply flex flex-col;
                 }
 
