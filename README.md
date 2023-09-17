@@ -61,6 +61,7 @@ and add the new link at the end of the `<ul>` respecting the same format, making
 > This way you can ask us questions and tell us about your ideas
 
 Go to issues:
+
 ![issues](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-10.png)
 
 Create a new issue:
