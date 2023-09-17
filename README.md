@@ -59,7 +59,6 @@ Go to issues:
 ![issues](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-10.png)
 
 Create a new issue:
-
 ![new issue](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-11.png)
 
 Select a label:
