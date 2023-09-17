@@ -68,6 +68,8 @@ Create a new issue:
 
 ![new issue](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-11.png)
 
+Write the content ✍️ of your issue
+
 Select a label:
 
 ![label](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-12.png)
