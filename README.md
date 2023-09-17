@@ -15,7 +15,7 @@
 ## About this project:
 The project was made with the framework Astro 🚀, and modules Tailwind 🍃 & React ⚛️.
 
-It's easyer to contibute if you know them, but you can still and impovements if you don't know about them!
+It's easier to contibute if you know them, but you can still and impovements if you don't know about them!
 
 ## First steps:
 Check out the site's GitHub Page (click the logo of the site).
@@ -40,7 +40,7 @@ and wait for our approval 👍:
 ![approval](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-9.png)
 ## Important locations:
 
-`/public` - here are document files stored
+`/public` - here are documents stored
 
 `/src` - here is the source code of the site and where pages are created
 
@@ -49,7 +49,26 @@ and wait for our approval 👍:
 To make a new page you can copy one of the avabile pages in `/src/pages` and rename it and put it in `/src/pages/{PATH}` where `PATH` is the location relative to the site's domain (cuza.pages.dev/{PATH}).
 
 You will probably need to change the navbar of the page so go to `src/components/Navbar.astro`
-and add at the end of the `<ul>` respecting the same format, making necessary changes for your page's PATH.
+and add the new link at the end of the `<ul>` respecting the same format, making necessary changes for your page's PATH.
+
+## How to make a feature request or report bugs:
+
+> This way you can ask us questions and tell us about your ideas
+
+Go to issues:
+![issues](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-10.png)
+
+Create a new issue:
+
+![new issue](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-11.png)
+
+Select a label:
+![label](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-12.png)
+
+Submit the issue:
+
+![submit](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-13.png)
+
 
 ## Rules:
 
@@ -61,6 +80,6 @@ and add at the end of the `<ul>` respecting the same format, making necessary ch
 
 ## Extra:
 
-- Try to be open 🤗 to changes of your code at push commits (most of the time they aren't needed if the impovements look good).
+- Try to be open 🤗 to changes of your code at push commits (most of the time they aren't needed).
 
 - You can specify the alias you want for contribuing (at the bottom of pages) 😊.
