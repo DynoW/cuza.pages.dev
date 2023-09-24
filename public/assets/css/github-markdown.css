@@ -315,6 +315,7 @@
 
 .markdown-body ul,
 .markdown-body ol {
+  list-style: circle;
   margin-top: 0;
   margin-bottom: 0;
   padding-left: 2em;

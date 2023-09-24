@@ -1,0 +1,54 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Navbar from "../../components/Navbar.astro";
+import Footer from "../../components/Footer.astro";
+import MainContainer from "../../layouts/MainContainer.astro";
+import CenterContainer from "../../components/CenterContainer.astro";
+import Curs from "../../components/Curs.astro";
+const courses = await Astro.glob("../../content/info/*.md");
+---
+
+<Layout title="mate-fizica | cuza.pages.dev">
+    <Navbar>
+        <Navbar />
+    </Navbar>
+    <MainContainer>
+        <div class="bg-[rgba(10,13,16,.9)] rounded-3xl py-5 mb-2.5 basis-1/4">
+            <div class="mx-5">
+                <span class="text-lg text-white">Linkuri utile:</span>
+                <ul class="altele-list">
+                    <li class="altele-link">
+                        <a href="https://www.w3schools.com/cpp/default.asp"
+                            >Learn C++</a
+                        >
+                    </li>
+                    <li class="altele-link">
+                        <a href="https://onecompiler.com/cpp">OneCompiler</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <CenterContainer />
+        <div
+            class="basis-4/6 text-white">
+            <h1 class="bg-[#0d1117] rounded-3xl p-5 pr-4 mb-1">Notițe algoritmi de baza: (Imagini pentru explicații în curând!)</h1>
+            <ul>
+                {
+                    courses.map((course) => (
+                        <li class="bg-[#0d1117] rounded-3xl p-5 pr-4 mb-2 max-w-[95vw]">
+                            <Curs
+                                curs={course.file
+                                    .split("/")
+                                    [course.file.split("/").length - 1].replace(
+                                        ".md",
+                                        "",
+                                    )}
+                            />
+                        </li>
+                    ))
+                }
+            </ul>
+        </div>
+    </MainContainer>
+    <Footer />
+</Layout>

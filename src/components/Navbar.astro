@@ -125,11 +125,12 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                             </div>
                         </li>
                         <li class="px-2 py-1 xl:px-4 xl:py-2">
-                            <button
-                                class={currentPath[1] === "informatica"
+                            <a
+                                class={currentPath[1] === "info"
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}
-                                onclick="alert('În curând!')">Informatică</button
+                                rel="prefetch"
+                                href="/info">Informatică</a
                             >
                         </li>
                         <li class="px-2 py-1 xl:px-4 xl:py-2">

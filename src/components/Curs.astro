@@ -1,0 +1,13 @@
+---
+import {getEntry} from "astro:content";
+
+const {curs} = Astro.props;
+
+const entry = await getEntry("info", curs);
+const {Content, headings} = await entry.render();
+---
+
+<p>{entry.data.title} &nbsp; {entry.data.description}</p>
+<article class="markdown-body overscroll-y-auto">
+    <Content />
+</article>
