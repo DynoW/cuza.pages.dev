@@ -18,7 +18,7 @@ do {
     for(i=0;i<n-1;i++){
         if(v[i]>v[i+1]){
             OK=0;
-            swap(v[i],v[i+1])
+            swap(v[i],v[i+1]);
         }
     }
 } while(OK==0);
