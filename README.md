@@ -1,4 +1,4 @@
-# Help us improve the site 😀!
+# Help us add more content to the site 😀!
 > (This is Cuza highschool's non-official site _by students for students_)
 
 <font size="1">For help contact **Danutz** or send an email ✉️ (slower response 🐌).</font>
