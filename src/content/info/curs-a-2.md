@@ -11,14 +11,14 @@ for(i=0;i<n-1;i++)
             swap(v[i],v[j]);
 ```
 
-Varianta II - boubble sort:
+Varianta II - bubble sort:
 ```cpp
 do {
     OK=1;
     for(i=0;i<n-1;i++){
         if(v[i]>v[i+1]){
             OK=0;
-            swap(v[i],v[i+1])
+            swap(v[i],v[i+1]);
         }
     }
 } while(OK==0);

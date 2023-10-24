@@ -30,9 +30,9 @@ if(a*b==0){
 } else {
     while(a!=b){
         if(a>b)
-            a=a-b
+            a=a-b;
         else
-            b=b-a
+            b=b-a;
     }
     cmmdc=0;
 }
