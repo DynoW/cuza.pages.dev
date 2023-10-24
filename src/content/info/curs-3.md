@@ -5,9 +5,9 @@ description: "Factori primi"
 
 Varianta I:
 ```cpp
-d=0;
+d=2;
 while(n!=1){
-    n=0;
+    p=0;
     while(n%d==0){
         p++;
         n=n/d;
