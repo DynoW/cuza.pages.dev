@@ -41,7 +41,7 @@ const courses = await Astro.glob("../../content/info/*.md");
             <ul>
                 {
                     courses.map((course) => (
-                        <li class="bg-[#0d1117] rounded-3xl p-5 pr-4 mb-2 max-w-[95vw]">
+                        <li class="bg-[#0d1117] rounded-3xl p-5 pr-4 mb-2 max-w-[95vw] select-text">
                             <Curs
                                 curs={course.file
                                     .split("/")

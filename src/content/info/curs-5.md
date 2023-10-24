@@ -16,7 +16,7 @@ if(n==1){
 } else {
     c = b = 1;
     a = 0;
-    while(n>0){
+    while(a<n){
         a = b + c;
         c = b;
         b = a;
