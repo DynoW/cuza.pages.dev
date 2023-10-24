@@ -32,7 +32,7 @@ if(a*b==0){
         else
             b=b-a;
     }
-    cmmdc=0;
+    cmmdc=a;
 }
 cmmmc = a*b/cmmdc;
 ```
