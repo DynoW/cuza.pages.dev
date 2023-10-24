@@ -23,8 +23,6 @@ cmmmc = a*b/cmmdc;
 
 Varianta II - scăderi repetate:
 ```cpp
-ca=a;
-cb=b;
 if(a*b==0){
     cmmdc=a+b;
 } else {
