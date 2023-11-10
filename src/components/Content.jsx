@@ -32,6 +32,7 @@ for (const file in data) {
 
 class Content extends React.Component {
     listDir(dict) {
+        let Child=0
         if (typeof dict !== 'object' || dict === null || Array.isArray(dict)) {
             return
         }
@@ -45,7 +46,8 @@ class Content extends React.Component {
                             </li>
                         ) : (
                             <li key={key.replace("-", " ")}>
-                                <p className={(this.props.page == "altele") ? "altele-text" : "content-text"}>{key.replace("-", " ") + ":"}</p>
+                                <hr className={(++Child != 1) ? "hidden" : "border-black mb-2"} />
+                                <p className={(this.props.page == "altele") ? "altele-text" : "content-text"} id={key}>{key.replace("-", " ") + ":"}</p>
                                 {this.listDir(value)}
                             </li>
                         )
