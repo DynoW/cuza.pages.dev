@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /files/
 
 Sitemap: https://cuza.pages.dev/sitemap-index.xml
