@@ -1,6 +1,6 @@
 ---
 title: "Curs-6"
-description: "Citire de nr"
+description: "Citire de nr."
 ---
 
 Varianta I - citire pană la 0:
