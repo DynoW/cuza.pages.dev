@@ -82,10 +82,10 @@ async function getSocials(name: string) {
 const dict = await fetchData();
 ---
 
-<footer class="mt-3 bg-gray-300/75 text-slate-500">
+<footer class="absolute bottom-0 w-full bg-gray-300/75 text-slate-500">
     <div class="container py-4 lg:py-3 mx-auto">
-        <div class="text-muted flex justify-between items-center pt-3">
-            <div class="row">
+        <div class="text-muted flex flex-col xs:flex-row justify-between items-center pt-3">
+            <div class="row mb-4 xs:mb-0">
                 <div class="col">
                     <p class="mb-0">Copyright © 2023 DynoW</p>
                 </div>
@@ -186,7 +186,7 @@ const dict = await fetchData();
                     </div>
                 </div>
             </div>
-            <div class="row sm:rotate-0 rotate-90">
+            <div class="row xs:rotate-90 md:rotate-0 rotate-0 mt-8 xs:mt-0">
                 <div class="col">
                     <p class="">cuza.pages.dev @ gmail.com</p>
                 </div>

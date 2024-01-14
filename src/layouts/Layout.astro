@@ -139,7 +139,7 @@ const {title} = Astro.props;
             </script>
             ): []}
     </head>
-    <body class="backgroundImage font-serif select-none overflow-x-hidden">
+    <body class="backgroundImage font-serif select-none overflow-x-hidden relative min-h-screen">
         <slot />
         <style is:global>
             @tailwind utilities;
@@ -214,7 +214,7 @@ const {title} = Astro.props;
                 }
 
                 .dropdown-content {
-                    @apply hidden absolute border rounded-lg border-blue-950 -ml-5 z-10;
+                    @apply hidden absolute border rounded-lg border-blue-950 z-10;
                 }
 
                 .dropdown-content a {

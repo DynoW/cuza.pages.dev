@@ -9,6 +9,10 @@ module.exports = {
 				'sans': ['Inter', ...defaultTheme.fontFamily.sans],
 				'serif': ['Poppins', ...defaultTheme.fontFamily.sans],
 			},
+			screens: {
+				'xxs': '320px',
+				'xs': '400px',
+			}
 		},
 	},
 	plugins: [],
