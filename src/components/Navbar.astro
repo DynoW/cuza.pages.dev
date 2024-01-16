@@ -56,7 +56,6 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                 class={currentPath[1] === ""
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}
-                                rel="prefetch"
                                 href="/">Acasă</a
                             >
                         </li>
@@ -71,7 +70,7 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}>
                                 Fizică
                             </p>
-                            <div class="dropdown-content">
+                            <div class="dropdown-content -ml-12">
                                 <a
                                     class={currentPath[1] === "fizica" &&
                                     currentPath[2] === undefined
@@ -111,7 +110,7 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}>
                                 Matematică
                             </p>
-                            <div class="dropdown-content">
+                            <div class="dropdown-content -ml-5">
                                 <a
                                     class={currentPath[1] === "mate" &&
                                     currentPath[2] === undefined
@@ -139,6 +138,46 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                 rel="prefetch"
                                 href="/info">Informatică</a
                             >
+                        </li>
+                        <li class="px-2 py-1 xl:px-4 xl:py-2 dropdown">
+                            <p
+                                tabindex="0"
+                                role="button"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                class={currentPath[1] === "admitere"
+                                    ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                    : "text-lg font-bold hover:text-lime-400 text-blue-500"}>
+                                Admitere
+                            </p>
+                            <div class="dropdown-content">
+                                <a
+                                    class={currentPath[1] === "admitere" &&
+                                    currentPath[2] === "mate"
+                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                    rel="prefetch"
+                                    href="/admitere/mate">Mate</a
+                                >
+                                <a
+                                    class={currentPath[1] === "admitere" &&
+                                    currentPath[2] === "fizica"
+                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                    rel="prefetch"
+                                    href="/admitere/fizica"
+                                    >Fizica</a
+                                >
+                                <a
+                                    class={currentPath[1] === "admitere" &&
+                                    currentPath[2] === "info"
+                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                    rel="prefetch"
+                                    href="/admitere/info"
+                                    >Info</a
+                                >
+                            </div>
                         </li>
                     </ul>
                 </nav>
