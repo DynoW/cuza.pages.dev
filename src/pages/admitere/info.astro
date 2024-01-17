@@ -6,19 +6,23 @@ import MainContainer from "../../layouts/MainContainer.astro";
 import LeftContainer from "../../layouts/LeftContainer.astro";
 import CenterContainer from "../../components/CenterContainer.astro";
 import RightContainer from "../../layouts/RightContainer.astro";
+import Content from "../../components/Content.jsx";
 ---
 
-<Layout title="fizica | cuza.pages.dev">
+<Layout title="admitere-info | cuza.pages.dev">
     <Navbar>
         <Navbar />
     </Navbar>
     <MainContainer>
         <LeftContainer>
             <span class="text-lg font-bold text-white">Altele</span>
+            <ul class="text-slate-500 flex flex-col space-y-2 lg:space-y-1">
+                <Content subject={"admitere"} page={"altele-info"} />
+            </ul>
         </LeftContainer>
         <CenterContainer />
         <RightContainer>
-            <h2>Soon!</h2>
+            <Content subject={"admitere"} page={"info"} />
         </RightContainer>
     </MainContainer>
     <Footer />

@@ -37,17 +37,17 @@ class Content extends React.Component {
             return
         }
         return (
-            <ul className={(this.props.page == "altele") ? "altele-list" : "content-list"}>
+            <ul className={(this.props.page.includes('altele')) ? "altele-list" : "content-list"}>
                 {Object.entries(dict).reverse().map(([key, value]) => (
                     (typeof value !== 'object' || value === null || Array.isArray(value)) ?
                         (
                             <li key={value[value.length - 1]}>
-                                <a className={(this.props.page == "altele") ? "altele-link" : "content-link"} href={"/files/" + value.join("/")} target="_blank">{value[value.length - 1]}</a>
+                                <a className={(this.props.page.includes('altele')) ? "altele-link" : "content-link"} href={"/files/" + value.join("/")} target="_blank">{value[value.length - 1]}</a>
                             </li>
                         ) : (
                             <li key={key.replace("-", " ")}>
                                 <hr className={(++Child != 1) ? "hidden" : "border-black mb-2"} />
-                                <p className={(this.props.page == "altele") ? "altele-text" : "content-text"} id={key}>{key.replace("-", " ") + ":"}</p>
+                                <p className={(this.props.page.includes('altele')) ? "altele-text" : "content-text"} id={key}>{key.replace("-", " ")}</p>
                                 {this.listDir(value)}
                             </li>
                         )
