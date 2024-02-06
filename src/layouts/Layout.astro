@@ -254,6 +254,7 @@ const {title} = Astro.props;
                 if (link.href.includes('/files/')) {
                     const regex = /.*\/files\//;
                     link.href = link.href.replace(regex, 'https://docs.google.com/gview?embedded=true&url=https://cuza.pages.dev/files/');
+                    link.target = '_self'
                 }
             });
         }
