@@ -1,0 +1,27 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Navbar from "../../components/Navbar.astro";
+import Footer from "../../components/Footer.astro";
+import MainContainer from "../../layouts/MainContainer.astro";
+import LeftContainer from "../../layouts/LeftContainer.astro";
+import CenterContainer from "../../components/CenterContainer.astro";
+import RightContainer from "../../layouts/RightContainer.astro";
+import Content from "../../components/Content.jsx";
+---
+
+<Layout title="mate-simulări | cuza.pages.dev">
+    <Navbar>
+        <Navbar />
+    </Navbar>
+    <MainContainer>
+        <LeftContainer>
+            <span class="text-lg font-bold text-white">Altele</span>
+            <Content subject={"mate"} page={"altele"} />
+        </LeftContainer>
+        <CenterContainer />
+        <RightContainer>
+            <h2>În curând!</h2>
+        </RightContainer>
+    </MainContainer>
+    <Footer />
+</Layout>

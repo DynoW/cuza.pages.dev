@@ -83,21 +83,28 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                 >
                                 <a
                                     class={currentPath[1] === "fizica" &&
+                                    currentPath[2] === "teste"
+                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                    rel="prefetch"
+                                    href="/fizica/teste"
+                                    >Teste de antrenament</a
+                                >
+                                <a
+                                    class={currentPath[1] === "fizica" &&
+                                    currentPath[2] === "simulari"
+                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                    rel="prefetch"
+                                    href="/fizica/simulari">Simulări județene</a
+                                >
+                                <a
+                                    class={currentPath[1] === "fizica" &&
                                     currentPath[2] === "variante"
                                         ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                         : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                     rel="prefetch"
-                                    href="/fizica/variante"
-                                    >Variante</a
-                                >
-                                <a
-                                    class={currentPath[1] === "fizica" &&
-                                    currentPath[2] === "antrenament"
-                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
-                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}
-                                    rel="prefetch"
-                                    href="/fizica/antrenament"
-                                    >Teste de antrenament</a
+                                    href="/fizica/variante">100 Variante</a
                                 >
                             </div>
                         </li>
@@ -123,12 +130,21 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                 >
                                 <a
                                     class={currentPath[1] === "mate" &&
-                                    currentPath[2] === "antrenament"
+                                    currentPath[2] === "teste"
                                         ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                         : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                     rel="prefetch"
-                                    href="/mate/antrenament"
+                                    href="/mate/teste"
                                     >Teste de antrenament</a
+                                >
+                                <a
+                                    class={currentPath[1] === "mate" &&
+                                    currentPath[2] === "simulari"
+                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                        : "text-lg font-bold hover:text-lime-400 text-blue-500"}
+                                    rel="prefetch"
+                                    href="/mate/simulari"
+                                    >Simulări județene</a
                                 >
                             </div>
                         </li>
@@ -167,8 +183,7 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                         ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                         : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                     rel="prefetch"
-                                    href="/admitere/fizica"
-                                    >Fizica</a
+                                    href="/admitere/fizica">Fizică</a
                                 >
                                 <a
                                     class={currentPath[1] === "admitere" &&
@@ -176,8 +191,7 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                         ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                         : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                     rel="prefetch"
-                                    href="/admitere/info"
-                                    >Info</a
+                                    href="/admitere/info">Info</a
                                 >
                             </div>
                         </li>
@@ -187,7 +201,12 @@ const currentPath: any = pathname.replace(".html", "").split("/");
         </div>
         <div class="row">
             <div class="col mb-[6px] flex justify-center">
-                <img alt="banner" src="/assets/img/banner/poza.webp" height="250px" width="1500px">
+                <img
+                    alt="banner"
+                    src="/assets/img/banner/poza.webp"
+                    height="250px"
+                    width="1500px"
+                />
                 <div class="clouds"></div>
                 <div class="bunny"></div>
                 <div class="grass"></div>
