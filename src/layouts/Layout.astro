@@ -188,8 +188,39 @@ const {title} = Astro.props;
                     flex: 1 0 0%;
                 }
                 .backgroundImage {
-                    background: url("/assets/img/background/bg-pattern-cr.png"),
-                        linear-gradient(to left, #330d0d,#cc3333);
+                    background: url("/assets/img/background/bg-pattern.webp"),
+                        linear-gradient(to top, #5a801d, #92a9c7 40%, #bbd8ff);
+                    background-attachment: fixed;
+                }
+                .grass {
+                    z-index: -2;
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 170px;
+                    background-image: url("/assets/img/background/grass.webp");
+                    background-repeat: repeat-x;
+                }
+                .clouds {
+                    z-index: -1;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 275px;
+                    background-image: url("/assets/img/background/clouds.webp");
+                    background-repeat: repeat-x;
+                }
+                .bunny {
+                    z-index: -1;
+                    position: fixed;
+                    bottom: -1px;
+                    left: 0;
+                    width: 250px;
+                    height: 300px;
+                    background-image: url("/assets/img/background/bunny.webp");
+                    background-repeat: no-repeat;
                 }
                 .altele-list {
                     @apply flex flex-col space-y-2 lg:space-y-1 text-slate-500;
