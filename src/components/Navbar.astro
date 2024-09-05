@@ -52,15 +52,7 @@ const currentPath: any = pathname.replace(".html", "").split("/");
             <div class="col !my-2">
                 <nav>
                     <ul
-                        class="flex flex-wrap !pl-0 !mb-0 list-none border-none mx-auto">
-                        <li class="px-2 py-1 xl:px-4 xl:py-2">
-                            <a
-                                class={currentPath[1] === ""
-                                    ? "text-lg font-bold hover:text-lime-400 text-lime-400"
-                                    : "text-lg font-bold hover:text-lime-400 text-blue-500"}
-                                href="/">Acasă</a
-                            >
-                        </li>
+                        class="flex flex-wrap !pl-0 !mb-0 list-none border-none mx-auto lg:justify-end">
                         <li class="px-2 py-1 xl:px-4 xl:py-2 dropdown">
                             <p
                                 tabindex="0"
@@ -200,12 +192,11 @@ const currentPath: any = pathname.replace(".html", "").split("/");
             </div>
         </div>
         <div class="row">
-            <div class="col mb-[6px] flex justify-center">
+            <div class="col mb-[6px] ">
                 <img
                     alt="banner"
-                    src="/assets/img/banner/poza1.webp"
-                    height="250px"
-                    width="1500px"
+                    src="/assets/img/banner/fizica.webp"
+                    class="max-h-32 object-cover w-full"
                 />
                 <!-- easter update -->
                 <!-- <div class="clouds"></div>

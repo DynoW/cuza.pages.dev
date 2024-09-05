@@ -1,10 +1,12 @@
 ---
-import {SEO} from "astro-seo";
+import { SEO } from "astro-seo";
+import  UpArrow  from "../icons/UpArrow.astro"; 
 interface Props {
     title: string;
 }
 
 const {title} = Astro.props;
+const description = "Subiecte de bac din anii anteriori la fizica si matematica pentru liceeni si profesori. Parte din proiectul: DynoW/cuza.pages.dev";
 ---
 
 <!doctype html>
@@ -13,7 +15,7 @@ const {title} = Astro.props;
         <SEO
             charset="UTF-8"
             title={title}
-            description="Subiecte de bac din anii anteriori la fizica si matematica pentru liceeni si profesori. Parte din proiectul: DynoW/cuza.pages.dev"
+            description={description}
             openGraph={{
                 basic: {
                     title: title,
@@ -111,8 +113,7 @@ const {title} = Astro.props;
                     },
                     {
                         name: "twitter:description",
-                        content:
-                            "Subiecte de bac din anii anteriori la fizica si matematica pentru liceeni si profesori. Parte din proiectul: DynoW/cuza.pages.dev",
+                        content: description,
                     },
                     {
                         name: "theme-color",
@@ -137,10 +138,32 @@ const {title} = Astro.props;
 
                 gtag("config", "G-PS1EBGH4HS")
             </script>
-            ): []}
+            ): null }
     </head>
     <body class="backgroundImage font-serif select-none overflow-x-hidden relative min-h-screen">
         <slot />
+        <div class="fixed bottom-4 right-4">
+            <button
+                id="scrollToTop"
+                class="bg-white font-bold p-4 rounded-full transition ease-in-out hover:scale-105 duration-200"
+                onclick="scrollToTop()"
+            >
+                <UpArrow />
+            </button>
+            <script is:inline>
+                function scrollToTop() {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                window.addEventListener('scroll', function() {
+                    const button = document.getElementById('scrollToTop');
+                    if (window.scrollY > 0) {
+                        button.style.display = 'block';
+                    } else {
+                        button.style.display = 'none';
+                    }
+                });
+            </script>
+        </div>
         <style is:global>
             @tailwind utilities;
 
@@ -148,8 +171,7 @@ const {title} = Astro.props;
                 @font-face {
                     font-family: Poppins;
                     src:
-                        url("/assets/fonts/poppins-medium.woff2")
-                            format("woff2"),
+                        url("/assets/fonts/poppins-medium.woff2") format("woff2"),
                         url("/assets/fonts/poppins-medium.woff") format("woff");
                     font-display: swap;
                 }
@@ -240,10 +262,10 @@ const {title} = Astro.props;
                     @apply text-white;
                 }
                 .content-list {
-                    @apply mb-2 space-y-4 text-slate-600;
+                    @apply mb-2 space-y-4;
                 }
                 .content-link {
-                    @apply hover:text-slate-900 focus:text-slate-900 md:text-lg;
+                    @apply text-slate-600 hover:text-slate-900 focus:text-slate-900 md:text-lg;
                 }
                 .content-text {
                     @apply text-gray-900 md:text-lg;
@@ -251,20 +273,16 @@ const {title} = Astro.props;
                 .dropdown {
                     @apply relative inline-block;
                 }
-
                 .dropdown-content {
                     @apply hidden absolute border rounded-lg border-blue-950 z-10;
                 }
-
                 .dropdown-content a {
                     @apply border-2 bg-zinc-950/70 border-blue-950 py-1 px-3;
                 }
-
                 .dropdown:hover .dropdown-content,
                 .dropdown:focus .dropdown-content {
                     @apply flex flex-col;
                 }
-
                 .dropdown .dropdown-content a:hover {
                     @apply bg-zinc-950/80;
                 }

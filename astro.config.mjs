@@ -8,6 +8,9 @@ import compress from "astro-compress";
 export default defineConfig({
   site: 'https://cuza.pages.dev',
   trailingSlash: 'never',
+  redirects: {
+    '/': '/fizica',
+  },
   build: {
     format: 'file',
     inlineStylesheets: 'always'
