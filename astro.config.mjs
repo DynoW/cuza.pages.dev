@@ -9,7 +9,7 @@ export default defineConfig({
   site: 'https://cuza.pages.dev',
   trailingSlash: 'never',
   redirects: {
-    '/': '/fizica',
+    '/fizica': '/',
   },
   build: {
     format: 'file',

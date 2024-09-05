@@ -59,19 +59,18 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                 role="button"
                                 aria-expanded="false"
                                 aria-haspopup="true"
-                                class={currentPath[1] === "fizica"
+                                class={currentPath[1] === ""
                                     ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                     : "text-lg font-bold hover:text-lime-400 text-blue-500"}>
                                 Fizică
                             </p>
                             <div class="dropdown-content -ml-12">
                                 <a
-                                    class={currentPath[1] === "fizica" &&
-                                    currentPath[2] === undefined
+                                    class={currentPath[1] === ""
                                         ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                                         : "text-lg font-bold hover:text-lime-400 text-blue-500"}
                                     rel="prefetch"
-                                    href="/fizica">Bac</a
+                                    href="/">Bac</a
                                 >
                                 <a
                                     class={currentPath[1] === "fizica" &&
