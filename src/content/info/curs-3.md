@@ -3,8 +3,7 @@ title: "Curs-3"
 description: "Suma divizorilor."
 ---
 
-a)
-
+Varianta I:
 ```cpp
 nrd = 0;
 for(d = 1; d<=n; d++)
@@ -12,8 +11,7 @@ for(d = 1; d<=n; d++)
         nrd++;
 ```
 
-b) eficient
-
+Varianta II (eficientă):
 ```cpp
 s = 0;
 for(d = 1; d * d < n; d++)

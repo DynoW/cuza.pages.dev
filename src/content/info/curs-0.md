@@ -23,7 +23,7 @@ for(i=1;i<=n;i++){
 }
 ```
 
-Varianta III - pana la finalul fisierului (End Of File):
+Varianta III - pană la finalul fișierului (End Of File):
 ```cpp
 // ! Nu uita sa imporți librăria !
 #include <fstream>
