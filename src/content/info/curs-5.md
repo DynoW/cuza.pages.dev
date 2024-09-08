@@ -1,29 +1,37 @@
 ---
 title: "Curs-5"
-description: "Șirul lui Fibonacci"
+description: "cmmdc/cmmmc"
 ---
 
-```
-    c  b  a
-ex: 1, 1, 2, 3, 5, 8, 13, ...
-      +  =
+Varianta I - împarțiri repetate (Euclid):
+```cpp
+if(a * b == 0)
+    cmmdc = a + b;
+else {
+    D = a;
+    I = b;
+    R = D % I;
+    while(R != 0){
+        D = I;
+        I = R;
+        R = D % I;
+    }
+    cmmdc = I;
+}
+cmmmc = a * b / cmmdc;
 ```
 
+Varianta II - scăderi repetate:
 ```cpp
-if(n==1){
-    // n face parte
-    // ...
-} else {
-    c = b = 1;
-    a = 0;
-    while(a<n){
-        a = b + c;
-        c = b;
-        b = a;
-    }
-    if(n==a){
-        // n face parte
-        // ...
-    }
+if(a * b == 0)
+    cmmdc = a + b;
+else {
+    while(a != b)
+        if(a > b)
+            a = a - b;
+        else
+            b = b - a;
+    cmmdc = a;
 }
+cmmmc = ca * cb / cmmdc;
 ```

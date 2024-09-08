@@ -1,35 +1,12 @@
 ---
 title: "Curs-2"
-description: "Verificare nr. prim"
+description: "Oglinditul/Inversul/Răsturnatul."
 ---
 
-Varianta I:
 ```cpp
-nrd=0;
-for(d=1;d<=n;d++){
-    if(n%d==0){
-        nrd++;
-    }
-}
-if(nrd==2){
-    // prelucrare n
-    // ...
-}
-```
-
-Varianta II (eficientă):
-```cpp
-nrd=0;
-for(d=1;d*d<n;d++){
-    if(n%d==0){
-        nrd+=2;
-    }
-}
-if(d*d==n){
-    nrd++;
-}
-if(nrd==2){
-    // prelucrare n
-    // ...
+ogl = 0;
+while(n != 0){
+    ogl = ogl * 10 + n % 10;
+    n = n / 10;
 }
 ```

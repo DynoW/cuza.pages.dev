@@ -1,38 +1,28 @@
 ---
 title: "Curs-4"
-description: "cmmdc/cmmmc"
+description: "Verificare nr. prim"
 ---
 
-Varianta I - împarțiri repetate (Euclid):
+Varianta I:
 ```cpp
-if(a*b==0){
-    cmmdc=a+b;
-} else {
-    D = a;
-    I = b;
-    R = D%I;
-    while(R!=0){
-        D=I;
-        I=R;
-        R=D%I;
-    }
-    cmmdc = I;
-}
-cmmmc = a*b/cmmdc;
+nrd = 0;
+for(d = 1; d <= n; d++)
+    if(n % d == 0)
+        nrd++;
+if(nrd == 2)
+    // prelucrare n
+    // ...
 ```
 
-Varianta II - scăderi repetate:
+Varianta II (eficientă):
 ```cpp
-if(a*b==0){
-    cmmdc=a+b;
-} else {
-    while(a!=b){
-        if(a>b)
-            a=a-b;
-        else
-            b=b-a;
-    }
-    cmmdc=a;
-}
-cmmmc = a*b/cmmdc;
+nrd = 0;
+for(d = 1; d * d < n; d++)
+    if(n % d == 0)
+        nrd = nrd + 2;
+if(d * d == n)
+    nrd++;
+if(nrd == 2)
+    // prelucrare n
+    // ...
 ```

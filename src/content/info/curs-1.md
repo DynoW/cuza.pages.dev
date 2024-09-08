@@ -1,12 +1,18 @@
 ---
 title: "Curs-1"
-description: "Oglinditul (inversul) unui nr."
+description: "Suma cifrelor"
 ---
 
 ```cpp
-ogl=0;
-while(n){
-    ogl=ogl*10+n%10;
-    n=n/10;
+s = 0;
+while(n != 0){
+    s = s + n % 10;
+    n = n / 10;
 }
+```
+sau
+```cpp
+s = 0;
+while(n)
+    s += n % 10, n /= 10;
 ```
