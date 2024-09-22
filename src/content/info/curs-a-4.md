@@ -11,7 +11,6 @@ ld=n-1;
 do {
     mij = (ls+ld) / 2;
     if(v[mij]==x){
-        
         OK=1;
     } else {
         if(v[mij]<x)
