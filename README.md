@@ -1,9 +1,11 @@
 # Help us add more content to the site 😀!
+
 > (This is Cuza highschool's non-official site _by students for students_)
 
 <font size="1">For help contact **Danutz** or send an email ✉️ (slower response 🐌).</font>
 
 ## Why to contribute:
+
 - Contributing helps other people to learn more easly 🥰.
 
 - You can upload your own courses/documents to help other people prepare for exams 🙌.
@@ -13,11 +15,13 @@
 - Rewards!! 😎 You can be among the first to contribute to leave your fingerprint for genrerations (You will be part of us at the bottom of each page).
 
 ## About this project:
+
 The project was made with the framework Astro 🚀, and modules Tailwind 🍃 & React ⚛️.
 
 It's easier to contibute if you know them, but you can still and impovements if you don't know about them!
 
 ## First steps:
+
 Check out the site's GitHub Page (click the logo of the site).
 
 ![logo of the site](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-1.png)
@@ -43,6 +47,7 @@ Create a pull request:
 and wait for our approval 👍:
 
 ![approval](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-9.png)
+
 ## Important locations:
 
 `/public` - here are documents stored
