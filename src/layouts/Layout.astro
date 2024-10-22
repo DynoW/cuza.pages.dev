@@ -168,7 +168,7 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
             </script>
         </div>
         <script>
-            const backgroundImageElement = document.querySelector('.backgroundImage');
+            const backgroundImageElement = document.querySelector('.backgroundImage') as HTMLElement;
             if (backgroundImageElement) {
                 if(new Date().getMonth() === 12) {
                     backgroundImageElement.style.background = 'url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d,#cc3333)';
