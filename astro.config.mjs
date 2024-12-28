@@ -15,5 +15,18 @@ export default defineConfig({
     format: 'file',
     inlineStylesheets: 'always'
   },
-  integrations: [sitemap(), tailwind(), react(), prefetch(), compress()]
+  markdown: {
+    shikiConfig: {
+      theme: 'github-dark'
+    }
+  },
+  integrations: [
+    sitemap({
+      filter: (page) => !['/install', '/upload'].includes(page)
+    }),
+    tailwind(),
+    react(),
+    prefetch(),
+    compress()
+  ]
 });

@@ -3,19 +3,27 @@ import { SEO } from "astro-seo";
 import  UpArrow  from "../icons/UpArrow.astro"; 
 interface Props {
     title: string;
+    noindex?: boolean;
+    nofollow?: boolean;
+    extendMeta?: object;
+    extendLink?: object;
+    bodyClass?: string;
+    markdown?: boolean;
 }
 
-const {title} = Astro.props;
+const {title, noindex, nofollow, extendMeta, extendLink, bodyClass, markdown} = Astro.props;
 const description = "Subiecte de bac din anii anteriori la fizica si matematica pentru liceeni si profesori. Parte din proiectul: DynoW/cuza.pages.dev";
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="ro">
     <head>
         <SEO
             charset="UTF-8"
             title={title}
             description={description}
+            noindex={noindex}
+            nofollow={nofollow}
             openGraph={{
                 basic: {
                     title: title,
@@ -84,17 +92,18 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
                     },
                     {
                         rel: "manifest",
-                        href: "/manifest.json",
+                        href: "/manifest.webmanifest",
                     },
                     {
                         rel: "sitemap",
                         type: "application/xml",
                         href: "/sitemap-index.xml",
                     },
-                    {
+                    ...(markdown ? [{
                         rel: "stylesheet",
                         href: "/assets/css/github-markdown.css",
-                    },
+                    }] : []),
+                    ...(Array.isArray(extendLink) ? extendLink : []),
                 ],
                 meta: [
                     {
@@ -119,6 +128,7 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
                         name: "theme-color",
                         content: "#0e1720",
                     },
+                    ...(Array.isArray(extendMeta) ? extendMeta : []),
                 ],
             }}
         />
@@ -143,11 +153,14 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
             </>
             ): null }
     </head>
-    <body class="backgroundImage font-serif select-none overflow-x-hidden relative min-h-screen p-0">
+    <body class={`backgroundImage font-serif select-none overflow-x-hidden relative min-h-screen p-0 ${bodyClass || ''}`}></body>
         <slot />
         <div class="fixed bottom-4 right-4">
             <button
                 id="scrollToTop"
+                title="Du-te sus"
+                aria-label="Du-te sus"
+                type="button"
                 class="bg-white font-bold p-4 rounded-full transition ease-in-out hover:scale-105 duration-200"
                 onclick="scrollToTop()"
             >
@@ -164,6 +177,10 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
                     } else {
                         button.style.display = 'none';
                     }
+                });
+                document.addEventListener('DOMContentLoaded', function() {
+                    const button = document.getElementById('scrollToTop');
+                    button.style.display = 'none';
                 });
             </script>
         </div>
@@ -309,6 +326,10 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
                 }
                 .shortcut-pipe {
                     @apply text-slate-500 text-lg;
+                }
+                .astro-code {
+                    border-radius: 5px;
+                    padding: 10px;
                 }
             }
         </style>

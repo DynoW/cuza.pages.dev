@@ -2,22 +2,35 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<head>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@1,700&display=swap" rel="stylesheet">
-</head>
+<Layout
+    title="install | cuza.pages.dev"
+    extendLink={[
+        {
+            rel: "preconnect",
+            href: "https://fonts.googleapis.com",
+        },
+        {
+            rel: "preconnect",
+            href: "https://fonts.gstatic.com",
+            crossorigin: "",
+        },
+        {
+            rel: "stylesheet",
+            href: "https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@1,700&display=swap",
+        },
+    ]}
+    nofollow
+    noindex
+    >
 
-<Layout title="install | cuza.pages.dev">
     <div class="installBtnDiv">
         <button
             id="installBtn"
             class="blue-button"
-            onclick="
-            install()
-            "
-            disabled>
-            Add to home <br> screen &#128512;
+            onclick="install()"
+            disabled
+        >
+            Add to home <br /> screen &#128512;
         </button>
     </div>
     <script is:inline>

@@ -3,11 +3,25 @@ import {getEntry} from "astro:content";
 
 const {curs} = Astro.props;
 
-const entry = await getEntry("info", curs);
-const {Content, headings} = await entry.render();
+let entry;
+let Content;
+let headings;
+
+if (curs) {
+    entry = await getEntry("info", curs);
+    if (entry) {
+        ({Content, headings} = await entry.render());
+    }
+}
 ---
 
-<p>{entry.data.title} &nbsp; {entry.data.description}</p>
-<article class="markdown-body overscroll-y-auto">
-    <Content />
-</article>
+{entry ? (
+    <>
+        <p>{entry.data.title} &nbsp; {entry.data.description}</p>
+        <article class="flex flex-col gap-2">
+            <Content />
+        </article>
+    </>
+) : (
+    <p>Eroare</p>
+)}

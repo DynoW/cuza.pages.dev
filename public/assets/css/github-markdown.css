@@ -1,7 +1,7 @@
 .markdown-body {
   color-scheme: dark;
-  -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   margin: 0;
   color: #c9d1d9;
   background-color: #0d1117;
@@ -143,6 +143,7 @@
 .markdown-body [type=reset],
 .markdown-body [type=submit] {
   -webkit-appearance: button;
+  appearance: button;
 }
 
 .markdown-body [type=checkbox],
