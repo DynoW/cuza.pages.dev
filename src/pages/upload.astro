@@ -1,0 +1,258 @@
+---
+---
+
+<html lang="ro">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Încarcă PDF by @Danutz</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                margin: 0;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 600px;
+                margin: auto;
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            h1 {
+                text-align: center;
+                color: #333;
+            }
+
+            form {
+                display: flex;
+                flex-direction: column;
+            }
+
+            label {
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+
+            input[type="number"],
+            input[type="file"],
+            select {
+                padding: 10px;
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+
+            .submitButton {
+                background-color: #337fd5;
+                color: white;
+                border: none;
+                padding: 10px;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            .submitButton:hover {
+                background-color: #337fd5;
+            }
+
+            .success-message {
+                color: green;
+                text-align: center;
+            }
+
+            .error-message {
+                color: red;
+                text-align: center;
+            }
+
+            .loading-message {
+                color: blue;
+                text-align: center;
+            }
+
+            /* Custom modal styles */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+                background-color: rgb(0,0,0);
+                background-color: rgba(0,0,0,0.4);
+                padding-top: 60px;
+            }
+
+            .modal-content {
+                background-color: #fefefe;
+                margin: 5% auto;
+                padding: 20px;
+                border: 1px solid #888;
+                width: 80%;
+                max-width: 300px;
+                border-radius: 8px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .modal-content-heading {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            .passwordInputText {
+                margin: auto;
+            }
+
+            .close {
+                color: #aaa;
+                font-size: 28px;
+                font-weight: bold;
+            }
+
+            .close:hover,
+            .close:focus {
+                color: black;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            input[type="password"] {
+                border: 2px solid #000000;
+                border-radius: 6px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Încarcă documentul PDF pentru <a href="https://cuza.pages.dev">cuza.pages.dev</a> - <a href="https://github.com/DynoW">DynoW</a></h1>
+            <form
+                id="uploadForm"
+                method="POST"
+                enctype="multipart/form-data"
+            >
+                <label for="year">An:</label>
+                <input type="number" id="year" name="year" required />
+
+                <label for="type1">Tip 1:</label>
+                <select id="type1" name="type1" required>
+                    <option value="model">Model</option>
+                    <option value="simulare">Simulare</option>
+                    <option value="01">01</option>
+                    <option value="02">02</option>
+                    <option value="03">03</option>
+                    <option value="04">04</option>
+                    <option value="05">05</option>
+                    <option value="06">06</option>
+                    <option value="07">07</option>
+                    <option value="08">08</option>
+                    <option value="09">09</option>
+                    <option value="10">10</option>
+                </select>
+
+                <label for="type2">Tip 2:</label>
+                <select id="type2" name="type2" required>
+                    <option value="var">Var</option>
+                    <option value="bar">Bar</option>
+                </select>
+
+                <label for="file">Selectează PDF:</label>
+                <input
+                    type="file"
+                    id="file"
+                    name="file"
+                    accept="application/pdf"
+                    required
+                />
+
+                <button class="submitButton" type="submit">Încarcă</button>
+            </form>
+            <div id="message"></div>
+        </div>
+
+        <!-- The Modal -->
+        <div id="passwordModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-content-heading">
+                    <label class="passwordInputText" for="passwordInput">Enter Password</label>
+                    <span class="close">&times;</span>
+                </div>
+                <input type="password" id="passwordInput" />
+                <button class="submitButton" id="submitPassword">Submit</button>
+            </div>
+        </div>
+
+        <script>
+            const form = document.getElementById("uploadForm");
+            const messageDiv = document.getElementById("message");
+            const modal = document.getElementById("passwordModal");
+            const closeModal = document.getElementsByClassName("close")[0] as HTMLElement;
+            const submitPasswordBtn = document.getElementById("submitPassword");
+
+            let password = '';
+
+            if (form && messageDiv && modal && closeModal && submitPasswordBtn) {
+                form.addEventListener("submit", async (event) => {
+                    event.preventDefault();
+                    modal.style.display = "block";
+                });
+
+                closeModal.onclick = function() {
+                    modal.style.display = "none";
+                }
+
+                window.onclick = function(event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
+
+                submitPasswordBtn.onclick = async function() {
+                    const passwordInput = document.getElementById("passwordInput") as HTMLInputElement;
+                    if (passwordInput) {
+                        password = passwordInput.value;
+                    }
+                    modal.style.display = "none";
+
+                    messageDiv.textContent = "Se încarcă...";
+                    messageDiv.className = "loading-message";
+
+                    const formData = new FormData(form as HTMLFormElement);
+                    const username = 'admin';
+                    const authHeader = 'Basic ' + btoa(`${username}:${password}`);
+
+                    try {
+                        const response = await fetch("https://cuza-worker.danutz.workers.dev", {
+                            method: "POST",
+                            headers: {
+                                'Authorization': authHeader
+                            },
+                            body: formData,
+                        });
+
+                        if (response.ok) {
+                            messageDiv.textContent = "Fișierul a fost încărcat cu succes!";
+                            messageDiv.className = "success-message";
+                        } else {
+                            const result = await response.text();
+                            messageDiv.textContent = `Eroare: ${result}`;
+                            messageDiv.className = "error-message";
+                        }
+                    } catch (error) {
+                        messageDiv.textContent = "A apărut o eroare în timpul încărcării.";
+                        messageDiv.className = "error-message";
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>

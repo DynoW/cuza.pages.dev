@@ -1,0 +1,6 @@
+name = "cuza-pages-dev-worker"
+
+account_id = "f23d89f989b552da46a4049cb843423d"
+workers_dev = true
+compatibility_date = "2023-10-01"
+main = "src/index.ts"

@@ -143,7 +143,7 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
             </>
             ): null }
     </head>
-    <body class="backgroundImage font-serif select-none overflow-x-hidden relative min-h-screen">
+    <body class="backgroundImage font-serif select-none overflow-x-hidden relative min-h-screen p-0">
         <slot />
         <div class="fixed bottom-4 right-4">
             <button
@@ -170,10 +170,10 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
         <script>
             const backgroundImageElement = document.querySelector('.backgroundImage') as HTMLElement;
             if (backgroundImageElement) {
-                if(new Date().getMonth() === 12) {
+                if(new Date().getMonth() === 11) {
                     backgroundImageElement.style.background = 'url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d,#cc3333)';
                 }
-                if(new Date().getMonth() === 3) {
+                if(new Date().getMonth() === 2) {
                     backgroundImageElement.style.background = 'url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2)';
                 }
             }
