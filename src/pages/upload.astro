@@ -1,5 +1,4 @@
 ---
-// filepath: /c:/Users/naffe/repos/cuza.pages.dev/src/pages/upload.astro
 import Layout from "../layouts/Layout.astro";
 ---
 
@@ -55,7 +54,7 @@ import Layout from "../layouts/Layout.astro";
     </div>
 
     <script>
-        const form = document.getElementById("uploadForm");
+        const form = document.getElementById("uploadForm") as HTMLFormElement;
         const messageDiv = document.getElementById("message");
         const modal = document.getElementById("passwordModal");
         const closeModal = document.getElementsByClassName("close")[0];
@@ -69,7 +68,7 @@ import Layout from "../layouts/Layout.astro";
                 modal.classList.remove("hidden");
             });
 
-            closeModal.onclick = function () {
+            (closeModal as HTMLElement).onclick = function () {
                 modal.classList.add("hidden");
             };
 
@@ -82,7 +81,7 @@ import Layout from "../layouts/Layout.astro";
             submitPasswordBtn.onclick = async function () {
                 const passwordInput = document.getElementById("passwordInput");
                 if (passwordInput) {
-                    password = passwordInput.value;
+                    password = (passwordInput as HTMLInputElement).value;
                 }
                 modal.classList.add("hidden");
 
