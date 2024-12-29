@@ -82,26 +82,26 @@ function validateFormData(formData: FormData): string | null {
     const file = formData.get('file') as unknown as File;
 
     if (!page || !year || !type || !type2 || !file) {
-        return 'Missing required fields';
+        return 'Câmpuri obligatorii lipsă';
     }
 
     if (page === 'bac' && !title) {
-        return 'Missing title for bac page';
+        return 'Lipsă titlu pentru pagina bac';
     }
 
     if (page === 'teste' && !testNumber) {
-        return 'Missing test number for teste page';
+        return 'Lipsă număr test pentru pagina teste';
     }
 
     if (page === 'sim') {
         if (!simulation) {
-            return 'Missing simulation type for sim page';
+            return 'Lipsă tip simulare pentru pagina sim';
         }
         if (simulation === 'judetene' && !county) {
-            return 'Missing county for judetene simulation';
+            return 'Lipsă județ pentru simulare județeană';
         }
         if (simulation === 'locale' && !local) {
-            return 'Missing local for locale simulation';
+            return 'Lipsă localitate pentru simulare locală';
         }
     }
 
