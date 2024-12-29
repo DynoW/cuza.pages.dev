@@ -1,4 +1,5 @@
 ---
+// filepath: /c:/Users/naffe/repos/cuza.pages.dev/src/pages/upload.astro
 import Layout from "../layouts/Layout.astro";
 ---
 
@@ -8,13 +9,33 @@ import Layout from "../layouts/Layout.astro";
             Încarcă documentul PDF pentru <a href="https://cuza.pages.dev" class="text-blue-500">cuza.pages.dev</a> - <a href="https://github.com/DynoW" class="text-blue-500">DynoW</a>
         </h1>
         <form id="uploadForm" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4 mt-4">
+            <label for="page" class="font-bold">Pagina:</label>
+            <select id="page" name="page" required class="p-2 border border-gray-300 rounded">
+                <option value="bac">Bac</option>
+                <option value="teste">Teste Antrenament</option>
+                <option value="sim">Simulări Județene</option>
+            </select>
+
             <label for="year" class="font-bold">An:</label>
             <input type="number" id="year" name="year" required class="p-2 border border-gray-300 rounded" />
 
-            <label for="type1" class="font-bold">Tip 1:</label>
-            <select id="type1" name="type1" required class="p-2 border border-gray-300 rounded">
+            <div id="titleField" class="hidden">
+                <label for="title" class="font-bold">Titlu:</label>
+                <select id="title" name="title" class="p-2 border border-gray-300 rounded">
+                    <option value="Simulare">Simulare</option>
+                    <option value="Model">Model</option>
+                    <option value="Sesiunea-I">Sesiunea I</option>
+                    <option value="Sesiunea-II">Sesiunea II</option>
+                    <option value="Sesiune-Olimpici">Sesiune olimpici</option>
+                    <option value="Rezerva">Rezerva</option>
+                </select>
+            </div>
+
+            <label for="type" class="font-bold">Tip:</label>
+            <select id="type" name="type" required class="p-2 border border-gray-300 rounded">
                 <option value="model">Model</option>
                 <option value="simulare">Simulare</option>
+                <option value="test">Test</option>
                 <option value="01">01</option>
                 <option value="02">02</option>
                 <option value="03">03</option>
@@ -27,7 +48,73 @@ import Layout from "../layouts/Layout.astro";
                 <option value="10">10</option>
             </select>
 
-            <label for="type2" class="font-bold">Tip 2:</label>
+            <div id="simulationField" class="hidden">
+                <label for="simulation" class="font-bold">Tip simulare:</label>
+                <select id="simulation" name="simulation" class="p-2 border border-gray-300 rounded">
+                    <option value="judetene">Județeană</option>
+                    <option value="locale">Locală</option>
+                </select>
+            </div>
+
+            <div id="countyField" class="hidden">
+                <label for="county" class="font-bold">Județ:</label>
+                <select id="county" name="county" class="p-2 border border-gray-300 rounded">
+                    <option value="Alba">Alba</option>
+                    <option value="Arad">Arad</option>
+                    <option value="Argeș">Argeș</option>
+                    <option value="Bacău">Bacău</option>
+                    <option value="Bihor">Bihor</option>
+                    <option value="Bistrița-Năsăud">Bistrița-Năsăud</option>
+                    <option value="Botoșani">Botoșani</option>
+                    <option value="Brașov">Brașov</option>
+                    <option value="Brăila">Brăila</option>
+                    <option value="Buzău">Buzău</option>
+                    <option value="Caraș-Severin">Caraș-Severin</option>
+                    <option value="Călărași">Călărași</option>
+                    <option value="Cluj">Cluj</option>
+                    <option value="Constanța">Constanța</option>
+                    <option value="Covasna">Covasna</option>
+                    <option value="Dâmbovița">Dâmbovița</option>
+                    <option value="Dolj">Dolj</option>
+                    <option value="Galați">Galați</option>
+                    <option value="Giurgiu">Giurgiu</option>
+                    <option value="Gorj">Gorj</option>
+                    <option value="Harghita">Harghita</option>
+                    <option value="Hunedoara">Hunedoara</option>
+                    <option value="Ialomița">Ialomița</option>
+                    <option value="Iași">Iași</option>
+                    <option value="Ilfov">Ilfov</option>
+                    <option value="Maramureș">Maramureș</option>
+                    <option value="Mehedinți">Mehedinți</option>
+                    <option value="Mureș">Mureș</option>
+                    <option value="Neamț">Neamț</option>
+                    <option value="Olt">Olt</option>
+                    <option value="Prahova">Prahova</option>
+                    <option value="Satu Mare">Satu Mare</option>
+                    <option value="Sălaj">Sălaj</option>
+                    <option value="Sibiu">Sibiu</option>
+                    <option value="Suceava">Suceava</option>
+                    <option value="Teleorman">Teleorman</option>
+                    <option value="Timiș">Timiș</option>
+                    <option value="Tulcea">Tulcea</option>
+                    <option value="Vaslui">Vaslui</option>
+                    <option value="Vâlcea">Vâlcea</option>
+                    <option value="Vrancea">Vrancea</option>
+                    <option value="București">București</option>
+                </select>
+            </div>
+
+            <div id="localField" class="hidden">
+                <label for="local" class="font-bold">Localitate/Liceu (poate fi LAICUZA):</label>
+                <input type="text" id="local" name="local" class="p-2 border border-gray-300 rounded" />
+            </div>
+
+            <div id="testNumberField" class="hidden">
+                <label for="testNumber" class="font-bold">Număr Test:</label>
+                <input type="number" id="testNumber" name="testNumber" min="1" max="99" class="p-2 border border-gray-300 rounded" oninput="this.value = this.value > 9 ? this.value : this.value.padStart(2, '0')" />
+            </div>
+
+            <label for="type2" class="font-bold">Variantă/Barem:</label>
             <select id="type2" name="type2" required class="p-2 border border-gray-300 rounded">
                 <option value="var">Var</option>
                 <option value="bar">Bar</option>
@@ -42,7 +129,7 @@ import Layout from "../layouts/Layout.astro";
     </div>
 
     <!-- The Modal -->
-    <div id="passwordModal" class="modal fixed z-10 top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div id="passwordModal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
         <div class="modal-content bg-white p-6 rounded-lg shadow-lg w-80">
             <div class="modal-content-heading flex justify-between items-center">
                 <label for="passwordInput" class="passwordInputText font-bold">Introdu parola</label>
@@ -54,7 +141,117 @@ import Layout from "../layouts/Layout.astro";
     </div>
 
     <script>
-        const form = document.getElementById("uploadForm") as HTMLFormElement;
+        const pageSelect = document.getElementById("page");
+        let page = pageSelect ? (pageSelect as HTMLSelectElement).value : '';
+        const simulationSelect = document.getElementById("simulation");
+        let simulation = simulationSelect ? (simulationSelect as HTMLSelectElement).value : '';
+        const titluSelect = document.getElementById("title"); // titleSelect is already declared
+        let title = titluSelect ? (titluSelect as HTMLSelectElement).value : '';
+        const simulationField = document.getElementById("simulationField");
+        const countyField = document.getElementById("countyField");
+        const localField = document.getElementById("localField");
+        const testNumberField = document.getElementById("testNumberField");
+        const titleField = document.getElementById("titleField");
+        const typeField = document.getElementById("type") as HTMLSelectElement;
+
+        function toggleFields(page: string, simulation: string) {
+            if (typeField) {
+                const options = typeField.options;
+                for (let i = 0; i < options.length; i++) {
+                    const option = options[i];
+                    if (page === 'teste' && option.value !== 'test') {
+                        option.classList.add('hidden');
+                    } else if (page === 'sim' && option.value !== 'simulare') {
+                        option.classList.add('hidden');
+                    } else {
+                        option.classList.remove('hidden');
+                    }
+                }
+            }
+            if (page === 'bac') {
+                titleField?.classList.remove('hidden');
+                simulationField?.classList.add('hidden');
+                testNumberField?.classList.add('hidden');
+                countyField?.classList.add('hidden');
+                localField?.classList.add('hidden');
+            } else if (page === 'teste') {
+                titleField?.classList.add('hidden');
+                if (typeField) typeField.value = 'test';
+                simulationField?.classList.add('hidden');
+                testNumberField?.classList.remove('hidden');
+                countyField?.classList.add('hidden');
+                localField?.classList.add('hidden');
+            } else if (page === 'sim') {
+                titleField?.classList.add('hidden');
+                if (typeField) typeField.value = 'simulare';
+                simulationField?.classList.remove('hidden');
+                testNumberField?.classList.add('hidden');
+                if (simulation === 'judetene') {
+                    countyField?.classList.remove('hidden');
+                    localField?.classList.add('hidden');
+                } else {
+                    countyField?.classList.add('hidden');
+                    localField?.classList.remove('hidden');
+                }
+            } else {
+                titleField?.classList.add('hidden');
+                simulationField?.classList.add('hidden');
+                testNumberField?.classList.add('hidden');
+                countyField?.classList.add('hidden');
+                localField?.classList.add('hidden');
+            }
+        }
+
+        function toggleTypeOptions(title: string) {
+            if (typeField) {
+                const options = typeField.options;
+                let firstVisibleOption = null;
+                for (let i = 0; i < options.length; i++) {
+                    const option = options[i];
+                    if (title === 'Simulare' && option.value !== 'simulare') {
+                        option.classList.add('hidden');
+                    } else if (title === 'Model' && option.value !== 'model') {
+                        option.classList.add('hidden');
+                    } else if (title !== 'Simulare' && title !== 'Model' && !['01', '02', '03', '04', '05', '06', '07', '08', '09', '10'].includes(option.value)) {
+                        option.classList.add('hidden');
+                    } else {
+                        option.classList.remove('hidden');
+                        if (!firstVisibleOption) {
+                            firstVisibleOption = option.value;
+                        }
+                    }
+                }
+                if (firstVisibleOption) {
+                    typeField.value = firstVisibleOption;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleFields(page, simulation);
+            toggleTypeOptions(title);
+        });
+
+        pageSelect?.addEventListener('change', (event) => {
+            const target = event.target;
+            page = (target as HTMLSelectElement).value;
+            toggleFields(page, simulation);
+        });
+
+        simulationSelect?.addEventListener('change', (event) => {
+            const target = event.target;
+            simulation = (target as HTMLSelectElement).value;
+            toggleFields(page, simulation);
+        });
+
+        const titleSelect = document.getElementById("title");
+        titleSelect?.addEventListener('change', (event) => {
+            const target = event.target;
+            const title = (target as HTMLSelectElement).value;
+            toggleTypeOptions(title);
+        });
+
+        const form = document.getElementById("uploadForm");
         const messageDiv = document.getElementById("message");
         const modal = document.getElementById("passwordModal");
         const closeModal = document.getElementsByClassName("close")[0];
@@ -88,7 +285,7 @@ import Layout from "../layouts/Layout.astro";
                 messageDiv.textContent = "Se încarcă...";
                 messageDiv.className = "text-blue-500";
 
-                const formData = new FormData(form);
+                const formData = new FormData(form as HTMLFormElement);
                 const username = "admin";
                 const authHeader = "Basic " + btoa(`${username}:${password}`);
 

@@ -17,21 +17,65 @@ async function handleRequest(request: Request): Promise<Response> {
 
         try {
             const formData = await request.formData();
+            const page = formData.get('page');
             const year = formData.get('year');
-            const type1 = formData.get('type1');
+            const title = formData.get('title');
+            const type = formData.get('type');
             const type2 = formData.get('type2');
+            const testNumber = formData.get('testNumber');
+            const simulation = formData.get('simulation');
+            const county = formData.get('county');
+            const local = formData.get('local');
             const file = formData.get('file') as unknown as File;
 
             if (!file || file.type !== 'application/pdf' || file.size > 50 * 1024 * 1024) {
                 return new Response('Fișier invalid', { status: 400, headers: corsHeaders });
             }
 
-            if (!isValidYear(year) || !isValidType1(type1) || !isValidType2(type2)) {
+            if (!isValidYear(year) || !isValidType(type) || !isValidType2(type2)) {
                 return new Response('Parametri invalizi', { status: 400, headers: corsHeaders });
             }
 
-            const newFileName = `E_d_fizica_${year}_${type1}_${type2}.pdf`;
-            const storagePath = `public/files/fizica/bac/${year}/${type1}/${newFileName}`;
+            if (!isValidPage(page)) {
+                return new Response('Pagina invalidă', { status: 400, headers: corsHeaders });
+            }
+
+            if (page === 'bac' && !isValidTitle(title)) {
+                return new Response('Titlu invalid', { status: 400, headers: corsHeaders });
+            }
+
+            if (page === 'teste' && !isValidTestNumber(testNumber)) {
+                return new Response('Număr test invalid', { status: 400, headers: corsHeaders });
+            }
+
+            if (page === 'sim' && !isValidSimulation(simulation)) {
+                return new Response('Tip simulare invalid', { status: 400, headers: corsHeaders });
+            }
+
+            if (page === 'sim' && simulation === 'jud' && !isValidCounty(county)) {
+                return new Response('Județ invalid', { status: 400, headers: corsHeaders });
+            }
+
+            if (page === 'sim' && simulation === 'loc' && !isValidLocal(local)) {
+                return new Response('Localitate invalidă', { status: 400, headers: corsHeaders });
+            }
+
+            let storagePath = '';
+            let newFileName = '';
+
+            if (page === 'bac') {
+                newFileName = `E_d_fizica_${year}_${type}_${type2}.pdf`;
+                storagePath = `public/files/fizica/bac/${year}/${title}/${newFileName}`;
+            } else if (page === 'teste') {
+                newFileName = `E_d_fizica_${year}_${type2}_${testNumber}.pdf`;
+                storagePath = `public/files/fizica/teste/${year}/-/${newFileName}`;
+            } else if (page === 'sim') {
+                const location = simulation === 'jud' ? county : local;
+                newFileName = `E_d_fizica_${location}_${year}_${type2}.pdf`;
+                storagePath = `public/files/fizica/simulari/${year}-simulari-${simulation}/${newFileName}`;
+            } else {
+                return new Response('Pagina invalidă', { status: 400, headers: corsHeaders });
+            }
 
             await createPullRequest(storagePath, file, newFileName);
             return new Response('Fișier încărcat cu succes!', { status: 200, headers: corsHeaders });
@@ -62,9 +106,9 @@ function isValidYear(year: any): boolean {
     return yearRegex.test(year);
 }
 
-function isValidType1(type1: any): boolean {
-    const validTypes = ['model', 'simulare', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10'];
-    return validTypes.includes(type1);
+function isValidType(type: any): boolean {
+    const validTypes = ['model', 'simulare', 'test', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10'];
+    return validTypes.includes(type);
 }
 
 function isValidType2(type2: any): boolean {
@@ -72,15 +116,55 @@ function isValidType2(type2: any): boolean {
     return validTypes.includes(type2);
 }
 
+function isValidPage(page: any): boolean {
+    const validPages = ['bac', 'teste', 'sim'];
+    return validPages.includes(page);
+}
+
+function isValidTitle(title: any): boolean {
+    const validTitles = ['Simulare', 'Model', 'Sesiunea-I', 'Sesiunea-II', 'Sesiune-Olimpici', 'Rezerva'];
+    return validTitles.includes(title);
+}
+
+function isValidTestNumber(testNumber: any): boolean {
+    const testNumberRegex = /^\d{1,2}$/;
+    return testNumberRegex.test(testNumber);
+}
+
+function isValidSimulation(simulation: any): boolean {
+    const validSimulations = ['jud', 'loc'];
+    return validSimulations.includes(simulation);
+}
+
+function isValidCounty(county: any): boolean {
+    const validCounties = [
+        'Alba', 'Arad', 'Argeș', 'Bacău', 'Bihor', 'Bistrița-Năsăud', 'Botoșani', 'Brașov', 'Brăila', 'Buzău',
+        'Caraș-Severin', 'Călărași', 'Cluj', 'Constanța', 'Covasna', 'Dâmbovița', 'Dolj', 'Galați', 'Giurgiu',
+        'Gorj', 'Harghita', 'Hunedoara', 'Ialomița', 'Iași', 'Ilfov', 'Maramureș', 'Mehedinți', 'Mureș', 'Neamț',
+        'Olt', 'Prahova', 'Satu Mare', 'Sălaj', 'Sibiu', 'Suceava', 'Teleorman', 'Timiș', 'Tulcea', 'Vaslui',
+        'Vâlcea', 'Vrancea', 'București'
+    ];
+    return validCounties.includes(county);
+}
+
+function isValidLocal(local: any): boolean {
+    return typeof local === 'string' && local.trim().length > 0;
+}
+
 function isValidAuth(authHeader: string): boolean {
     const encoded = authHeader.split(' ')[1];
+    if (!encoded) {
+        return false;
+    }
     const decoded = atob(encoded);
     const [username, password] = decoded.split(':');
+    // @ts-ignore
     return password === UPLOAD_PASSWORD;
 }
 
 async function createPullRequest(storagePath: string, file: File, newFileName: string) {
     const octokit = new Octokit({
+        // @ts-ignore
         auth: GITHUB_TOKEN
     });
 
@@ -114,7 +198,9 @@ async function createPullRequest(storagePath: string, file: File, newFileName: s
         // Build the binary string in chunks
         let binary = '';
         for (let i = 0; i < uint8Array.length; i++) {
-            binary += String.fromCharCode(uint8Array[i]);
+            if (uint8Array[i] !== undefined) {
+                binary += String.fromCharCode(uint8Array[i] as number);
+            }
         }
 
         // Encode the binary string to Base64
