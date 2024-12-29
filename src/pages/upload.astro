@@ -1,5 +1,4 @@
 ---
-// filepath: /c:/Users/naffe/repos/cuza.pages.dev/src/pages/upload.astro
 import Layout from "../layouts/Layout.astro";
 ---
 
@@ -170,35 +169,57 @@ import Layout from "../layouts/Layout.astro";
             }
             if (page === 'bac') {
                 titleField?.classList.remove('hidden');
+                titleField?.querySelector('select')?.setAttribute('required', 'true');
                 simulationField?.classList.add('hidden');
+                simulationField?.querySelector('select')?.removeAttribute('required');
                 testNumberField?.classList.add('hidden');
+                testNumberField?.querySelector('input')?.removeAttribute('required');
                 countyField?.classList.add('hidden');
+                countyField?.querySelector('select')?.removeAttribute('required');
                 localField?.classList.add('hidden');
+                localField?.querySelector('input')?.removeAttribute('required');
             } else if (page === 'teste') {
                 titleField?.classList.add('hidden');
+                titleField?.querySelector('select')?.removeAttribute('required');
                 if (typeField) typeField.value = 'test';
                 simulationField?.classList.add('hidden');
+                simulationField?.querySelector('select')?.removeAttribute('required');
                 testNumberField?.classList.remove('hidden');
+                testNumberField?.querySelector('input')?.setAttribute('required', 'true');
                 countyField?.classList.add('hidden');
+                countyField?.querySelector('select')?.removeAttribute('required');
                 localField?.classList.add('hidden');
+                localField?.querySelector('input')?.removeAttribute('required');
             } else if (page === 'sim') {
                 titleField?.classList.add('hidden');
+                titleField?.querySelector('select')?.removeAttribute('required');
                 if (typeField) typeField.value = 'simulare';
                 simulationField?.classList.remove('hidden');
+                simulationField?.querySelector('select')?.setAttribute('required', 'true');
                 testNumberField?.classList.add('hidden');
+                testNumberField?.querySelector('input')?.removeAttribute('required');
                 if (simulation === 'judetene') {
                     countyField?.classList.remove('hidden');
+                    countyField?.querySelector('select')?.setAttribute('required', 'true');
                     localField?.classList.add('hidden');
+                    localField?.querySelector('input')?.removeAttribute('required');
                 } else {
                     countyField?.classList.add('hidden');
+                    countyField?.querySelector('select')?.removeAttribute('required');
                     localField?.classList.remove('hidden');
+                    localField?.querySelector('input')?.setAttribute('required', 'true');
                 }
             } else {
                 titleField?.classList.add('hidden');
+                titleField?.querySelector('select')?.removeAttribute('required');
                 simulationField?.classList.add('hidden');
+                simulationField?.querySelector('select')?.removeAttribute('required');
                 testNumberField?.classList.add('hidden');
+                testNumberField?.querySelector('input')?.removeAttribute('required');
                 countyField?.classList.add('hidden');
+                countyField?.querySelector('select')?.removeAttribute('required');
                 localField?.classList.add('hidden');
+                localField?.querySelector('input')?.removeAttribute('required');
             }
         }
 
@@ -286,6 +307,28 @@ import Layout from "../layouts/Layout.astro";
                 messageDiv.className = "text-blue-500";
 
                 const formData = new FormData(form as HTMLFormElement);
+
+                // Remove unnecessary parameters based on the selected page
+                if (page === 'bac') {
+                    formData.delete('simulation');
+                    formData.delete('county');
+                    formData.delete('local');
+                    formData.delete('testNumber');
+                } else if (page === 'teste') {
+                    formData.delete('title');
+                    formData.delete('simulation');
+                    formData.delete('county');
+                    formData.delete('local');
+                } else if (page === 'sim') {
+                    formData.delete('title');
+                    formData.delete('testNumber');
+                    if (simulation === 'judetene') {
+                        formData.delete('local');
+                    } else {
+                        formData.delete('county');
+                    }
+                }
+
                 const username = "admin";
                 const authHeader = "Basic " + btoa(`${username}:${password}`);
 

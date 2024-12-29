@@ -1,154 +1,61 @@
 import { Octokit } from "@octokit/rest";
 
-addEventListener('fetch', event => {
-    event.respondWith(handleRequest(event.request));
-});
-
-async function handleRequest(request: Request): Promise<Response> {
-    if (request.method === 'OPTIONS') {
-        return handleOptions(request);
-    }
-
-    if (request.method === 'POST') {
-        const authHeader = request.headers.get('Authorization');
-        if (!authHeader || !isValidAuth(authHeader)) {
-            return new Response('Neautorizat', { status: 401, headers: corsHeaders });
-        }
-
-        try {
-            const formData = await request.formData();
-            const page = formData.get('page');
-            const year = formData.get('year');
-            const title = formData.get('title');
-            const type = formData.get('type');
-            const type2 = formData.get('type2');
-            const testNumber = formData.get('testNumber');
-            const simulation = formData.get('simulation');
-            const county = formData.get('county');
-            const local = formData.get('local');
-            const file = formData.get('file') as unknown as File;
-
-            if (!file || file.type !== 'application/pdf' || file.size > 50 * 1024 * 1024) {
-                return new Response('Fișier invalid', { status: 400, headers: corsHeaders });
-            }
-
-            if (!isValidYear(year) || !isValidType(type) || !isValidType2(type2)) {
-                return new Response('Parametri invalizi', { status: 400, headers: corsHeaders });
-            }
-
-            if (!isValidPage(page)) {
-                return new Response('Pagina invalidă', { status: 400, headers: corsHeaders });
-            }
-
-            if (page === 'bac' && !isValidTitle(title)) {
-                return new Response('Titlu invalid', { status: 400, headers: corsHeaders });
-            }
-
-            if (page === 'teste' && !isValidTestNumber(testNumber)) {
-                return new Response('Număr test invalid', { status: 400, headers: corsHeaders });
-            }
-
-            if (page === 'sim' && !isValidSimulation(simulation)) {
-                return new Response('Tip simulare invalid', { status: 400, headers: corsHeaders });
-            }
-
-            if (page === 'sim' && simulation === 'jud' && !isValidCounty(county)) {
-                return new Response('Județ invalid', { status: 400, headers: corsHeaders });
-            }
-
-            if (page === 'sim' && simulation === 'loc' && !isValidLocal(local)) {
-                return new Response('Localitate invalidă', { status: 400, headers: corsHeaders });
-            }
-
-            let storagePath = '';
-            let newFileName = '';
-
-            if (page === 'bac') {
-                newFileName = `E_d_fizica_${year}_${type}_${type2}.pdf`;
-                storagePath = `public/files/fizica/bac/${year}/${title}/${newFileName}`;
-            } else if (page === 'teste') {
-                newFileName = `E_d_fizica_${year}_${type2}_${testNumber}.pdf`;
-                storagePath = `public/files/fizica/teste/${year}/-/${newFileName}`;
-            } else if (page === 'sim') {
-                const location = simulation === 'jud' ? county : local;
-                newFileName = `E_d_fizica_${location}_${year}_${type2}.pdf`;
-                storagePath = `public/files/fizica/simulari/${year}-simulari-${simulation}/${newFileName}`;
-            } else {
-                return new Response('Pagina invalidă', { status: 400, headers: corsHeaders });
-            }
-
-            await createPullRequest(storagePath, file, newFileName);
-            return new Response('Fișier încărcat cu succes!', { status: 200, headers: corsHeaders });
-        } catch (error) {
-            console.error('Eroare la procesarea cererii:', error);
-            return new Response('Eroare la încărcarea fișierului', { status: 500, headers: corsHeaders });
-        }
-    }
-
-    return new Response('Metodă nepermisă', { status: 405, headers: corsHeaders });
-}
-
-function handleOptions(request: Request): Response {
-    return new Response(null, {
-        status: 204,
-        headers: corsHeaders
-    });
-}
-
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
-function isValidYear(year: any): boolean {
-    const yearRegex = /^\d{4}$/;
-    return yearRegex.test(year);
+addEventListener('fetch', event => {
+    event.respondWith(handleRequest(event.request));
+});
+
+async function handleRequest(request: Request): Promise<Response> {
+    if (request.method === 'OPTIONS') {
+        return handleOptions();
+    }
+
+    if (request.method === 'POST') {
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader || !isValidAuth(authHeader)) {
+            console.log('Authorization failed');
+            return new Response('Neautorizat', { status: 401, headers: corsHeaders });
+        }
+
+        const contentType = request.headers.get('Content-Type') || '';
+        if (!contentType.includes('multipart/form-data')) {
+            console.log('Invalid content type:', contentType);
+            return new Response('Tip de conținut neacceptat', { status: 415, headers: corsHeaders });
+        }
+
+        const formData = await request.formData();
+        const validationError = validateFormData(formData);
+        if (validationError) {
+            console.log('Validation error:', validationError);
+            return new Response(`Date lipsă: ${validationError}`, { status: 400, headers: corsHeaders });
+        }
+
+        const { page, year, title, type, type2, testNumber, simulation, county, local, file } = extractFormData(formData);
+
+        const { storagePath, newFileName } = generateFilePath(page, year, title, type, type2, testNumber, simulation, county, local);
+
+        try {
+            await createPullRequest(storagePath, file, newFileName);
+            return new Response('Fișier încărcat cu succes', { status: 200, headers: corsHeaders });
+        } catch (error) {
+            console.log('Error creating pull request:', error);
+            return new Response('Eroare la crearea pull request-ului', { status: 500, headers: corsHeaders });
+        }
+    }
+
+    return new Response('Metodă nepermisă', { status: 405, headers: corsHeaders });
 }
 
-function isValidType(type: any): boolean {
-    const validTypes = ['model', 'simulare', 'test', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10'];
-    return validTypes.includes(type);
-}
-
-function isValidType2(type2: any): boolean {
-    const validTypes = ['var', 'bar'];
-    return validTypes.includes(type2);
-}
-
-function isValidPage(page: any): boolean {
-    const validPages = ['bac', 'teste', 'sim'];
-    return validPages.includes(page);
-}
-
-function isValidTitle(title: any): boolean {
-    const validTitles = ['Simulare', 'Model', 'Sesiunea-I', 'Sesiunea-II', 'Sesiune-Olimpici', 'Rezerva'];
-    return validTitles.includes(title);
-}
-
-function isValidTestNumber(testNumber: any): boolean {
-    const testNumberRegex = /^\d{1,2}$/;
-    return testNumberRegex.test(testNumber);
-}
-
-function isValidSimulation(simulation: any): boolean {
-    const validSimulations = ['jud', 'loc'];
-    return validSimulations.includes(simulation);
-}
-
-function isValidCounty(county: any): boolean {
-    const validCounties = [
-        'Alba', 'Arad', 'Argeș', 'Bacău', 'Bihor', 'Bistrița-Năsăud', 'Botoșani', 'Brașov', 'Brăila', 'Buzău',
-        'Caraș-Severin', 'Călărași', 'Cluj', 'Constanța', 'Covasna', 'Dâmbovița', 'Dolj', 'Galați', 'Giurgiu',
-        'Gorj', 'Harghita', 'Hunedoara', 'Ialomița', 'Iași', 'Ilfov', 'Maramureș', 'Mehedinți', 'Mureș', 'Neamț',
-        'Olt', 'Prahova', 'Satu Mare', 'Sălaj', 'Sibiu', 'Suceava', 'Teleorman', 'Timiș', 'Tulcea', 'Vaslui',
-        'Vâlcea', 'Vrancea', 'București'
-    ];
-    return validCounties.includes(county);
-}
-
-function isValidLocal(local: any): boolean {
-    return typeof local === 'string' && local.trim().length > 0;
+function handleOptions(): Response {
+    return new Response(null, {
+        status: 204,
+        headers: corsHeaders
+    });
 }
 
 function isValidAuth(authHeader: string): boolean {
@@ -162,6 +69,79 @@ function isValidAuth(authHeader: string): boolean {
     return password === UPLOAD_PASSWORD;
 }
 
+function validateFormData(formData: FormData): string | null {
+    const page = formData.get('page') as string;
+    const year = formData.get('year') as string;
+    const title = formData.get('title') as string;
+    const type = formData.get('type') as string;
+    const type2 = formData.get('type2') as string;
+    const testNumber = formData.get('testNumber') as string;
+    const simulation = formData.get('simulation') as string;
+    const county = formData.get('county') as string;
+    const local = formData.get('local') as string;
+    const file = formData.get('file') as unknown as File;
+
+    if (!page || !year || !type || !type2 || !file) {
+        return 'Missing required fields';
+    }
+
+    if (page === 'bac' && !title) {
+        return 'Missing title for bac page';
+    }
+
+    if (page === 'teste' && !testNumber) {
+        return 'Missing test number for teste page';
+    }
+
+    if (page === 'sim') {
+        if (!simulation) {
+            return 'Missing simulation type for sim page';
+        }
+        if (simulation === 'judetene' && !county) {
+            return 'Missing county for judetene simulation';
+        }
+        if (simulation === 'locale' && !local) {
+            return 'Missing local for locale simulation';
+        }
+    }
+
+    return null;
+}
+
+function extractFormData(formData: FormData) {
+    return {
+        page: formData.get('page') as string,
+        year: formData.get('year') as string,
+        title: formData.get('title') as string,
+        type: formData.get('type') as string,
+        type2: formData.get('type2') as string,
+        testNumber: formData.get('testNumber') as string,
+        simulation: formData.get('simulation') as string,
+        county: formData.get('county') as string,
+        local: formData.get('local') as string,
+        file: formData.get('file') as unknown as File
+    };
+}
+
+function generateFilePath(page: string, year: string, title: string, type: string, type2: string, testNumber: string = '', simulation: string = '', county: string = '', local: string = '') {
+    let storagePath = '';
+    let newFileName = '';
+
+    if (page === 'bac') {
+        newFileName = `E_d_fizica_${year}_${type}_${type2}.pdf`;
+        storagePath = `public/files/fizica/bac/${year}/${title}/${newFileName}`;
+    } else if (page === 'teste') {
+        newFileName = `E_d_fizica_${year}_${type2}_${testNumber}.pdf`;
+        storagePath = `public/files/fizica/teste/${year}/-/${newFileName}`;
+    } else if (page === 'sim') {
+        const location = simulation === 'judetene' ? county : local;
+        newFileName = `E_d_fizica_${location}_${year}_${type2}.pdf`;
+        storagePath = `public/files/fizica/simulari/${year}-simulari-${simulation}/${newFileName}`;
+    }
+
+    return { storagePath, newFileName };
+}
+
 async function createPullRequest(storagePath: string, file: File, newFileName: string) {
     const octokit = new Octokit({
         // @ts-ignore
@@ -170,7 +150,12 @@ async function createPullRequest(storagePath: string, file: File, newFileName: s
 
     const owner = 'dynow';
     const repo = 'cuza.pages.dev';
-    const branchName = `upload-${Date.now()}`;
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(now.getUTCDate()).padStart(2, '0');
+    let index = 1;
+    let branchName = `upload-${year}-${month}-${day}-${String(index).padStart(2, '0')}`;
     const baseBranch = 'main';
 
     try {
@@ -181,6 +166,23 @@ async function createPullRequest(storagePath: string, file: File, newFileName: s
             ref: `heads/${baseBranch}`
         });
         console.log('Base branch SHA:', baseSha);
+
+        // Check if branch already exists and increment index if it does
+        while (true) {
+            try {
+                await octokit.git.getRef({
+                    owner,
+                    repo,
+                    ref: `heads/${branchName}`
+                });
+                // Branch exists, increment index and update branch name
+                index++;
+                branchName = `upload-${year}-${month}-${day}-${String(index).padStart(2, '0')}`;
+            } catch (error) {
+                // Branch does not exist, break the loop
+                break;
+            }
+        }
 
         // Create a new branch
         await octokit.git.createRef({
