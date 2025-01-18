@@ -7,8 +7,31 @@
     <div class="flex flex-col gap-2">
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1687540397754088"
         crossorigin="anonymous"></script>
-        <div id="ad">
+        <div id="ad" class="bg-purple-500 top-2">
             <!-- banner-ad-1-vertical -->
+            <ins class="adsbygoogle"
+                style="display:block"
+                data-ad-client="ca-pub-1687540397754088"
+                data-ad-slot="5482915098"
+                data-ad-format="auto"
+                data-full-width-responsive="true"></ins>
+            <script is:inline>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        <script>
+            const ad = document.getElementById("ad");
+            window.addEventListener('scroll', () => {
+            if(ad && window.innerWidth > 768) {
+                if (window.scrollY > window.innerHeight * 3 / 4) {
+                    ad.style.position = 'fixed';
+                } else {
+                    ad.style.position = 'static';
+                }
+            }
+            });
+        </script>
+        <!-- <div id="ad">
             <ins class="adsbygoogle block md:hidden"
                 data-ad-client="ca-pub-1687540397754088"
                 data-ad-slot="5482915098"
@@ -19,14 +42,14 @@
             </script>
         </div>
         <div id="ad2" class="transition-all duration-50">
-            <!-- multiplex-ad-1-vertical -->
+            multiplex-ad-1-vertical
             <ins class="adsbygoogle hidden md:inline-block"
             style="width:100%;max-width:341px;height:620px"
             data-ad-client="ca-pub-1687540397754088"
             data-ad-slot="1042210850"></ins>
-            <script is:inline>
+            < is:inline>
             (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
+            </>
         </div>
         <script>
             const ad2 = document.getElementById("ad2");
@@ -42,6 +65,6 @@
                 }
             }
             });
-        </script>
+        </script> -->
     </div>
 </div>
