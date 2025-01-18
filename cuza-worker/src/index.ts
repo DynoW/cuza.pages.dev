@@ -40,7 +40,7 @@ async function handleRequest(request: Request): Promise<Response> {
         const { storagePath, newFileName } = generateFilePath(page, year, title, type, type2, testNumber, simulation, county, local);
 
         try {
-            await createPullRequest(storagePath, file, newFileName);
+            await createPullRequest(storagePath, file, newFileName, page, type);
             return new Response('Fișier încărcat cu succes', { status: 200, headers: corsHeaders });
         } catch (error) {
             console.log('Error creating pull request:', error);
@@ -142,7 +142,7 @@ function generateFilePath(page: string, year: string, title: string, type: strin
     return { storagePath, newFileName };
 }
 
-async function createPullRequest(storagePath: string, file: File, newFileName: string) {
+async function createPullRequest(storagePath: string, file: File, newFileName: string, page: string, type: string) {
     const octokit = new Octokit({
         // @ts-ignore
         auth: GITHUB_TOKEN
@@ -221,16 +221,36 @@ async function createPullRequest(storagePath: string, file: File, newFileName: s
         });
         console.log('File created in new branch:', storagePath);
 
+        // Modify the type if it includes numbers
+        const mtype = /\d/.test(type) ? 'varianta' : type.toLocaleLowerCase();
+
         // Create a pull request
-        await octokit.pulls.create({
+        const { data: pullRequest } = await octokit.pulls.create({
             owner,
             repo,
             title: `Upload ${newFileName}`,
             head: branchName,
             base: baseBranch,
-            body: `This PR uploads the file ${newFileName} to the path ${storagePath}\nOld file name: ${file.name}`
+            body: `This PR uploads the (*${mtype}*) **${newFileName}** to the path:\n\`${storagePath}\`\nOld name: *${file.name}*`
         });
         console.log('Pull request created');
+
+        // Automatically merge the pull request
+        await octokit.pulls.merge({
+            owner,
+            repo,
+            pull_number: pullRequest.number,
+            merge_method: 'merge'
+        });
+        console.log('Pull request merged');
+
+        // Delete the branch
+        await octokit.git.deleteRef({
+            owner,
+            repo,
+            ref: `heads/${branchName}`
+        });
+        console.log('Branch deleted');
     } catch (error) {
         console.error('Error creating pull request:', error);
         throw error;
