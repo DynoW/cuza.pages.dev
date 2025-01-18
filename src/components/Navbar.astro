@@ -30,21 +30,26 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                     class="text-white hover:text-white no-underline flex align-items-center"
                                     href="https://github.com/DynoW/cuza.pages.dev"
                                 >
-                                    <h1
-                                        class="container text-3xl italic font-bold !m-0"
+                                    <h1 id="page-title"
+                                        class="relative container text-3xl italic font-bold !m-0"
                                     >
-                                        <!-- Christmas update -->
-                                        {
-                                            new Date().getMonth() === 11 ? (
-                                                <img
-                                                    src="/assets/img/logo/sapca.png"
-                                                    width="32"
-                                                    height="35.03"
-                                                    alt="sapca"
-                                                    class="relative mb-[-10px] ml-[-6px]"
-                                                />
-                                            ) : null
-                                        }
+                                        <script>
+                                            document.addEventListener('DOMContentLoaded', () => {
+                                                
+                                                if (new Date().getMonth() === 0) {
+                                                    const logoContainer = document.getElementById('page-title');
+                                                    if(logoContainer) {
+                                                        const img = document.createElement('img');
+                                                        img.src = '/assets/img/logo/sapca.png';
+                                                        img.width = 32;
+                                                        img.height = 35.03;
+                                                        img.alt = 'sapca';
+                                                        img.classList.add('absolute', '-top-[10px]', 'left-[6px]');
+                                                        logoContainer.insertBefore(img, logoContainer.firstChild);
+                                                    }
+                                                }
+                                            });
+                                        </script>
                                         Cuza<span class="text-lg">.</span
                                         >Pages<span class="text-lg">.dev</span>
                                     </h1>
@@ -206,7 +211,7 @@ const currentPath: any = pathname.replace(".html", "").split("/");
             </div>
         </div>
         <div class="row">
-            <div class="col mb-[6px]">
+            <div id="container-banner" class="col mb-[6px]">
                 <img
                     alt="banner"
                     src="/assets/img/banner/fizica.webp"
@@ -215,15 +220,24 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                     width="800"
                 />
                 <!-- Easter update -->
-                {
-                    new Date().getMonth() === 2 ? (
-                        <>
-                            <div class="clouds" />
-                            <div class="bunny" />
-                            <div class="grass" />
-                        </>
-                    ) : null
-                }
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        if (new Date().getMonth() === 2) {
+                            const container = document.getElementById('container-banner');
+                            if (container) {
+                                const clouds = document.createElement('div');
+                                clouds.className = 'clouds';
+                                const bunny = document.createElement('div');
+                                bunny.className = 'bunny';
+                                const grass = document.createElement('div');
+                                grass.className = 'grass';
+                                container.appendChild(clouds);
+                                container.appendChild(bunny);
+                                container.appendChild(grass);
+                            }
+                        }
+                    });
+                </script>
             </div>
         </div>
     </div>
