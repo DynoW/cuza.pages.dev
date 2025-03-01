@@ -136,7 +136,7 @@ function generateFilePath(page: string, year: string, title: string, type: strin
     } else if (page === 'sim') {
         const location = simulation === 'judetene' ? county : local;
         newFileName = `E_d_fizica_${location}_${year}_${type2}.pdf`;
-        storagePath = `public/files/fizica/simulari/${year}-simulari-${simulation}/${newFileName}`;
+        storagePath = `public/files/fizica/simulari/${year}-simulari-${simulation}/-/${newFileName}`;
     }
 
     return { storagePath, newFileName };
