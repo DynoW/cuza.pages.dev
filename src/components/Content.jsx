@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 
 // Update the glob pattern to look in src instead of public
 const data = await import.meta.glob(
@@ -34,9 +34,69 @@ const buildCategories = () => {
 
 const categories = buildCategories();
 
-const Content = ({ subject, page }) => {
-    // Start with all folders expanded by default
+const Content = ({ subject, page, expansionMode = "years" }) => {
+    // Initialize based on stored preference or default value
+    const [currentExpansionMode, setCurrentExpansionMode] = useState(
+        typeof localStorage !== 'undefined' ? 
+        localStorage.getItem('folderExpansionMode') || expansionMode : 
+        expansionMode
+    );
+    
+    // Use a ref to track if initial expansion has been set
+    const initialExpansionSet = useRef(false);
+    
+    // State for expanded folders
     const [expandedFolders, setExpandedFolders] = useState({});
+
+    // Listen for expansion mode changes
+    useEffect(() => {
+        const handleExpansionModeChange = (event) => {
+            const { mode } = event.detail;
+            setCurrentExpansionMode(mode);
+            updateFolderExpansion(mode);
+        };
+        
+        window.addEventListener('expansionModeChanged', handleExpansionModeChange);
+        
+        return () => {
+            window.removeEventListener('expansionModeChanged', handleExpansionModeChange);
+        };
+    }, []);
+    
+    // Initialize folder expansion based on mode when component mounts
+    useEffect(() => {
+        if (!initialExpansionSet.current) {
+            updateFolderExpansion(currentExpansionMode);
+            initialExpansionSet.current = true;
+        }
+    }, [currentExpansionMode]);
+    
+    // Function to update folder expansion based on mode
+    const updateFolderExpansion = (mode) => {
+        const newExpanded = {};
+        
+        // Helper function to traverse the category structure
+        const processCategory = (category, path = '') => {
+            if (typeof category !== 'object' || category === null) return;
+            
+            Object.keys(category).forEach(key => {
+                const currentPath = path ? `${path}-${key}` : key;
+                const isYear = /^20\d{2}$/.test(key);
+                
+                if (mode === 'all' || (mode === 'years' && isYear)) {
+                    newExpanded[currentPath] = true;
+                }
+                
+                processCategory(category[key], currentPath);
+            });
+        };
+        
+        if (categories[subject] && categories[subject][page]) {
+            processCategory(categories[subject][page]);
+        }
+        
+        setExpandedFolders(newExpanded);
+    };
 
     // Helper function to generate a unique key
     const generateKey = useCallback((key, index) => {
@@ -100,9 +160,16 @@ const Content = ({ subject, page }) => {
                         );
                     } else {
                         const showDivider = index === 0 && level === 1;
+                        // Check if key is a year (4-digit number)
+                        const isYear = /^20\d{2}$/.test(key);
                         
                         return (
-                            <li key={generateKey(key, index)} className="space-y-2">
+                            <li 
+                                key={generateKey(key, index)} 
+                                className="space-y-2"
+                                // Add ID attribute if this is a year folder
+                                id={isYear ? key : undefined}
+                            >
                                 {showDivider && <hr className="border-black" />}
                                 <div 
                                     className={`${classNames.folder} flex items-center cursor-pointer`}

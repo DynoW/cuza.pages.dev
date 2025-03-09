@@ -1,12 +1,29 @@
 ---
-// Get the available years from the file structure
+// Add props to customize shortcuts for each page
+interface Props {
+  subject?: string;
+  page?: string;
+}
+
+const { subject, page } = Astro.props;
+
+// Get all PDF files in the file structure
 const data = await import.meta.glob("/src/files/**/*.pdf");
 
-// Extract years from the file paths
+// Extract years from the file paths that match current subject and page
 const extractYears = () => {
   const years: Set<number> = new Set();
   
   for (const file in data) {
+    // Filter by subject and page if provided
+    if (subject && !file.includes(`/src/files/${subject}/`)) {
+      continue;
+    }
+    
+    if (page && !file.includes(`/${page}/`) && page !== 'bac') {
+      continue;
+    }
+
     // Find years in the path (4 digit numbers that might be years)
     const yearMatches = file.match(/\/20\d{2}\//g);
     if (yearMatches) {
@@ -18,41 +35,66 @@ const extractYears = () => {
     }
   }
   
-  // Now TypeScript knows these are numbers
+  // Return years in descending order
   return Array.from(years).sort((a, b) => b - a);
 };
 
 const availableYears = extractYears();
+
+// Add a title based on the current page
+const getTitle = () => {
+  if (subject && page) {
+    return `${subject.charAt(0).toUpperCase() + subject.slice(1)} - ${page.charAt(0).toUpperCase() + page.slice(1)}`;
+  }
+  return "Shortcuts";
+}
 ---
 
-<span class="text-lg font-bold text-white">Shortcuts</span>
-<div class="flex flex-wrap">
-  {availableYears.map((year, index) => (
-    <>
-      <a class="shortcut-link" href={`#${year}`}>
+<div class="shortcuts-container">
+  <span class="text-lg font-bold text-white mb-2">Accesare rapidă</span>
+  
+  <div class="shortcuts-grid">
+    {availableYears.map((year) => (
+      <a 
+        href={`#${year}`} 
+        class="shortcut-button"
+        title={`Salt la documentele din ${year}`}
+      >
         {year}
       </a>
-      {index < availableYears.length - 1 && 
-        <span class="shortcut-pipe"> |</span>
-      }
-    </>
-  ))}
+    ))}
+  </div>
 </div>
 
 <style>
-  /* Add any specific styles for the shortcuts here */
-  .shortcut-link {
-    color: #64748b; /* slate-500 */
-    transition: color 0.2s ease;
+  .shortcuts-container {
+    margin-bottom: 1.5rem;
   }
-  
-  .shortcut-link:hover {
-    color: #cbd5e1; /* slate-300 */
-    cursor: pointer;
+
+  .shortcuts-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
   }
-  
-  .shortcut-pipe {
-    color: #64748b; /* slate-500 */
-    margin: 0 0.25rem;
+
+  .shortcut-button {
+    background-color: #1e293b;
+    color: #94a3b8;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    text-align: center;
+    min-width: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .shortcut-button:hover {
+    background-color: #334155;
+    color: #e2e8f0;
+    transform: translateY(-1px);
   }
 </style>
