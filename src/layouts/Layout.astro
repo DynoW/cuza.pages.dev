@@ -186,6 +186,7 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
             </script>
         </div>
         <script>
+            // Background update
             const backgroundImageElement = document.querySelector('.backgroundImage') as HTMLElement;
             if (backgroundImageElement) {
                 if(new Date().getMonth() === 11) {
@@ -195,6 +196,18 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
                 if(new Date().getMonth() === 2) {
                     backgroundImageElement.style.background = 'url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2)';
                     backgroundImageElement.style.backgroundAttachment = 'fixed';
+                    const container = document.getElementById('container-banner');
+                    if (container) {
+                        const clouds = document.createElement('div');
+                        clouds.className = 'clouds';
+                        const bunny = document.createElement('div');
+                        bunny.className = 'bunny';
+                        const grass = document.createElement('div');
+                        grass.className = 'grass';
+                        container.appendChild(clouds);
+                        container.appendChild(bunny);
+                        container.appendChild(grass);
+                    }
                 }
             }
         </script>
@@ -297,7 +310,7 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
                     @apply text-white;
                 }
                 .content-list {
-                    @apply mb-2 space-y-4;
+                    @apply space-y-4;
                 }
                 .content-link {
                     @apply text-slate-600 hover:text-slate-900 focus:text-slate-900 md:text-lg;

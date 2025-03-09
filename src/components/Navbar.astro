@@ -35,7 +35,6 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                                     >
                                         <script>
                                             document.addEventListener('DOMContentLoaded', () => {
-                                                
                                                 if (new Date().getMonth() === 11) {
                                                     const logoContainer = document.getElementById('page-title');
                                                     if(logoContainer) {
@@ -218,26 +217,7 @@ const currentPath: any = pathname.replace(".html", "").split("/");
                     class="max-h-32 object-cover w-full"
                     height="160"
                     width="800"
-                />
-                <!-- Easter update -->
-                <script>
-                    document.addEventListener('DOMContentLoaded', () => {
-                        if (new Date().getMonth() === 2) {
-                            const container = document.getElementById('container-banner');
-                            if (container) {
-                                const clouds = document.createElement('div');
-                                clouds.className = 'clouds';
-                                const bunny = document.createElement('div');
-                                bunny.className = 'bunny';
-                                const grass = document.createElement('div');
-                                grass.className = 'grass';
-                                container.appendChild(clouds);
-                                container.appendChild(bunny);
-                                container.appendChild(grass);
-                            }
-                        }
-                    });
-                </script>
+                />              
             </div>
         </div>
     </div>
