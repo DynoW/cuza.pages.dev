@@ -16,13 +16,11 @@ interface Props {
   page: string;
 }
 
-const { subject, page } = Astro.props;
+const { subject, page = 'bac' } = Astro.props;
+const isAdmitere = subject === 'admitere';
 
 // Page title construction
-const pageTitle = `${subject}${page ? `-${page}` : ''} | cuza.pages.dev`;
-
-// Special case for the admitere section
-const isAdmitere = subject === 'admitere';
+const pageTitle = `${subject === 'fizica' && page === 'bac' ? 'mate-fizica' : `${subject}${page ? `-${page}` : ''}`} | cuza.pages.dev`;
 ---
 
 <Layout title={pageTitle}>
@@ -32,24 +30,22 @@ const isAdmitere = subject === 'admitere';
   <MainContainer>
     <LeftContainer>
       <span class="text-lg font-bold text-white">Altele</span>
-      {isAdmitere ? 
-        <Content subject={subject} page={`altele-${page || subject}`} client:load /> :
+      {(subject === 'admitere' && page === 'fizica') || (subject === 'fizica') ? (
+        <a class="altele-link mb-2" href="https://drive.google.com/drive/folders/1RUHqNmCLyEN-FV3IXjw_aIpZEaE-qJWq?usp=sharing" target="_blank">Culegeri fizică</a>
+      ) : null}
+      {isAdmitere ? (
+        /* For admitere subjects, look for altele inside the current page directory */
+        <Content subject="admitere" page={`${page}/altele`} client:load/>
+      ) : (
         <Content subject={subject} page="altele" client:load/>
-      }
-      {!isAdmitere && subject !== 'info' && 
-        <>
-          <br />
-          <Shortcuts subject={subject} page={page} />
-        </>
-      }
+      )}
+      <br />
+      <Shortcuts subject={subject} page={page} />
       <ToggleExpansion />
     </LeftContainer>
     <CenterContainer />
-    <RightContainer>      
-      {isAdmitere && page ? 
-        <Content subject={subject} page={page} client:load expansionMode="years" /> :
-        <Content subject={subject} page={page || 'bac'} client:load expansionMode="years" />
-      }
+    <RightContainer>
+        <Content subject={subject} page={page} client:load expansionMode="years" />
     </RightContainer>
   </MainContainer>
   <Footer />

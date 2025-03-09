@@ -8,7 +8,7 @@ interface Props {
 const { subject, page } = Astro.props;
 
 // Get all PDF files in the file structure
-const data = await import.meta.glob("/src/files/**/*.pdf");
+const data = await import.meta.glob("/files/**/*.pdf");
 
 // Extract years from the file paths that match current subject and page
 const extractYears = () => {
@@ -16,7 +16,7 @@ const extractYears = () => {
   
   for (const file in data) {
     // Filter by subject and page if provided
-    if (subject && !file.includes(`/src/files/${subject}/`)) {
+    if (subject && !file.includes(`/files/${subject}/`)) {
       continue;
     }
     
@@ -41,12 +41,15 @@ const extractYears = () => {
 
 const availableYears = extractYears();
 
-// Add a title based on the current page
-const getTitle = () => {
-  if (subject && page) {
-    return `${subject.charAt(0).toUpperCase() + subject.slice(1)} - ${page.charAt(0).toUpperCase() + page.slice(1)}`;
+// Function to determine the URL for a year shortcut
+function getShortcutUrl(year: number) {
+  // Special case: if subject is fizica, page is bac, and year is 2007, link to /fizica/variante
+  if (subject === 'fizica' && (page === 'bac' || !page) && year === 2007) {
+    return '/fizica/variante';
   }
-  return "Shortcuts";
+  
+  // Default behavior: link to anchor tag for the year
+  return `#${year}`;
 }
 ---
 
@@ -56,9 +59,11 @@ const getTitle = () => {
   <div class="shortcuts-grid">
     {availableYears.map((year) => (
       <a 
-        href={`#${year}`} 
+        href={getShortcutUrl(year)}
         class="shortcut-button"
-        title={`Salt la documentele din ${year}`}
+        title={year === 2007 && subject === 'fizica' && (page === 'bac' || !page) 
+          ? 'Salt la variante' 
+          : `Salt la documentele din ${year}`}
       >
         {year}
       </a>

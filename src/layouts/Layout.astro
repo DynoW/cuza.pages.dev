@@ -321,10 +321,10 @@ const description =
                 background-repeat: no-repeat;
             }
             .altele-list {
-                @apply flex flex-col space-y-2 lg:space-y-1 text-slate-500;
+                @apply flex flex-col space-y-2 lg:space-y-1;
             }
             .altele-link {
-                @apply hover:text-slate-300;
+                @apply text-slate-500 hover:text-slate-300;
             }
             .altele-text {
                 @apply text-white;
@@ -337,22 +337,6 @@ const description =
             }
             .content-text {
                 @apply text-gray-900 md:text-lg;
-            }
-            .dropdown {
-                @apply relative inline-block;
-            }
-            .dropdown-content {
-                @apply hidden absolute border rounded-lg border-blue-950 z-10;
-            }
-            .dropdown-content a {
-                @apply border-2 bg-zinc-950/70 border-blue-950 py-1 px-3;
-            }
-            .dropdown:hover .dropdown-content,
-            .dropdown:focus .dropdown-content {
-                @apply flex flex-col;
-            }
-            .dropdown .dropdown-content a:hover {
-                @apply bg-zinc-950/80;
             }
             .QR {
                 @apply max-md:hidden;

@@ -1,8 +1,9 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 
-// Update the glob pattern to look in src instead of public
+// Update the glob pattern to look in files instead of public/files
 const data = await import.meta.glob(
-    "/src/files/**/*.pdf"
+    "/files/**/*.pdf",
+    { eager: true, query: "?url" }
 );
 
 // Build category structure from file paths
@@ -10,9 +11,7 @@ const buildCategories = () => {
     const categories = {};
 
     for (const file in data) {
-        data[file](); // Ensure file is loaded
-        // Update the path replacement to match the new location
-        const filePath = file.replace("/src/files/", "");
+        const filePath = file.replace("/files/", "");
         const pathParts = filePath.split("/");
 
         let currentCategory = categories;
@@ -40,9 +39,8 @@ const filePathToUrl = {};
 // Process all files to get their URLs
 const processFileUrls = async () => {
     for (const file in data) {
-        const module = await data[file]();
-        const filePath = file.replace("/src/files/", "");
-        filePathToUrl[filePath] = module.default;
+        const filePath = file.replace("/files/", "");
+        filePathToUrl[filePath] = data[file].default;
     }
 };
 
@@ -52,14 +50,14 @@ processFileUrls();
 const Content = ({ subject, page, expansionMode = "years" }) => {
     // Initialize based on stored preference or default value
     const [currentExpansionMode, setCurrentExpansionMode] = useState(
-        typeof localStorage !== 'undefined' ? 
-        localStorage.getItem('folderExpansionMode') || expansionMode : 
-        expansionMode
+        typeof localStorage !== 'undefined' ?
+            localStorage.getItem('folderExpansionMode') || expansionMode :
+            expansionMode
     );
-    
+
     // Use a ref to track if initial expansion has been set
     const initialExpansionSet = useRef(false);
-    
+
     // State for expanded folders
     const [expandedFolders, setExpandedFolders] = useState({});
 
@@ -70,14 +68,14 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
             setCurrentExpansionMode(mode);
             updateFolderExpansion(mode);
         };
-        
+
         window.addEventListener('expansionModeChanged', handleExpansionModeChange);
-        
+
         return () => {
             window.removeEventListener('expansionModeChanged', handleExpansionModeChange);
         };
     }, []);
-    
+
     // Initialize folder expansion based on mode when component mounts
     useEffect(() => {
         if (!initialExpansionSet.current) {
@@ -85,31 +83,57 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
             initialExpansionSet.current = true;
         }
     }, [currentExpansionMode]);
-    
+
     // Function to update folder expansion based on mode
     const updateFolderExpansion = (mode) => {
         const newExpanded = {};
-        
+
         // Helper function to traverse the category structure
         const processCategory = (category, path = '') => {
             if (typeof category !== 'object' || category === null) return;
-            
+
             Object.keys(category).forEach(key => {
                 const currentPath = path ? `${path}-${key}` : key;
                 const isYear = /^20\d{2}$/.test(key);
-                
+
                 if (mode === 'all' || (mode === 'years' && isYear)) {
                     newExpanded[currentPath] = true;
                 }
-                
+
                 processCategory(category[key], currentPath);
             });
         };
-        
-        if (categories[subject] && categories[subject][page]) {
-            processCategory(categories[subject][page]);
+
+        // Get content path parts
+        const pageParts = page.split('/');
+        const mainPage = pageParts[0];
+        const nestedPath = pageParts.length > 1 ? pageParts.slice(1).join('/') : '';
+
+        // Find the appropriate category to process
+        let targetCategory;
+        if (pageParts.length > 1 && categories[subject] && categories[subject][mainPage]) {
+            // For nested paths like 'fizica/altele'
+            let current = categories[subject][mainPage];
+            const remainingParts = pageParts.slice(1);
+            
+            for (const part of remainingParts) {
+                if (current && current[part]) {
+                    current = current[part];
+                } else {
+                    current = null;
+                    break;
+                }
+            }
+            targetCategory = current;
+        } else {
+            // For direct paths like 'altele'
+            targetCategory = categories[subject]?.[page];
         }
-        
+
+        if (targetCategory) {
+            processCategory(targetCategory);
+        }
+
         setExpandedFolders(newExpanded);
     };
 
@@ -119,13 +143,15 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
     }, []);
 
     // Extract repeated logic for class determination
-    const isAltele = page.includes('altele');
+    // Check if this is an altele page (either directly or nested)
+    const isAltele = page === 'altele' || page.endsWith('/altele');
+    
     const classNames = useMemo(() => ({
         list: isAltele ? "altele-list" : "content-list",
         link: isAltele ? "altele-link" : "content-link",
         text: isAltele ? "altele-text" : "content-text",
         folder: isAltele ? "altele-folder" : "content-folder",
-    }), [isAltele, page]);
+    }), [isAltele]);
 
     // Toggle folder expansion
     const toggleFolder = useCallback((folderPath) => {
@@ -142,25 +168,30 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
         }
 
         const entries = Object.entries(dict).reverse();
-        
+
         return (
             <ul className={`${classNames.list} ${level > 0 ? 'ml-4' : ''}`}>
                 {entries.map(([key, value], index) => {
+                    // Skip "altele" folders when they're in the main content area (not in altele page)
+                    if (key === 'altele' && !isAltele && subject === 'admitere') {
+                        return null;
+                    }
+
                     const isFile = typeof value !== 'object' || value === null || Array.isArray(value);
                     const formattedKey = key.replace(/-/g, " ");
                     const itemPath = parentPath ? `${parentPath}-${key}` : key;
                     const isExpanded = !!expandedFolders[itemPath];
-                    
+
                     if (isFile) {
                         const fileName = value[value.length - 1];
                         const filePath = value.join("/");
-                        
-                        // Use the processed URL instead of the src path
-                        const fileUrl = filePathToUrl[filePath] || `/src/files/${filePath}`;
-                        
+
+                        // Use the processed URL instead of the public path
+                        const fileUrl = filePathToUrl[filePath] || `/files/${filePath}`;
+
                         return (
                             <li key={generateKey(fileName, index)}>
-                                <a 
+                                <a
                                     className={`${classNames.link} flex items-center`}
                                     href={fileUrl}
                                     target="_blank"
@@ -181,21 +212,21 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                         // Rest of your folder rendering code remains the same
                         const showDivider = index === 0 && level === 1;
                         const isYear = /^20\d{2}$/.test(key);
-                        
+
                         return (
-                            <li 
-                                key={generateKey(key, index)} 
+                            <li
+                                key={generateKey(key, index)}
                                 className="space-y-2"
                                 id={isYear ? key : undefined}
                             >
                                 {showDivider && <hr className="border-black" />}
-                                <div 
+                                <div
                                     className={`${classNames.folder} flex items-center cursor-pointer`}
                                     onClick={() => toggleFolder(itemPath)}
                                 >
-                                    <svg 
-                                        className={`w-5 h-5 mr-2 transition-transform duration-200 ${isExpanded ? 'transform rotate-90' : ''}`} 
-                                        fill="currentColor" 
+                                    <svg
+                                        className={`w-5 h-5 mr-2 transition-transform duration-200 ${isExpanded ? 'transform rotate-90' : ''}`}
+                                        fill="currentColor"
                                         viewBox="0 0 20 20"
                                     >
                                         <path d="M6 6L14 10L6 14V6Z" />
@@ -214,18 +245,44 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                 })}
             </ul>
         );
-    }, [classNames, expandedFolders, generateKey, toggleFolder]);
+    }, [classNames, expandedFolders, generateKey, toggleFolder, isAltele, subject]);
 
-    // Handle missing content gracefully
-    if (!categories[subject] || !categories[subject][page]) {
-        return <div className="p-4 text-center">
-            <p>No content available for this section.</p>
-        </div>;
-    }
-    
+    // Get content based on path structure
+    const getContent = () => {
+        // Split the page path if it contains slashes
+        const pageParts = page.split('/');
+        
+        // If it's a simple path, use it directly
+        if (pageParts.length === 1) {
+            if (!categories[subject] || !categories[subject][page]) {
+                return (
+                    <div className="p-4 text-center">
+                        <p>No content available for this section.</p>
+                    </div>
+                );
+            }
+            return listDir(categories[subject][page]);
+        }
+        
+        // For nested paths, traverse the structure
+        let currentContent = categories[subject];
+        for (const part of pageParts) {
+            if (!currentContent || !currentContent[part]) {
+                return (
+                    <div className="p-4 text-center">
+                        <p>No content available for this section.</p>
+                    </div>
+                );
+            }
+            currentContent = currentContent[part];
+        }
+        
+        return listDir(currentContent);
+    };
+
     return (
         <div className="content-container">
-            {listDir(categories[subject][page])}
+            {getContent()}
         </div>
     );
 };

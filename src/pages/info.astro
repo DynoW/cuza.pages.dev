@@ -1,11 +1,11 @@
 ---
-import Layout from "../../layouts/Layout.astro";
-import Navbar from "../../components/Navbar.astro";
-import Footer from "../../components/Footer.astro";
-import MainContainer from "../../layouts/MainContainer.astro";
-import CenterContainer from "../../components/CenterContainer.astro";
-import Curs from "../../components/Curs.astro";
-const courses = await Astro.glob("../../content/info/*.md");
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+import MainContainer from "../layouts/MainContainer.astro";
+import CenterContainer from "../components/CenterContainer.astro";
+import Curs from "../components/Curs.astro";
+const courses = await Astro.glob("../content/info/*.md");
 ---
 
 <Layout title="informatica | cuza.pages.dev">

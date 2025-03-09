@@ -1,66 +1,28 @@
 ---
-import Layout from "../../layouts/Layout.astro";
-import Navbar from "../../components/Navbar.astro";
-import Footer from "../../components/Footer.astro";
-import MainContainer from "../../layouts/MainContainer.astro";
-import LeftContainer from "../../layouts/LeftContainer.astro";
-import CenterContainer from "../../components/CenterContainer.astro";
-import RightContainer from "../../layouts/RightContainer.astro";
-import Content from "../../components/Content.jsx";
-import Shortcuts from "../../components/Shortcuts.astro";
+import CustomPage from "../../components/CustomPage.astro";
+import fs from 'fs';
+import path from 'path';
 
-// Define all valid routes at build time
 export function getStaticPaths() {
-  const validSubjects = ['fizica', 'mate', 'info', 'admitere'];
-  const validPages = ['bac', 'teste', 'simulari', 'variante'];
+  // Get the absolute path to the files directory
+  const filesPath = path.join(process.cwd(), 'files');
   
-  const paths: { params: { subject: string, page: string } }[] = [];
+  // Read directories in the files path to get subjects
+  const validSubjects = fs.existsSync(filesPath) 
+    ? fs.readdirSync(filesPath).filter(file => 
+        fs.statSync(path.join(filesPath, file)).isDirectory())
+    : ['fizica', 'mate', 'info', 'admitere']; // Fallback to defaults if directory doesn't exist
   
-  // Generate all combinations of subject and page
-  validSubjects.forEach(subject => {
-    validPages.forEach(page => {
-      paths.push({ params: { subject, page } });
-    });
-  });
+  // Filter out 'fizica' since it's handled by the index page
+  const subjectsWithoutFizica = validSubjects.filter(subject => subject !== 'fizica');
   
-  return paths;
+  return subjectsWithoutFizica.map(subject => ({
+    params: { subject }
+  }));
 }
 
-// Get the dynamic route parameters
-const { subject, page } = Astro.params;
-
-// Page title construction
-const pageTitle = `${subject}${page ? `-${page}` : ''} | cuza.pages.dev`;
-
-// Special case for the admitere section
-const isAdmitere = subject === 'admitere';
+// Get the dynamic route parameter
+const { subject } = Astro.params;
 ---
 
-<Layout title={pageTitle}>
-  <Navbar>
-    <Navbar />
-  </Navbar>
-  <MainContainer>
-    <LeftContainer>
-      <span class="text-lg font-bold text-white">Altele</span>
-      {isAdmitere ? 
-        <Content subject={subject} page={`altele-${page || subject}`} /> :
-        <Content subject={subject} page="altele" />
-      }
-      {!isAdmitere && subject !== 'info' && 
-        <>
-          <br />
-          <Shortcuts />
-        </>
-      }
-    </LeftContainer>
-    <CenterContainer />
-    <RightContainer>
-      {isAdmitere && page ? 
-        <Content subject={subject} page={page} /> :
-        <Content subject={subject} page={page || 'bac'} />
-      }
-    </RightContainer>
-  </MainContainer>
-  <Footer />
-</Layout>
+<CustomPage subject={subject} page="bac" />
