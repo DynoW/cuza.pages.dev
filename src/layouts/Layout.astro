@@ -196,17 +196,13 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
                 if(new Date().getMonth() === 2) {
                     backgroundImageElement.style.background = 'url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2)';
                     backgroundImageElement.style.backgroundAttachment = 'fixed';
-                    const container = document.getElementById('container-banner');
+                    const container = document.querySelector('body');
                     if (container) {
-                        const clouds = document.createElement('div');
-                        clouds.className = 'clouds';
-                        const bunny = document.createElement('div');
-                        bunny.className = 'bunny';
-                        const grass = document.createElement('div');
-                        grass.className = 'grass';
-                        container.appendChild(clouds);
-                        container.appendChild(bunny);
-                        container.appendChild(grass);
+                        ['clouds', 'bunny', 'grass'].forEach(className => {
+                            const element = document.createElement('div');
+                            element.className = className;
+                            container.appendChild(element);
+                        });
                     }
                 }
             }
