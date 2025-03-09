@@ -150,6 +150,7 @@ const sortedNavEntries = Object.entries(navStructure).sort((a, b) => {
                             <div class="me-3">
                                 <a
                                     href="https://analytics.my-lab.ro/share/l2n3pDhX5KJiyuAp/cuza.pages.dev"
+                                    class="focus:outline-none"
                                 >
                                     <span
                                         class="min-w-min hover:scale-125 hover:rotate-6 duration-300"
@@ -441,78 +442,146 @@ const sortedNavEntries = Object.entries(navStructure).sort((a, b) => {
 </style>
 
 <script>
-    // Add touch support for mobile devices
+    // Add keyboard and touch support for accessible navigation
     document.addEventListener("DOMContentLoaded", () => {
         const dropdownTriggers = document.querySelectorAll(".dropdown-trigger");
 
         dropdownTriggers.forEach((trigger) => {
-            trigger.addEventListener("click", (e) => {
-                e.preventDefault();
-                const container = trigger.closest(".dropdown-container");
-                if (!container) return;
-
-                const content = container.querySelector(
-                    ".dropdown-content",
-                ) as HTMLElement | null;
-                if (!content) return;
-
-                // Close all other dropdowns
-                document
-                    .querySelectorAll(".dropdown-content.active")
-                    .forEach((dropdown) => {
-                        if (
-                            dropdown !== content &&
-                            dropdown instanceof HTMLElement
-                        ) {
-                            dropdown.classList.remove("active");
-                            dropdown.style.display = "none";
-                        }
-                    });
-
-                // Toggle current dropdown
-                if (content.classList.contains("active")) {
-                    content.classList.remove("active");
-                    content.style.display = "none";
-                } else {
-                    content.classList.add("active");
-                    content.style.display = "flex";
-
-                    // Ensure dropdown is within viewport
-                    const rect = content.getBoundingClientRect();
-                    const viewportWidth = window.innerWidth;
-
-                    if (rect.right > viewportWidth) {
-                        content.style.left = "auto";
-                        content.style.right = "0";
-                        content.style.transform = "none";
-                    }
-
-                    if (rect.left < 0) {
-                        content.style.left = "0";
-                        content.style.right = "auto";
-                        content.style.transform = "none";
-                    }
+            // Handle click events
+            trigger.addEventListener("click", (e) => handleDropdownToggle(e, trigger));
+            
+            // Handle keyboard events for accessibility
+            trigger.addEventListener("keydown", (e: Event) => {
+                const keyEvent = e as KeyboardEvent;
+                if (keyEvent.key === "Enter" || keyEvent.key === " " || keyEvent.key === "Space") {
+                    e.preventDefault();
+                    handleDropdownToggle(e, trigger);
+                }
+                
+                // Close on Escape key
+                if (keyEvent.key === "Escape") {
+                    const container = trigger.closest(".dropdown-container");
+                    if (!container) return;
+                    
+                    const content = container.querySelector(".dropdown-content") as HTMLElement | null;
+                    if (!content) return;
+                    
+                    closeDropdown(content);
+                    (trigger as HTMLElement).focus(); // Cast to HTMLElement for focus
                 }
             });
         });
+
+        // Helper function to handle dropdown toggling
+        function handleDropdownToggle(e: Event, trigger: Element) {
+            e.preventDefault();
+            const container = trigger.closest(".dropdown-container");
+            if (!container) return;
+
+            const content = container.querySelector(".dropdown-content") as HTMLElement | null;
+            if (!content) return;
+
+            // Close all other dropdowns
+            document.querySelectorAll(".dropdown-content.active").forEach((dropdown) => {
+                if (dropdown !== content && dropdown instanceof HTMLElement) {
+                    closeDropdown(dropdown);
+                }
+            });
+
+            // Toggle current dropdown
+            if (content.classList.contains("active")) {
+                closeDropdown(content);
+            } else {
+                openDropdown(content, trigger);
+            }
+        }
+        
+        // Helper function to open dropdown
+        function openDropdown(content: HTMLElement, trigger: Element) {
+            content.classList.add("active");
+            content.style.display = "flex";
+            
+            // Update ARIA attributes
+            if (trigger instanceof HTMLElement) {
+                trigger.setAttribute("aria-expanded", "true");
+            }
+            
+            // Ensure dropdown is within viewport
+            const rect = content.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+
+            if (rect.right > viewportWidth) {
+                content.style.left = "auto";
+                content.style.right = "0";
+                content.style.transform = "none";
+            }
+
+            if (rect.left < 0) {
+                content.style.left = "0";
+                content.style.right = "auto";
+                content.style.transform = "none";
+            }
+            
+            // Add keyboard navigation within dropdown
+            setupDropdownNavigation(content);
+        }
+        
+        // Helper function to close dropdown
+        function closeDropdown(content: HTMLElement) {
+            content.classList.remove("active");
+            content.style.display = "none";
+            
+            // Update ARIA attributes
+            const container = content.closest(".dropdown-container");
+            if (container) {
+                const trigger = container.querySelector("[aria-haspopup]");
+                if (trigger instanceof HTMLElement) {
+                    trigger.setAttribute("aria-expanded", "false");
+                }
+            }
+        }
+        
+        // Setup keyboard navigation within dropdown
+        function setupDropdownNavigation(dropdown: HTMLElement) {
+            const focusableElements = dropdown.querySelectorAll('a, button') as NodeListOf<HTMLElement>;
+            if (focusableElements.length === 0) return;
+            
+            // Enable arrow key navigation between items
+            focusableElements.forEach((el, index) => {
+                el.addEventListener('keydown', (e: Event) => {
+                    const keyEvent = e as KeyboardEvent;
+                    if (keyEvent.key === "ArrowDown") {
+                        e.preventDefault();
+                        const nextIndex = (index + 1) % focusableElements.length;
+                        focusableElements[nextIndex].focus();
+                    } else if (keyEvent.key === "ArrowUp") {
+                        e.preventDefault();
+                        const prevIndex = (index - 1 + focusableElements.length) % focusableElements.length;
+                        focusableElements[prevIndex].focus();
+                    } else if (keyEvent.key === "Escape") {
+                        e.preventDefault();
+                        closeDropdown(dropdown);
+                        const container = dropdown.closest(".dropdown-container");
+                        if (container) {
+                            const trigger = container.querySelector(".dropdown-trigger");
+                            if (trigger instanceof HTMLElement) trigger.focus();
+                        }
+                    }
+                });
+            });
+        }
 
         // Close dropdowns when clicking outside
         document.addEventListener("click", (event) => {
             const e = event as Event;
             const target = e.target;
 
-            if (
-                !(target instanceof Element) ||
-                !target.closest(".dropdown-container")
-            ) {
-                document
-                    .querySelectorAll(".dropdown-content.active")
-                    .forEach((dropdown) => {
-                        if (dropdown instanceof HTMLElement) {
-                            dropdown.classList.remove("active");
-                            dropdown.style.display = "none";
-                        }
-                    });
+            if (!(target instanceof Element) || !target.closest(".dropdown-container")) {
+                document.querySelectorAll(".dropdown-content.active").forEach((dropdown) => {
+                    if (dropdown instanceof HTMLElement) {
+                        closeDropdown(dropdown);
+                    }
+                });
             }
         });
     });
