@@ -34,6 +34,21 @@ const buildCategories = () => {
 
 const categories = buildCategories();
 
+// Create a mapping of file paths to their imported URLs
+const filePathToUrl = {};
+
+// Process all files to get their URLs
+const processFileUrls = async () => {
+    for (const file in data) {
+        const module = await data[file]();
+        const filePath = file.replace("/src/files/", "");
+        filePathToUrl[filePath] = module.default;
+    }
+};
+
+// Initialize the URL mapping
+processFileUrls();
+
 const Content = ({ subject, page, expansionMode = "years" }) => {
     // Initialize based on stored preference or default value
     const [currentExpansionMode, setCurrentExpansionMode] = useState(
@@ -120,6 +135,7 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
         }));
     }, []);
 
+    // In the listDir function, update the file URL generation
     const listDir = useCallback((dict, level = 0, parentPath = '') => {
         if (typeof dict !== 'object' || dict === null || Array.isArray(dict)) {
             return null;
@@ -139,11 +155,14 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                         const fileName = value[value.length - 1];
                         const filePath = value.join("/");
                         
+                        // Use the processed URL instead of the src path
+                        const fileUrl = filePathToUrl[filePath] || `/src/files/${filePath}`;
+                        
                         return (
                             <li key={generateKey(fileName, index)}>
                                 <a 
                                     className={`${classNames.link} flex items-center`}
-                                    href={`/src/files/${filePath}`}
+                                    href={fileUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label={`Open ${fileName} in new tab`}
@@ -159,15 +178,14 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                             </li>
                         );
                     } else {
+                        // Rest of your folder rendering code remains the same
                         const showDivider = index === 0 && level === 1;
-                        // Check if key is a year (4-digit number)
                         const isYear = /^20\d{2}$/.test(key);
                         
                         return (
                             <li 
                                 key={generateKey(key, index)} 
                                 className="space-y-2"
-                                // Add ID attribute if this is a year folder
                                 id={isYear ? key : undefined}
                             >
                                 {showDivider && <hr className="border-black" />}
@@ -175,7 +193,6 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                                     className={`${classNames.folder} flex items-center cursor-pointer`}
                                     onClick={() => toggleFolder(itemPath)}
                                 >
-                                    {/* Improved folder toggle icon */}
                                     <svg 
                                         className={`w-5 h-5 mr-2 transition-transform duration-200 ${isExpanded ? 'transform rotate-90' : ''}`} 
                                         fill="currentColor" 
@@ -184,7 +201,6 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                                         <path d="M6 6L14 10L6 14V6Z" />
                                     </svg>
                                     <div className="flex items-center">
-                                        {/* Folder icon */}
                                         <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
                                         </svg>
