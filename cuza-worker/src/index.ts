@@ -132,11 +132,11 @@ function generateFilePath(page: string, year: string, title: string, type: strin
         storagePath = `files/fizica/bac/${year}/${title}/${newFileName}`;
     } else if (page === 'teste') {
         newFileName = `E_d_fizica_${year}_${type2}_${testNumber}.pdf`;
-        storagePath = `files/fizica/teste/${year}/-/${newFileName}`;
+        storagePath = `files/fizica/teste/${year}/${newFileName}`;
     } else if (page === 'sim') {
         const location = simulation === 'judetene' ? county : local;
         newFileName = `E_d_fizica_${location}_${year}_${type2}.pdf`;
-        storagePath = `files/fizica/simulari/${year}-simulari-${simulation}/-/${newFileName}`;
+        storagePath = `files/fizica/simulari/${year}-simulari-${simulation}/${newFileName}`;
     }
 
     return { storagePath, newFileName };
