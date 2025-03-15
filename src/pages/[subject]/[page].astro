@@ -26,7 +26,7 @@ export function getStaticPaths() {
       validPages = fs.existsSync(subjectPath)
         ? fs.readdirSync(subjectPath).filter(file => 
             fs.statSync(path.join(subjectPath, file)).isDirectory())
-        : ['mate', 'fizica', 'info']; // Custom fallback for admitere
+        : ['mate', 'fizica', 'info', 'rezolvari']; // Custom fallback for admitere
     } else {
       validPages = fs.existsSync(subjectPath)
         ? fs.readdirSync(subjectPath).filter(file => 
