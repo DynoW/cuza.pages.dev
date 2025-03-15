@@ -1,0 +1,49 @@
+---
+import CustomPage from "../../components/CustomPage.astro";
+import fs from 'fs';
+import path from 'path';
+
+export function getStaticPaths() {
+  // Get the absolute path to the files directory
+  const filesPath = path.join(process.cwd(), 'files');
+  
+  // Read directories in the files path to get subjects
+  const validSubjects = fs.existsSync(filesPath) 
+    ? fs.readdirSync(filesPath).filter(file => 
+        fs.statSync(path.join(filesPath, file)).isDirectory())
+    : ['fizica', 'mate', 'admitere']; // Fallback to defaults if directory doesn't exist
+  
+  const paths: { params: { subject: string, page: string } }[] = [];
+  
+  // For each subject, get its valid pages from subdirectories
+  validSubjects.forEach(subject => {
+    const subjectPath = path.join(filesPath, subject);
+    
+    // Read subdirectories to get valid pages
+    // Use different fallback values based on the subject
+    let validPages;
+    if (subject === 'admitere') {
+      validPages = fs.existsSync(subjectPath)
+        ? fs.readdirSync(subjectPath).filter(file => 
+            fs.statSync(path.join(subjectPath, file)).isDirectory())
+        : ['mate', 'fizica', 'info']; // Custom fallback for admitere
+    } else {
+      validPages = fs.existsSync(subjectPath)
+        ? fs.readdirSync(subjectPath).filter(file => 
+            fs.statSync(path.join(subjectPath, file)).isDirectory())
+        : ['bac', 'teste', 'simulari', 'variante']; // Default fallback
+    }
+    
+    validPages.forEach(page => {
+      paths.push({ params: { subject, page } });
+    });
+  });
+  
+  return paths;
+}
+
+// Get the dynamic route parameters
+const { subject, page } = Astro.params;
+---
+
+<CustomPage subject={subject} page={page} />

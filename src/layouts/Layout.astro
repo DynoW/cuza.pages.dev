@@ -1,6 +1,6 @@
 ---
 import { SEO } from "astro-seo";
-import  UpArrow  from "../icons/UpArrow.astro"; 
+import UpArrow from "../icons/UpArrow.astro";
 interface Props {
     title: string;
     noindex?: boolean;
@@ -11,8 +11,17 @@ interface Props {
     markdown?: boolean;
 }
 
-const {title, noindex, nofollow, extendMeta, extendLink, bodyClass, markdown} = Astro.props;
-const description = "Subiecte de bac din anii anteriori la fizica si matematica pentru liceeni si profesori. Parte din proiectul: DynoW/cuza.pages.dev";
+const {
+    title,
+    noindex,
+    nofollow,
+    extendMeta,
+    extendLink,
+    bodyClass,
+    markdown,
+} = Astro.props;
+const description =
+    "Subiecte de bac din anii anteriori la fizica si matematica pentru liceeni si profesori. Parte din proiectul: DynoW/cuza.pages.dev";
 ---
 
 <!doctype html>
@@ -99,10 +108,14 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
                         type: "application/xml",
                         href: "/sitemap-index.xml",
                     },
-                    ...(markdown ? [{
-                        rel: "stylesheet",
-                        href: "/assets/css/github-markdown.css",
-                    }] : []),
+                    ...(markdown
+                        ? [
+                              {
+                                  rel: "stylesheet",
+                                  href: "/assets/css/github-markdown.css",
+                              },
+                          ]
+                        : []),
                     ...(Array.isArray(extendLink) ? extendLink : []),
                 ],
                 meta: [
@@ -133,10 +146,14 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
             }}
         />
         {
-            (import.meta.env.PROD === true) ? (
-            <>
-                <script defer src="https://analytics.my-lab.ro/script.js" data-website-id="afbd7bf4-d2a2-41f7-a401-5c7b73a3b42e"></script>
-                {/* <!-- Google tag (gtag.js) -->
+            import.meta.env.PROD === true ? (
+                <>
+                    <script
+                        defer
+                        src="https://analytics.my-lab.ro/script.js"
+                        data-website-id="afbd7bf4-d2a2-41f7-a401-5c7b73a3b42e"
+                    />
+                    {/* <!-- Google tag (gtag.js) -->
                 <script
                     async
                     src="https://www.googletagmanager.com/gtag/js?id=G-PS1EBGH4HS"
@@ -150,191 +167,190 @@ const description = "Subiecte de bac din anii anteriori la fizica si matematica 
 
                     gtag("config", "G-PS1EBGH4HS")
                 </script> */}
-            </>
-            ): null
+                </>
+            ) : null
         }
     </head>
-    <body class={`backgroundImage font-serif select-none overflow-x-hidden relative min-h-screen p-0 ${bodyClass || ''}`}></body>
-        <slot />
-        <div class="fixed bottom-4 right-4">
-            <button
-                id="scrollToTop"
-                title="Du-te sus"
-                aria-label="Du-te sus"
-                type="button"
-                class="bg-white font-bold p-4 rounded-full transition ease-in-out hover:scale-105 duration-200"
-                onclick="scrollToTop()"
-            >
-                <UpArrow />
-            </button>
-            <script is:inline>
-                function scrollToTop() {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-                window.addEventListener('scroll', function() {
-                    const button = document.getElementById('scrollToTop');
-                    if (window.scrollY > 0) {
-                        button.style.display = 'block';
-                    } else {
-                        button.style.display = 'none';
-                    }
-                });
-                document.addEventListener('DOMContentLoaded', function() {
-                    const button = document.getElementById('scrollToTop');
-                    button.style.display = 'none';
-                });
-            </script>
-        </div>
-        <script>
-            const backgroundImageElement = document.querySelector('.backgroundImage') as HTMLElement;
-            if (backgroundImageElement) {
-                if(new Date().getMonth() === 11) {
-                    backgroundImageElement.style.background = 'url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d,#cc3333)';
-                    backgroundImageElement.style.backgroundAttachment = 'fixed';
-                }
-                if(new Date().getMonth() === 2) {
-                    backgroundImageElement.style.background = 'url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2)';
-                    backgroundImageElement.style.backgroundAttachment = 'fixed';
-                }
+    <body
+        class={`backgroundImage font-serif select-none overflow-x-hidden relative min-h-screen p-0 ${bodyClass || ""}`}
+    ></body><slot />
+    <div class="fixed bottom-4 right-4">
+        <button
+            id="scrollToTop"
+            title="Du-te sus"
+            aria-label="Du-te sus"
+            type="button"
+            class="bg-white font-bold p-4 rounded-full transition ease-in-out hover:scale-105 duration-200"
+            onclick="scrollToTop()"
+        >
+            <UpArrow />
+        </button>
+        <script is:inline>
+            function scrollToTop() {
+                window.scrollTo({ top: 0, behavior: "smooth" });
             }
+            window.addEventListener("scroll", function () {
+                const button = document.getElementById("scrollToTop");
+                if (window.scrollY > 0) {
+                    button.style.display = "block";
+                } else {
+                    button.style.display = "none";
+                }
+            });
+            document.addEventListener("DOMContentLoaded", function () {
+                const button = document.getElementById("scrollToTop");
+                button.style.display = "none";
+            });
         </script>
-        <style is:global>
-            @tailwind utilities;
-
-            @layer utilities {
-                @font-face {
-                    font-family: Poppins;
-                    src:
-                        url("/assets/fonts/poppins-medium.woff2") format("woff2"),
-                        url("/assets/fonts/poppins-medium.woff") format("woff");
-                    font-display: swap;
-                }
-                @font-face {
-                    font-family: Inter;
-                    src:
-                        url("/assets/fonts/inter-medium.woff2") format("woff2"),
-                        url("/assets/fonts/inter-medium.woff") format("woff");
-                    font-display: swap;
-                }
-                :root {
-                    --bs-gutter-x: 1.5rem;
-                    --bs-gutter-y: 0;
-                }
-                a {
-                    transition: 0.2s;
-                }
-                .container {
-                    width: 100%;
-                    padding-right: calc(var(--bs-gutter-x) * 0.5);
-                    padding-left: calc(var(--bs-gutter-x) * 0.5);
-                }
-                .row {
-                    display: flex;
-                    flex-wrap: wrap;
-                }
-                .row > * {
-                    flex-shrink: 0;
-                    width: 100%;
-                    max-width: 100%;
-                    padding-right: calc(var(--bs-gutter-x) * 0.5);
-                    padding-left: calc(var(--bs-gutter-x) * 0.5);
-                    margin-top: var(--bs-gutter-y);
-                }
-                .col {
-                    flex: 1 0 0%;
-                }
-                .backgroundImage {
-                    background: url("/assets/img/background/bg-pattern.webp"),
-                        linear-gradient(to left, #212735, #337fd5);
-                    background-attachment: fixed;
-                    
-                    /* Christmas update */
-                    /* background: url("/assets/img/background/bg-pattern-cr.webp"),
-                    linear-gradient(to left, #330d0d,#cc3333); */
-                 
-
-                    /* Easter update */
-                    /* background: url("/assets/img/background/bg-pattern.webp"),
-                        linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2); */
-                }
-                .grass {
-                    z-index: -2;
-                    position: fixed;
-                    bottom: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 170px;
-                    background-image: url("/assets/img/background/grass.webp");
-                    background-repeat: repeat-x;
-                }
-                .clouds {
-                    z-index: -1;
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 275px;
-                    background-image: url("/assets/img/background/clouds.webp");
-                    background-repeat: repeat-x;
-                }
-                .bunny {
-                    z-index: -1;
-                    position: fixed;
-                    bottom: -1px;
-                    left: 0;
-                    width: 250px;
-                    height: 300px;
-                    background-image: url("/assets/img/background/bunny.webp");
-                    background-repeat: no-repeat;
-                }
-                .altele-list {
-                    @apply flex flex-col space-y-2 lg:space-y-1 text-slate-500;
-                }
-                .altele-link {
-                    @apply hover:text-slate-300;
-                }
-                .altele-text {
-                    @apply text-white;
-                }
-                .content-list {
-                    @apply mb-2 space-y-4;
-                }
-                .content-link {
-                    @apply text-slate-600 hover:text-slate-900 focus:text-slate-900 md:text-lg;
-                }
-                .content-text {
-                    @apply text-gray-900 md:text-lg;
-                }
-                .dropdown {
-                    @apply relative inline-block;
-                }
-                .dropdown-content {
-                    @apply hidden absolute border rounded-lg border-blue-950 z-10;
-                }
-                .dropdown-content a {
-                    @apply border-2 bg-zinc-950/70 border-blue-950 py-1 px-3;
-                }
-                .dropdown:hover .dropdown-content,
-                .dropdown:focus .dropdown-content {
-                    @apply flex flex-col;
-                }
-                .dropdown .dropdown-content a:hover {
-                    @apply bg-zinc-950/80;
-                }
-                .QR {
-                    @apply max-md:hidden;
-                }
-                .shortcut-link {
-                    @apply text-slate-500 hover:text-slate-300 text-lg;
-                }
-                .shortcut-pipe {
-                    @apply text-slate-500 text-lg;
-                }
-                .astro-code {
-                    border-radius: 5px;
-                    padding: 10px;
+    </div>
+    <script>
+        // Background update
+        const backgroundImageElement = document.querySelector(
+            ".backgroundImage",
+        ) as HTMLElement;
+        if (backgroundImageElement) {
+            if (new Date().getMonth() === 11) {
+                backgroundImageElement.style.background =
+                    'url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d,#cc3333)';
+                backgroundImageElement.style.backgroundAttachment = "fixed";
+            }
+            if (new Date().getMonth() === 2) {
+                backgroundImageElement.style.background =
+                    'url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2)';
+                backgroundImageElement.style.backgroundAttachment = "fixed";
+                const container = document.querySelector("body");
+                if (container) {
+                    ["clouds", "bunny", "grass"].forEach((className) => {
+                        const element = document.createElement("div");
+                        element.className = className;
+                        container.appendChild(element);
+                    });
                 }
             }
-        </style>
-    </body>
+        }
+    </script>
+    <style is:global>
+        @tailwind utilities;
+
+        @layer utilities {
+            @font-face {
+                font-family: Poppins;
+                src:
+                    url("/assets/fonts/poppins-medium.woff2") format("woff2"),
+                    url("/assets/fonts/poppins-medium.woff") format("woff");
+                font-display: swap;
+            }
+            @font-face {
+                font-family: Inter;
+                src:
+                    url("/assets/fonts/inter-medium.woff2") format("woff2"),
+                    url("/assets/fonts/inter-medium.woff") format("woff");
+                font-display: swap;
+            }
+            :root {
+                --bs-gutter-x: 1.5rem;
+                --bs-gutter-y: 0;
+            }
+            html {
+                scroll-behavior: smooth;
+            }
+            a {
+                transition: 0.2s;
+            }
+            .container {
+                width: 100%;
+                padding-right: calc(var(--bs-gutter-x) * 0.5);
+                padding-left: calc(var(--bs-gutter-x) * 0.5);
+            }
+            .row {
+                display: flex;
+                flex-wrap: wrap;
+            }
+            .row > * {
+                flex-shrink: 0;
+                width: 100%;
+                max-width: 100%;
+                padding-right: calc(var(--bs-gutter-x) * 0.5);
+                padding-left: calc(var(--bs-gutter-x) * 0.5);
+                margin-top: var(--bs-gutter-y);
+            }
+            .col {
+                flex: 1 0 0%;
+            }
+            .backgroundImage {
+                background: url("/assets/img/background/bg-pattern.webp"),
+                    linear-gradient(to left, #212735, #337fd5);
+                background-attachment: fixed;
+
+                /* Christmas update */
+                /* background: url("/assets/img/background/bg-pattern-cr.webp"),
+                    linear-gradient(to left, #330d0d,#cc3333); */
+
+                /* Easter update */
+                /* background: url("/assets/img/background/bg-pattern.webp"),
+                        linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2); */
+            }
+            .grass {
+                z-index: -2;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 170px;
+                background-image: url("/assets/img/background/grass.webp");
+                background-repeat: repeat-x;
+            }
+            .clouds {
+                z-index: -1;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 275px;
+                background-image: url("/assets/img/background/clouds.webp");
+                background-repeat: repeat-x;
+            }
+            .bunny {
+                z-index: -1;
+                position: fixed;
+                bottom: -1px;
+                left: 0;
+                width: 250px;
+                height: 300px;
+                background-image: url("/assets/img/background/bunny.webp");
+                background-repeat: no-repeat;
+            }
+            .altele-list {
+                @apply flex flex-col space-y-2 lg:space-y-1;
+            }
+            .altele-link {
+                @apply text-slate-500 hover:text-slate-300;
+            }
+            .altele-text {
+                @apply text-white;
+            }
+            .content-list {
+                @apply space-y-4;
+            }
+            .content-link {
+                @apply text-slate-600 hover:text-slate-900 focus:text-slate-900 md:text-lg;
+            }
+            .content-text {
+                @apply text-gray-900 md:text-lg;
+            }
+            .QR {
+                @apply max-md:hidden;
+            }
+            .shortcut-link {
+                @apply text-slate-500 hover:text-slate-300 text-lg;
+            }
+            .shortcut-pipe {
+                @apply text-slate-500 text-lg;
+            }
+            .astro-code {
+                border-radius: 5px;
+                padding: 10px;
+            }
+        }
+    </style>
 </html>

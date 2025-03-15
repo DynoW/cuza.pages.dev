@@ -1,63 +1,105 @@
-<span class="text-lg font-bold text-white">Shortcuts</span>
-<div>
-    <a class="shortcut-link" href="#2024">
-        2024
-    </a>
-    <span class="shortcut-pipe"> |</span>
-    <a class="shortcut-link" href="#2023">
-        2023
-    </a>
-    <span class="shortcut-pipe"> |</span>
-    <a class="shortcut-link" href="#2022">
-        2022
-    </a>
-    <span class="shortcut-pipe"> |</span>
-    <a class="shortcut-link" href="#2021">
-        2021
-    </a>
-    <span class="shortcut-pipe"> |</span>
-    <a class="shortcut-link" href="#2020">
-        2020
-    </a>
-    <span class="shortcut-pipe"> |</span>
-    <a class="shortcut-link" href="#2019">
-        2019
-    </a>
-    <span class="shortcut-pipe"> |</span>
-    <a class="shortcut-link" href="#2018">
-        2018
-    </a>
-    <span class="shortcut-pipe"> |</span>
-    <a class="shortcut-link" href="#2017">
-        2017
-    </a>
-    <span class="shortcut-pipe"> |</span>
-    <a class="shortcut-link" href="#2016">
-        2016
-    </a>
-    <span class="shortcut-pipe"> |</span>
-    <a class="shortcut-link" href="#2015">
-        2015
-    </a>
-    <span class="shortcut-pipe"> |</span>
-    <a class="shortcut-link" href="#2014">
-        2014
-    </a>
-    <span class="shortcut-pipe"> |</span>
-    <a class="shortcut-link" href="#2013">
-        2013
-    </a>
-    <span class="shortcut-pipe"> |</span>
-    <a class="shortcut-link" href="#2012">
-        2012
-    </a>
-    <span class="shortcut-pipe"> |</span>
-    <a class="shortcut-link" href="#2011">
-        2011
-    </a>
-    <span class="shortcut-pipe"> |</span>
-    <a class="shortcut-link" href="#2010">
-        2010
-    </a>
-    <span class="shortcut-pipe"> |</span>
+---
+// Add props to customize shortcuts for each page
+interface Props {
+  subject?: string;
+  page?: string;
+}
+
+const { subject, page } = Astro.props;
+
+// Get all PDF files in the file structure
+const data = await import.meta.glob("/files/**/*.pdf");
+
+// Extract years from the file paths that match current subject and page
+const extractYears = () => {
+  const years: Set<number> = new Set();
+  
+  for (const file in data) {
+    // Filter by subject and page if provided
+    if (subject && !file.includes(`/files/${subject}/`)) {
+      continue;
+    }
+    
+    if (page && !file.includes(`/${page}/`) && page !== 'bac') {
+      continue;
+    }
+
+    // Find years in the path (4 digit numbers that might be years)
+    const yearMatches = file.match(/\/20\d{2}\//g);
+    if (yearMatches) {
+      yearMatches.forEach(match => {
+        // Extract just the year (4 digits) and convert to number
+        const year = parseInt(match.replace(/\//g, ''), 10);
+        years.add(year);
+      });
+    }
+  }
+  
+  // Return years in descending order
+  return Array.from(years).sort((a, b) => b - a);
+};
+
+const availableYears = extractYears();
+
+// Function to determine the URL for a year shortcut
+function getShortcutUrl(year: number) {
+  // Special case: if subject is fizica, page is bac, and year is 2007, link to /fizica/variante
+  if (subject === 'fizica' && (page === 'bac' || !page) && year === 2007) {
+    return '/fizica/variante';
+  }
+  
+  // Default behavior: link to anchor tag for the year
+  return `#${year}`;
+}
+---
+
+<div class="shortcuts-container">
+  <span class="text-lg font-bold text-white mb-2">Accesare rapidă</span>
+  
+  <div class="shortcuts-grid">
+    {availableYears.map((year) => (
+      <a 
+        href={getShortcutUrl(year)}
+        class="shortcut-button"
+        title={year === 2007 && subject === 'fizica' && (page === 'bac' || !page) 
+          ? 'Salt la variante' 
+          : `Salt la documentele din ${year}`}
+      >
+        {year}
+      </a>
+    ))}
+  </div>
 </div>
+
+<style>
+  .shortcuts-container {
+    margin-bottom: 1.5rem;
+  }
+
+  .shortcuts-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .shortcut-button {
+    background-color: #1e293b;
+    color: #94a3b8;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    text-align: center;
+    min-width: 3rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .shortcut-button:hover {
+    background-color: #334155;
+    color: #e2e8f0;
+    transform: translateY(-1px);
+  }
+</style>

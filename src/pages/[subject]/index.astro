@@ -1,0 +1,28 @@
+---
+import CustomPage from "../../components/CustomPage.astro";
+import fs from 'fs';
+import path from 'path';
+
+export function getStaticPaths() {
+  // Get the absolute path to the files directory
+  const filesPath = path.join(process.cwd(), 'files');
+  
+  // Read directories in the files path to get subjects
+  const validSubjects = fs.existsSync(filesPath) 
+    ? fs.readdirSync(filesPath).filter(file => 
+        fs.statSync(path.join(filesPath, file)).isDirectory())
+    : ['fizica', 'mate', 'info', 'admitere']; // Fallback to defaults if directory doesn't exist
+  
+  // Filter out 'fizica' since it's handled by the index page
+  const subjectsWithoutFizica = validSubjects.filter(subject => subject !== 'fizica');
+  
+  return subjectsWithoutFizica.map(subject => ({
+    params: { subject }
+  }));
+}
+
+// Get the dynamic route parameter
+const { subject } = Astro.params;
+---
+
+<CustomPage subject={subject} page="bac" />
