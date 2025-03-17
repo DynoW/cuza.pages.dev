@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { Fragment, useState, useCallback, useMemo, useRef, useEffect } from 'react';
 
 // Update the glob pattern to look in files instead of public/files
 const data = await import.meta.glob(
@@ -204,7 +204,9 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                                         </svg>
                                     )}
                                     {fileName.split('_').map((part, i, arr) => (
-                                        i === arr.length - 1 ? part : <>{part}<wbr />_</>
+                                        i === arr.length - 1 ?
+                                            <span key={`part-${i}`}>{part}</span> :
+                                            <Fragment key={`part-${i}`}>{part}<wbr />_</Fragment>
                                     ))}
                                 </a>
                             </li>
