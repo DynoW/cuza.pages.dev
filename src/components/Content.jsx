@@ -107,7 +107,6 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
         // Get content path parts
         const pageParts = page.split('/');
         const mainPage = pageParts[0];
-        const nestedPath = pageParts.length > 1 ? pageParts.slice(1).join('/') : '';
 
         // Find the appropriate category to process
         let targetCategory;
@@ -115,7 +114,7 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
             // For nested paths like 'fizica/altele'
             let current = categories[subject][mainPage];
             const remainingParts = pageParts.slice(1);
-            
+
             for (const part of remainingParts) {
                 if (current && current[part]) {
                     current = current[part];
@@ -145,7 +144,7 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
     // Extract repeated logic for class determination
     // Check if this is an altele page (either directly or nested)
     const isAltele = page === 'altele' || page.endsWith('/altele');
-    
+
     const classNames = useMemo(() => ({
         list: isAltele ? "altele-list" : "content-list",
         link: isAltele ? "altele-link" : "content-link",
@@ -192,7 +191,7 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                         return (
                             <li key={generateKey(fileName, index)}>
                                 <a
-                                    className={`${classNames.link} flex items-center`}
+                                    className={`${classNames.link} flex items-center break-normal`}
                                     href={fileUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -204,7 +203,9 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                                             <path fill="currentColor" d="M8 10a1 1 0 100-2 1 1 0 000 2zm0 2a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1z" />
                                         </svg>
                                     )}
-                                    {fileName}
+                                    {fileName.split('_').map((part, i, arr) => (
+                                        i === arr.length - 1 ? part : <>{part}<wbr />_</>
+                                    ))}
                                 </a>
                             </li>
                         );
@@ -251,7 +252,7 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
     const getContent = () => {
         // Split the page path if it contains slashes
         const pageParts = page.split('/');
-        
+
         // If it's a simple path, use it directly
         if (pageParts.length === 1) {
             if (!categories[subject] || !categories[subject][page]) {
@@ -263,7 +264,7 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
             }
             return listDir(categories[subject][page]);
         }
-        
+
         // For nested paths, traverse the structure
         let currentContent = categories[subject];
         for (const part of pageParts) {
@@ -276,7 +277,7 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
             }
             currentContent = currentContent[part];
         }
-        
+
         return listDir(currentContent);
     };
 
