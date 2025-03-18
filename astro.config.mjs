@@ -22,7 +22,7 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
-      filter: (page) => !['/install', '/upload'].includes(page)
+      filter: (page) => !page.includes('/install') && !page.includes('/upload')
     }),
     tailwind(),
     react(),
