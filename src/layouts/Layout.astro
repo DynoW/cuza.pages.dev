@@ -3,25 +3,31 @@ import { SEO } from "astro-seo";
 import UpArrow from "../icons/UpArrow.astro";
 interface Props {
     title: string;
+    description?: string;
+    keywords?: string;
     noindex?: boolean;
     nofollow?: boolean;
+    canonicalUrl?: string;
     extendMeta?: object;
     extendLink?: object;
     bodyClass?: string;
     markdown?: boolean;
+    breadcrumbs?: Array<{name: string, url: string}>;
 }
 
 const {
     title,
+    description = "Subiecte de bacalaureat din anii anteriori la fizică, matematică și informatică pentru pregătirea elevilor. Resurse create de elevi pentru elevi din Liceul Teoretic Alexandru Ioan Cuza, București. Exerciții și variante rezolvate.",
+keywords = "bac, bacalaureat, subiecte, fizica, matematica, informatica, examen, admitere, upb, poli, programare, algoritmi, variante, teste, simulari, mate-fizica, mate-info, info, Liceul Teoretic Alexandru Ioan Cuza, București, LTAIC, cuza",
     noindex,
     nofollow,
+    canonicalUrl,
     extendMeta,
     extendLink,
     bodyClass,
     markdown,
+    breadcrumbs,
 } = Astro.props;
-const description =
-    "Subiecte de bac din anii anteriori la fizica si matematica pentru liceeni si profesori. Parte din proiectul: DynoW/cuza.pages.dev";
 ---
 
 <!doctype html>
@@ -33,11 +39,21 @@ const description =
             description={description}
             noindex={noindex}
             nofollow={nofollow}
+            canonical={canonicalUrl || Astro.url.href}
             openGraph={{
                 basic: {
                     title: title,
                     type: "website",
                     image: "https://cuza.pages.dev/assets/img/site-img.webp",
+                    url: Astro.url.href,
+                },
+                optional: {
+                    description: description,
+                    locale: "ro_RO",
+                    siteName: "Subiecte Bac",
+                },
+                image: {
+                    alt: "Subiecte Bac - Resurse pentru elevi",
                 },
             }}
             twitter={{
@@ -125,6 +141,10 @@ const description =
                             "width=device-width, initial-scale=1.0, shrink-to-fit=no",
                     },
                     {
+                        name: "keywords",
+                        content: keywords,
+                    },
+                    {
                         name: "twitter:image",
                         content:
                             "https://cuza.pages.dev/assets/img/site-img.webp",
@@ -145,6 +165,18 @@ const description =
                 ],
             }}
         />
+        {breadcrumbs && (
+            <script type="application/ld+json" set:html={JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                "itemListElement": breadcrumbs.map((crumb, index) => ({
+                    "@type": "ListItem",
+                    "position": index + 1,
+                    "name": crumb.name,
+                    "item": crumb.url
+                }))
+            })} />
+        )}
         {
             import.meta.env.PROD === true ? (
                 <>
@@ -167,7 +199,7 @@ const description =
 
                     gtag("config", "G-PS1EBGH4HS")
                 </script> */}
-            </>
+                </>
             ) : null
         }
     </head>
@@ -204,8 +236,7 @@ const description =
                 });
             </script>
         </div>
-    </body>
-    <script>
+    </body><script>
         // Background update
         const backgroundImageElement = document.querySelector(
             ".backgroundImage",
