@@ -1,4 +1,5 @@
 import { Fragment, useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useUmami } from '../hooks/useUmami';
 
 // Update the glob pattern to look in files instead of public/files
 const data = await import.meta.glob(
@@ -47,14 +48,9 @@ const processFileUrls = async () => {
 // Initialize the URL mapping
 processFileUrls();
 
-// Helper function for safely tracking events with Umami
-const trackEvent = (eventName, eventData) => {
-    if (typeof window !== 'undefined' && window.umami) {
-        window.umami.trackEvent(eventName, eventData);
-    }
-};
-
 const Content = ({ subject, page, expansionMode = "years" }) => {
+    const { isReady, track } = useUmami();
+
     // Initialize based on stored preference or default value
     const [currentExpansionMode, setCurrentExpansionMode] = useState(
         typeof localStorage !== 'undefined' ?
@@ -76,7 +72,7 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
             updateFolderExpansion(mode);
 
             // Track expansion mode change
-            trackEvent('change_expansion_mode', { mode, subject, page });
+            track('change_expansion_mode', { mode, subject, page });
         };
 
         window.addEventListener('expansionModeChanged', handleExpansionModeChange);
@@ -173,7 +169,7 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
         }));
 
         // Track folder toggle event
-        trackEvent('toggle_folder', {
+        track('toggle_folder', {
             folder: folderPath,
             action: newState ? 'expand' : 'collapse',
             subject,
@@ -219,7 +215,7 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                                     aria-label={`Open ${fileName} in new tab`}
                                     onClick={() => {
                                         // Track file download event
-                                        trackEvent('download_file', {
+                                        track('download_file', {
                                             fileName,
                                             filePath,
                                             subject,
