@@ -1,4 +1,5 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { Fragment, useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useUmami } from '../hooks/useUmami';
 
 // Update the glob pattern to look in files instead of public/files
 const data = await import.meta.glob(
@@ -48,6 +49,8 @@ const processFileUrls = async () => {
 processFileUrls();
 
 const Content = ({ subject, page, expansionMode = "years" }) => {
+    const { isReady, track } = useUmami();
+
     // Initialize based on stored preference or default value
     const [currentExpansionMode, setCurrentExpansionMode] = useState(
         typeof localStorage !== 'undefined' ?
@@ -67,6 +70,9 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
             const { mode } = event.detail;
             setCurrentExpansionMode(mode);
             updateFolderExpansion(mode);
+
+            // Track expansion mode change
+            track('change_expansion_mode', { mode, subject, page });
         };
 
         window.addEventListener('expansionModeChanged', handleExpansionModeChange);
@@ -152,13 +158,24 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
         folder: isAltele ? "altele-folder" : "content-folder",
     }), [isAltele]);
 
-    // Toggle folder expansion
+    // Toggle folder expansion with analytics
     const toggleFolder = useCallback((folderPath) => {
+        const isCurrentlyExpanded = !!expandedFolders[folderPath];
+        const newState = !isCurrentlyExpanded;
+
         setExpandedFolders(prev => ({
             ...prev,
-            [folderPath]: !prev[folderPath]
+            [folderPath]: newState
         }));
-    }, []);
+
+        // Track folder toggle event
+        track('toggle_folder', {
+            folder: folderPath,
+            action: newState ? 'expand' : 'collapse',
+            subject,
+            page
+        });
+    }, [expandedFolders, subject, page]);
 
     // In the listDir function, update the file URL generation
     const listDir = useCallback((dict, level = 0, parentPath = '') => {
@@ -196,6 +213,15 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label={`Open ${fileName} in new tab`}
+                                    onClick={() => {
+                                        // Track file download event
+                                        track('download_file', {
+                                            fileName,
+                                            filePath,
+                                            subject,
+                                            page
+                                        });
+                                    }}
                                 >
                                     {!isAltele && (
                                         <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -204,7 +230,9 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                                         </svg>
                                     )}
                                     {fileName.split('_').map((part, i, arr) => (
-                                        i === arr.length - 1 ? part : <>{part}<wbr />_</>
+                                        i === arr.length - 1 ?
+                                            <span key={`part-${i}`}>{part}</span> :
+                                            <Fragment key={`part-${i}`}>{part}<wbr />_</Fragment>
                                     ))}
                                 </a>
                             </li>
@@ -246,7 +274,7 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                 })}
             </ul>
         );
-    }, [classNames, expandedFolders, generateKey, toggleFolder, isAltele, subject]);
+    }, [classNames, expandedFolders, generateKey, toggleFolder, isAltele, subject, page]);
 
     // Get content based on path structure
     const getContent = () => {

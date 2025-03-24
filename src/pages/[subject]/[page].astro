@@ -30,8 +30,8 @@ export function getStaticPaths() {
     } else {
       validPages = fs.existsSync(subjectPath)
         ? fs.readdirSync(subjectPath).filter(file => 
-            fs.statSync(path.join(subjectPath, file)).isDirectory())
-        : ['bac', 'teste', 'simulari', 'variante']; // Default fallback
+        fs.statSync(path.join(subjectPath, file)).isDirectory() && file !== 'bac' && file !== 'altele')
+        : ['teste', 'simulari', 'variante']; // Default fallback excluding 'bac'
     }
     
     validPages.forEach(page => {

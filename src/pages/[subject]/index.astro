@@ -13,10 +13,10 @@ export function getStaticPaths() {
         fs.statSync(path.join(filesPath, file)).isDirectory())
     : ['fizica', 'mate', 'info', 'admitere']; // Fallback to defaults if directory doesn't exist
   
-  // Filter out 'fizica' since it's handled by the index page
-  const subjectsWithoutFizica = validSubjects.filter(subject => subject !== 'fizica');
+  const removedSubjects = ['fizica', 'admitere'];
+  const filteredSubjects = validSubjects.filter(subject => !removedSubjects.includes(subject));
   
-  return subjectsWithoutFizica.map(subject => ({
+  return filteredSubjects.map(subject => ({
     params: { subject }
   }));
 }

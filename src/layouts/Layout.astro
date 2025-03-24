@@ -3,25 +3,31 @@ import { SEO } from "astro-seo";
 import UpArrow from "../icons/UpArrow.astro";
 interface Props {
     title: string;
+    description?: string;
+    keywords?: string;
     noindex?: boolean;
     nofollow?: boolean;
+    canonicalUrl?: string;
     extendMeta?: object;
     extendLink?: object;
     bodyClass?: string;
     markdown?: boolean;
+    breadcrumbs?: Array<{name: string, url: string}>;
 }
 
 const {
     title,
+    description = "Subiecte de bacalaureat din anii anteriori la fizică, matematică și informatică pentru pregătirea elevilor. Resurse create de elevi pentru elevi din Liceul Teoretic Alexandru Ioan Cuza, București. Exerciții și variante rezolvate.",
+keywords = "bac, bacalaureat, subiecte, fizica, matematica, informatica, examen, admitere, upb, poli, programare, algoritmi, variante, teste, simulari, mate-fizica, mate-info, info, Liceul Teoretic Alexandru Ioan Cuza, București, LTAIC, cuza",
     noindex,
     nofollow,
+    canonicalUrl,
     extendMeta,
     extendLink,
     bodyClass,
     markdown,
+    breadcrumbs,
 } = Astro.props;
-const description =
-    "Subiecte de bac din anii anteriori la fizica si matematica pentru liceeni si profesori. Parte din proiectul: DynoW/cuza.pages.dev";
 ---
 
 <!doctype html>
@@ -33,11 +39,21 @@ const description =
             description={description}
             noindex={noindex}
             nofollow={nofollow}
+            canonical={canonicalUrl || Astro.url.href}
             openGraph={{
                 basic: {
                     title: title,
                     type: "website",
                     image: "https://cuza.pages.dev/assets/img/site-img.webp",
+                    url: Astro.url.href,
+                },
+                optional: {
+                    description: description,
+                    locale: "ro_RO",
+                    siteName: "Subiecte Bac",
+                },
+                image: {
+                    alt: "Subiecte Bac - Resurse pentru elevi",
                 },
             }}
             twitter={{
@@ -125,6 +141,10 @@ const description =
                             "width=device-width, initial-scale=1.0, shrink-to-fit=no",
                     },
                     {
+                        name: "keywords",
+                        content: keywords,
+                    },
+                    {
                         name: "twitter:image",
                         content:
                             "https://cuza.pages.dev/assets/img/site-img.webp",
@@ -145,6 +165,18 @@ const description =
                 ],
             }}
         />
+        {breadcrumbs && (
+            <script type="application/ld+json" set:html={JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                "itemListElement": breadcrumbs.map((crumb, index) => ({
+                    "@type": "ListItem",
+                    "position": index + 1,
+                    "name": crumb.name,
+                    "item": crumb.url
+                }))
+            })} />
+        )}
         {
             import.meta.env.PROD === true ? (
                 <>
@@ -173,48 +205,50 @@ const description =
     </head>
     <body
         class={`backgroundImage font-serif select-none overflow-x-hidden relative min-h-screen p-0 ${bodyClass || ""}`}
-    ></body><slot />
-    <div class="fixed bottom-4 right-4">
-        <button
-            id="scrollToTop"
-            title="Du-te sus"
-            aria-label="Du-te sus"
-            type="button"
-            class="bg-white font-bold p-4 rounded-full transition ease-in-out hover:scale-105 duration-200"
-            onclick="scrollToTop()"
-        >
-            <UpArrow />
-        </button>
-        <script is:inline>
-            function scrollToTop() {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            }
-            window.addEventListener("scroll", function () {
-                const button = document.getElementById("scrollToTop");
-                if (window.scrollY > 0) {
-                    button.style.display = "block";
-                } else {
-                    button.style.display = "none";
+    >
+        <slot />
+        <div class="fixed bottom-4 right-4">
+            <button
+                id="scrollToTop"
+                title="Du-te sus"
+                aria-label="Du-te sus"
+                type="button"
+                class="bg-white font-bold p-4 rounded-full transition ease-in-out hover:scale-105 duration-200"
+                onclick="scrollToTop()"
+            >
+                <UpArrow />
+            </button>
+            <script is:inline>
+                function scrollToTop() {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
                 }
-            });
-            document.addEventListener("DOMContentLoaded", function () {
-                const button = document.getElementById("scrollToTop");
-                button.style.display = "none";
-            });
-        </script>
-    </div>
-    <script>
+                window.addEventListener("scroll", function () {
+                    const button = document.getElementById("scrollToTop");
+                    if (window.scrollY > 0) {
+                        button.style.display = "block";
+                    } else {
+                        button.style.display = "none";
+                    }
+                });
+                document.addEventListener("DOMContentLoaded", function () {
+                    const button = document.getElementById("scrollToTop");
+                    button.style.display = "none";
+                });
+            </script>
+        </div>
+    </body><script>
         // Background update
         const backgroundImageElement = document.querySelector(
             ".backgroundImage",
         ) as HTMLElement;
         if (backgroundImageElement) {
-            if (new Date().getMonth() === 11) {
+            const month = new Date().getMonth();
+            if (month === 11) {
                 backgroundImageElement.style.background =
                     'url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d,#cc3333)';
                 backgroundImageElement.style.backgroundAttachment = "fixed";
             }
-            if (new Date().getMonth() === 2) {
+            if (month === 2 || month === 3) {
                 backgroundImageElement.style.background =
                     'url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2)';
                 backgroundImageElement.style.backgroundAttachment = "fixed";
