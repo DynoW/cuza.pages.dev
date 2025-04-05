@@ -20,6 +20,8 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
+*ignore*
+
 .wrangler
 
 deploy.yml
