@@ -13,7 +13,8 @@ export default defineConfig({
   },
   build: {
     format: 'file',
-    inlineStylesheets: 'always'
+    inlineStylesheets: 'always',
+    assets: 'file'
   },
   markdown: {
     shikiConfig: {
