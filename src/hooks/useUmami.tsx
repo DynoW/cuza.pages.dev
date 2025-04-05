@@ -16,17 +16,17 @@ declare global {
 export function useUmami() {
   const [isReady, setIsReady] = useState(false);
   const isProd = import.meta.env.PROD === true;
-  
+
   useEffect(() => {
     // Only check for Umami in production
     if (!isProd) return;
-    
+
     // Check if Umami is already loaded
     if (typeof window !== 'undefined' && window.umami) {
       setIsReady(true);
       return;
     }
-    
+
     // If not loaded, wait for it
     const checkUmami = setInterval(() => {
       if (typeof window !== 'undefined' && window.umami) {
@@ -34,14 +34,14 @@ export function useUmami() {
         clearInterval(checkUmami);
       }
     }, 500);
-    
+
     return () => clearInterval(checkUmami);
   }, [isProd]);
-  
+
   const track = (eventName: string, eventData?: Record<string, unknown>) => {
     // Only track in production
     if (!isProd) return;
-    
+
     try {
       if (isReady && window.umami) {
         if (typeof window.umami.track === 'function') {
@@ -54,6 +54,6 @@ export function useUmami() {
       console.debug('Error tracking event:', error);
     }
   };
-  
+
   return { isReady: isProd && isReady, track };
 }
