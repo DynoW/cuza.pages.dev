@@ -12,8 +12,7 @@ export default defineConfig({
     '/fizica': '/',
   },
   build: {
-    format: 'file',
-    inlineStylesheets: 'always'
+    assets: 'file'
   },
   markdown: {
     shikiConfig: {
