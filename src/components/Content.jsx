@@ -230,9 +230,9 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                                         </svg>
                                     )}
                                     {fileName.split('_').map((part, i, arr) => (
-                                        i === arr.length - 1 ?
-                                            <span key={`part-${i}`}>{part}</span> :
-                                            <Fragment key={`part-${i}`}>{part}<wbr />_</Fragment>
+                                        <Fragment key={`part-${i}`}>
+                                            {part}{i < arr.length - 1 && <><wbr />_</>}
+                                        </Fragment>
                                     ))}
                                 </a>
                             </li>
