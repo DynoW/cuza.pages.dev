@@ -16,6 +16,15 @@ export default defineConfig({
     inlineStylesheets: 'always',
     assets: 'file'
   },
+  vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          assetFileNames: `file/[name][extname]`,
+        },
+      },
+    },
+  },
   markdown: {
     shikiConfig: {
       theme: 'github-dark'
