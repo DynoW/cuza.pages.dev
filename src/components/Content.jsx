@@ -1,5 +1,6 @@
 import { Fragment, useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useUmami } from '../hooks/useUmami';
+import { useGoogle } from '../hooks/useGoogle';
 
 // Update the glob pattern to look in files instead of public/files
 const data = await import.meta.glob(
@@ -49,7 +50,8 @@ const processFileUrls = async () => {
 processFileUrls();
 
 const Content = ({ subject, page, expansionMode = "years" }) => {
-    const { isReady, track } = useUmami();
+    const { trackUmami } = useUmami();
+    const { trackGoogle } = useGoogle();
 
     // Initialize based on stored preference or default value
     const [currentExpansionMode, setCurrentExpansionMode] = useState(
@@ -70,9 +72,6 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
             const { mode } = event.detail;
             setCurrentExpansionMode(mode);
             updateFolderExpansion(mode);
-
-            // Track expansion mode change
-            track('change_expansion_mode', { mode, subject, page });
         };
 
         window.addEventListener('expansionModeChanged', handleExpansionModeChange);
@@ -169,11 +168,11 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
         }));
 
         // Track folder toggle event
-        track('toggle_folder', {
+        trackUmami('toggle_folder', {
             folder: folderPath,
-            action: newState ? 'expand' : 'collapse',
-            subject,
-            page
+        });
+        trackGoogle('toggle_folder', {
+            folder: folderPath,
         });
     }, [expandedFolders, subject, page]);
 
@@ -215,8 +214,12 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                                     aria-label={`Open ${fileName} in new tab`}
                                     onClick={() => {
                                         // Track file download event
-                                        track('download_file', {
-                                            fileName,
+                                        trackUmami('download_file', {
+                                            filePath,
+                                            subject,
+                                            page
+                                        });
+                                        trackGoogle('download_file', {
                                             filePath,
                                             subject,
                                             page

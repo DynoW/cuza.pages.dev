@@ -180,25 +180,21 @@ const {
         {
             import.meta.env.PROD === true ? (
                 <>
+                    {/* Umami tag */}
                     <script
                         defer
                         src="https://analytics.my-lab.ro/script.js"
                         data-website-id="afbd7bf4-d2a2-41f7-a401-5c7b73a3b42e"
                     />
-                    {/* <!-- Google tag (gtag.js) -->
-                <script
-                    async
-                    src="https://www.googletagmanager.com/gtag/js?id=G-PS1EBGH4HS"
-                ></script>
-                <script is:inline>
-                    window.dataLayer = window.dataLayer || [];
-                    function gtag() {
-                        dataLayer.push(arguments);
-                    }
-                    gtag("js", new Date());
-
-                    gtag("config", "G-PS1EBGH4HS")
-                </script> */}
+                    {/* <!-- Google tag (gtag.js) --> */}
+                    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PS1EBGH4HS"></script>
+                    <script is:inline>
+                      window.dataLayer = window.dataLayer || [];
+                      function gtag(){dataLayer.push(arguments);}
+                      gtag('js', new Date());
+                    
+                      gtag('config', 'G-PS1EBGH4HS');
+                    </script>
                 </>
             ) : null
         }
