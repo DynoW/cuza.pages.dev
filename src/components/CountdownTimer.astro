@@ -1,0 +1,204 @@
+---
+
+---
+
+<div
+    id="countdown-container"
+    class="bg-[rgba(10,13,16,.9)] rounded-3xl py-3 px-4 text-white mb-4"
+>
+    <div class="flex justify-between items-center mb-2">
+        <h3 id="countdown-title" class="text-lg font-bold">BAC 2025</h3>
+        <button id="toggle-countdown" class="text-white hover:text-gray-300">
+            <span id="toggle-icon">▼</span>
+        </button>
+    </div>
+    <div id="countdown-content">
+        <!-- Countdown timer until exam -->
+        <div id="countdown-to-exam">
+            <p class="text-sm mb-1">Timp rămas până la examen:</p>
+            <div class="grid grid-cols-4 gap-2 text-center">
+                <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 min-w-[70px]">
+                    <span id="days" class="text-xl font-bold block text-center truncate">--</span>
+                    <span class="text-xs block text-center">Zile</span>
+                </div>
+                <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 min-w-[70px]">
+                    <span id="hours" class="text-xl font-bold block text-center truncate">--</span>
+                    <span class="text-xs block text-center">Ore</span>
+                </div>
+                <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 min-w-[70px]">
+                    <span id="minutes" class="text-xl font-bold block text-center truncate">--</span>
+                    <span class="text-xs block text-center">Minute</span>
+                </div>
+                <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 min-w-[70px]">
+                    <span id="seconds" class="text-xl font-bold block text-center truncate">--</span>
+                    <span class="text-xs block text-center">Secunde</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress bar until results -->
+        <div id="progress-to-results" class="hidden">
+            <div class="w-full bg-[rgba(30,33,36,.9)] rounded-full h-5 mb-2">
+                <div
+                    id="progress-bar"
+                    class="bg-blue-600 h-5 rounded-full text-xs text-center leading-5 text-white"
+                >
+                    0%
+                </div>
+            </div>
+        </div>
+        
+        <!-- Completion message -->
+        <div id="completion-message" class="hidden">
+            <div class="w-full bg-[rgba(30,33,36,.9)] rounded-full h-5 mb-2">
+                <div
+                    id="progress-bar"
+                    class="bg-green-600 h-5 rounded-full text-xs text-center leading-5 text-white"
+                >
+                    Completed
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Set dates for our different phases
+    const startDate = new Date("June 10, 2025 09:00:00").getTime();
+    const endDate = new Date("June 13, 2025 12:00:00").getTime();
+
+    // Get DOM elements
+    const daysElement = document.getElementById("days");
+    const hoursElement = document.getElementById("hours");
+    const minutesElement = document.getElementById("minutes");
+    const secondsElement = document.getElementById("seconds");
+    const toggleButton = document.getElementById("toggle-countdown");
+    const toggleIcon = document.getElementById("toggle-icon");
+    const countdownContent = document.getElementById("countdown-content");
+    const countdownTitle = document.getElementById("countdown-title");
+
+    // Get the different display sections
+    const countdownToExam = document.getElementById("countdown-to-exam");
+    const progressToResults = document.getElementById("progress-to-results");
+    const completionMessage = document.getElementById("completion-message");
+    const progressBar = document.getElementById("progress-bar");
+
+    // Function to update the countdown timer
+    function updateCountdown() {
+        // Get current time
+        const now = new Date().getTime();
+
+        // Find the distance between now and the exam date
+        const distanceToExam = startDate - now;
+
+        // Check which phase we're in
+        if (distanceToExam > 0) {
+            // PHASE 1: Before the exam
+            showCountdownToExam(distanceToExam);
+        } else {
+            // Find the distance between now and the results date
+            const distanceToResults = endDate - now;
+
+            if (distanceToResults > 0) {
+                // PHASE 2: After the exam, waiting for results
+                showProgressToResults(startDate, endDate, now);
+            } else {
+                // PHASE 3: After results published
+                showCompletionMessage();
+            }
+        }
+    } // Function to display the countdown to exam
+    function showCountdownToExam(distance: number) {
+        // Make sure the right container is visible
+        if (countdownToExam) countdownToExam.classList.remove("hidden");
+        if (progressToResults) progressToResults.classList.add("hidden");
+        if (completionMessage) completionMessage.classList.add("hidden");
+
+        // Set the title
+        if (countdownTitle) countdownTitle.textContent = "BAC 2025";
+
+        // Time calculations for days, hours, minutes and seconds
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+            (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+        );
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        // Display the result
+        if (daysElement) daysElement.textContent = days.toString();
+        if (hoursElement)
+            hoursElement.textContent =
+                hours < 10 ? `0${hours}` : hours.toString();
+        if (minutesElement)
+            minutesElement.textContent =
+                minutes < 10 ? `0${minutes}` : minutes.toString();
+        if (secondsElement)
+            secondsElement.textContent =
+                seconds < 10 ? `0${seconds}` : seconds.toString();
+    } // Function to display progress towards results
+    function showProgressToResults(
+        startDate: number,
+        endDate: number,
+        now: number,
+    ) {
+        // Make sure the right container is visible
+        if (countdownToExam) countdownToExam.classList.add("hidden");
+        if (progressToResults) progressToResults.classList.remove("hidden");
+        if (completionMessage) completionMessage.classList.add("hidden");
+
+        // Set the title
+        if (countdownTitle) countdownTitle.textContent = "BAC 2025 | Progres";
+
+        // Calculate progress percentage
+        const totalDuration = endDate - startDate;
+        const elapsed = now - startDate;
+        const percentage = Math.min(
+            100,
+            Math.floor((elapsed / totalDuration) * 100),
+        );
+
+        // Update progress bar
+        if (progressBar) {
+            progressBar.style.width = `${percentage}%`;
+            progressBar.textContent = `${percentage}%`;
+        }
+    } // Function to display completion message
+    function showCompletionMessage() {
+        // Make sure the right container is visible
+        if (countdownToExam) countdownToExam.classList.add("hidden");
+        if (progressToResults) progressToResults.classList.add("hidden");
+        if (completionMessage) completionMessage.classList.remove("hidden");
+
+        // Set the title
+        if (countdownTitle) countdownTitle.textContent = "BAC 2025 | Finalizat";
+    }
+
+    // Initialize the countdown
+    updateCountdown();
+
+    // Toggle countdown visibility
+    if (toggleButton && countdownContent && toggleIcon) {
+        // Check if the user preference is stored
+        const isCollapsed =
+            localStorage.getItem("countdownCollapsed") === "true";
+
+        // Set initial state based on user preference
+        if (isCollapsed) {
+            countdownContent.style.display = "none";
+            toggleIcon.textContent = "▲";
+        }
+
+        toggleButton.addEventListener("click", function () {
+            if (countdownContent.style.display === "none") {
+                countdownContent.style.display = "block";
+                toggleIcon.textContent = "▼";
+                localStorage.setItem("countdownCollapsed", "false");
+            } else {
+                countdownContent.style.display = "none";
+                toggleIcon.textContent = "▲";
+                localStorage.setItem("countdownCollapsed", "true");
+            }
+        });
+    }
+</script>
