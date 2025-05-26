@@ -18,19 +18,35 @@
             <p class="text-sm mb-1">Timp rămas până la examen:</p>
             <div class="grid grid-cols-4 gap-2 text-center">
                 <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 min-w-[70px]">
-                    <span id="days" class="text-xl font-bold block text-center truncate">--</span>
+                    <span
+                        id="days"
+                        class="text-xl font-bold block text-center truncate"
+                        >--</span
+                    >
                     <span class="text-xs block text-center">Zile</span>
                 </div>
                 <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 min-w-[70px]">
-                    <span id="hours" class="text-xl font-bold block text-center truncate">--</span>
+                    <span
+                        id="hours"
+                        class="text-xl font-bold block text-center truncate"
+                        >--</span
+                    >
                     <span class="text-xs block text-center">Ore</span>
                 </div>
                 <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 min-w-[70px]">
-                    <span id="minutes" class="text-xl font-bold block text-center truncate">--</span>
+                    <span
+                        id="minutes"
+                        class="text-xl font-bold block text-center truncate"
+                        >--</span
+                    >
                     <span class="text-xs block text-center">Minute</span>
                 </div>
                 <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 min-w-[70px]">
-                    <span id="seconds" class="text-xl font-bold block text-center truncate">--</span>
+                    <span
+                        id="seconds"
+                        class="text-xl font-bold block text-center truncate"
+                        >--</span
+                    >
                     <span class="text-xs block text-center">Secunde</span>
                 </div>
             </div>
@@ -47,13 +63,11 @@
                 </div>
             </div>
         </div>
-        
         <!-- Completion message -->
         <div id="completion-message" class="hidden">
             <div class="w-full bg-[rgba(30,33,36,.9)] rounded-full h-5 mb-2">
                 <div
-                    id="progress-bar"
-                    class="bg-green-600 h-5 rounded-full text-xs text-center leading-5 text-white"
+                    class="bg-green-600 h-5 rounded-full text-xs text-center leading-5 text-white w-full"
                 >
                     Completed
                 </div>
@@ -62,7 +76,7 @@
     </div>
 </div>
 
-<script>
+<script is:inline>
     // Set dates for our different phases
     const startDate = new Date("June 10, 2025 09:00:00").getTime();
     const endDate = new Date("June 13, 2025 12:00:00").getTime();
@@ -81,9 +95,7 @@
     const countdownToExam = document.getElementById("countdown-to-exam");
     const progressToResults = document.getElementById("progress-to-results");
     const completionMessage = document.getElementById("completion-message");
-    const progressBar = document.getElementById("progress-bar");
-
-    // Function to update the countdown timer
+    const progressBar = document.getElementById("progress-bar"); // Function to update the countdown timer
     function updateCountdown() {
         // Get current time
         const now = new Date().getTime();
@@ -107,8 +119,9 @@
                 showCompletionMessage();
             }
         }
-    } // Function to display the countdown to exam
-    function showCountdownToExam(distance: number) {
+    }
+    // Function to display the countdown to exam
+    function showCountdownToExam(distance) {
         // Make sure the right container is visible
         if (countdownToExam) countdownToExam.classList.remove("hidden");
         if (progressToResults) progressToResults.classList.add("hidden");
@@ -136,12 +149,10 @@
         if (secondsElement)
             secondsElement.textContent =
                 seconds < 10 ? `0${seconds}` : seconds.toString();
-    } // Function to display progress towards results
-    function showProgressToResults(
-        startDate: number,
-        endDate: number,
-        now: number,
-    ) {
+    }
+
+    // Function to display progress towards results
+    function showProgressToResults(startDate, endDate, now) {
         // Make sure the right container is visible
         if (countdownToExam) countdownToExam.classList.add("hidden");
         if (progressToResults) progressToResults.classList.remove("hidden");
@@ -172,10 +183,11 @@
 
         // Set the title
         if (countdownTitle) countdownTitle.textContent = "BAC 2025 | Finalizat";
-    }
-
-    // Initialize the countdown
+    } // Initialize the countdown
     updateCountdown();
+
+    // Update the countdown every second
+    setInterval(updateCountdown, 1000);
 
     // Toggle countdown visibility
     if (toggleButton && countdownContent && toggleIcon) {
