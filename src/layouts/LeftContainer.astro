@@ -9,12 +9,12 @@ import CountdownTimer from "../components/CountdownTimer.astro";
         </div>
     </div>
     <div class="flex flex-col gap-2">
-        {import.meta.env.PROD && (
-            <>
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1687540397754088"
-                crossorigin="anonymous"></script>
-                <div id="ad" class="top-2">
-                    <CountdownTimer />
+        <div id="ad" class="top-2">
+            <CountdownTimer />
+            {import.meta.env.PROD && (
+                <>
+                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1687540397754088"
+                    crossorigin="anonymous"></script>
                     <!-- banner-ad-1-vertical -->
                     <ins class="adsbygoogle"
                         style="display:block"
@@ -25,27 +25,27 @@ import CountdownTimer from "../components/CountdownTimer.astro";
                     <script is:inline>
                         (adsbygoogle = window.adsbygoogle || []).push({});
                     </script>
-                </div>
-                <script>
-                    const ad = document.getElementById("ad");
-                    let adOriginalTop = 780;
-                    
-                    if (ad) {
-                        adOriginalTop = ad.getBoundingClientRect().top + window.scrollY;
-                    }
+                </>
+            )}
+        </div>
+        <script>
+            const ad = document.getElementById("ad");
+            let adOriginalTop = 780;
+            
+            if (ad) {
+                adOriginalTop = ad.getBoundingClientRect().top + window.scrollY;
+            }
 
-                    window.addEventListener('scroll', () => {
-                        if(ad && window.innerWidth > 768) {
-                            const scrollY = window.scrollY;
-                            if (scrollY > adOriginalTop) { //(window.innerWidth >= 1024 ? adOriginalTop + 24 : (window.innerWidth>= 968 ? adOriginalTop + 20 : (window.innerWidth >= 835 ? adOriginalTop + 25 : adOriginalTop + 40 )))
-                                ad.style.position = 'fixed';
-                            } else {
-                                ad.style.position = 'static';
-                            }
-                        }
-                    });
-                </script>
-            </>
-        )}
+            window.addEventListener('scroll', () => {
+                if(ad && window.innerWidth > 768) {
+                    const scrollY = window.scrollY;
+                    if (scrollY > adOriginalTop) { //(window.innerWidth >= 1024 ? adOriginalTop + 24 : (window.innerWidth>= 968 ? adOriginalTop + 20 : (window.innerWidth >= 835 ? adOriginalTop + 25 : adOriginalTop + 40 )))
+                        ad.style.position = 'fixed';
+                    } else {
+                        ad.style.position = 'static';
+                    }
+                }
+            });
+        </script>
     </div>
 </div>
