@@ -11,8 +11,8 @@ export function getStaticPaths() {
   const validSubjects = fs.existsSync(filesPath) 
     ? fs.readdirSync(filesPath).filter(file => 
         fs.statSync(path.join(filesPath, file)).isDirectory())
-    : ['fizica', 'mate', 'info', 'admitere']; // Fallback to defaults if directory doesn't exist
-  
+    : ['fizica', 'mate', 'admitere']; // Fallback to defaults if directory doesn't exist
+  console.log('Valid subjects:', validSubjects);
   const removedSubjects = ['fizica', 'admitere'];
   const filteredSubjects = validSubjects.filter(subject => !removedSubjects.includes(subject));
   

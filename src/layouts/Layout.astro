@@ -10,9 +10,10 @@ interface Props {
     canonicalUrl?: string;
     extendMeta?: object;
     extendLink?: object;
+    backgroundImage?: boolean;
     bodyClass?: string;
     markdown?: boolean;
-    breadcrumbs?: Array<{name: string, url: string}>;
+    breadcrumbs?: Array<{ name: string; url: string }>;
 }
 
 const {
@@ -24,6 +25,7 @@ const {
     canonicalUrl,
     extendMeta,
     extendLink,
+    backgroundImage = true,
     bodyClass,
     markdown,
     breadcrumbs,
@@ -165,18 +167,28 @@ const {
                 ],
             }}
         />
-        {breadcrumbs && (
-            <script type="application/ld+json" set:html={JSON.stringify({
-                "@context": "https://schema.org",
-                "@type": "BreadcrumbList",
-                "itemListElement": breadcrumbs.map((crumb, index) => ({
-                    "@type": "ListItem",
-                    "position": index + 1,
-                    "name": crumb.name,
-                    "item": crumb.url
-                }))
-            })} />
-        )}
+        {
+            breadcrumbs && (
+                <script
+                    type="application/ld+json"
+                    set:html={JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "BreadcrumbList",
+                        itemListElement: breadcrumbs.map((crumb, index) => ({
+                            "@type": "ListItem",
+                            position: index + 1,
+                            name: crumb.name,
+                            item: crumb.url,
+                        })),
+                    })}
+                />
+            )
+        }
+        {/* Excalidraw asset path */}
+        <script is:inline>
+            window.EXCALIDRAW_ASSET_PATH = "/assets";
+        </script>
+
         {
             import.meta.env.PROD === true ? (
                 <>
@@ -200,7 +212,7 @@ const {
         }
     </head>
     <body
-        class={`backgroundImage font-serif select-none overflow-x-hidden relative min-h-screen p-0 ${bodyClass || ""}`}
+        class={`font-serif select-none overflow-x-hidden relative min-h-screen p-0${backgroundImage ? " backgroundImage" : ""}${bodyClass ? ` ${bodyClass}` : ""}`}
     >
         <slot />
         <div class="fixed bottom-4 right-4">
@@ -232,33 +244,34 @@ const {
                 });
             </script>
         </div>
-    </body><script>
-        // Background update
-        const backgroundImageElement = document.querySelector(
-            ".backgroundImage",
-        ) as HTMLElement;
-        if (backgroundImageElement) {
-            const month = new Date().getMonth();
-            if (month === 11) {
-                backgroundImageElement.style.background =
-                    'url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d,#cc3333)';
-                backgroundImageElement.style.backgroundAttachment = "fixed";
-            }
-            if (month === 2 || month === 3) {
-                backgroundImageElement.style.background =
-                    'url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2)';
-                backgroundImageElement.style.backgroundAttachment = "fixed";
-                const container = document.querySelector("body");
-                if (container) {
-                    ["clouds", "bunny", "grass"].forEach((className) => {
-                        const element = document.createElement("div");
-                        element.className = className;
-                        container.appendChild(element);
-                    });
+        <script>
+            // Background update
+            const backgroundImageElement = document.querySelector(
+                ".backgroundImage",
+            ) as HTMLElement;
+            if (backgroundImageElement) {
+                const month = new Date().getMonth();
+                if (month === 11) {
+                    backgroundImageElement.style.background =
+                        'url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d,#cc3333)';
+                    backgroundImageElement.style.backgroundAttachment = "fixed";
+                }
+                if (month === 2 || month === 3) {
+                    backgroundImageElement.style.background =
+                        'url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2)';
+                    backgroundImageElement.style.backgroundAttachment = "fixed";
+                    const container = document.querySelector("body");
+                    if (container) {
+                        ["clouds", "bunny", "grass"].forEach((className) => {
+                            const element = document.createElement("div");
+                            element.className = className;
+                            container.appendChild(element);
+                        });
+                    }
                 }
             }
-        }
-    </script>
+        </script>
+    </body>
     <style is:global>
         @tailwind utilities;
 

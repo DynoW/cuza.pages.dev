@@ -13,6 +13,11 @@ const buildCategories = () => {
     const categories = {};
 
     for (const file in data) {
+        // Skip files containing the text "ignore"
+        if (file.toLowerCase().includes('ignore')) {
+            continue;
+        }
+
         const filePath = file.replace("/files/", "");
         const pathParts = filePath.split("/");
 
@@ -41,6 +46,11 @@ const filePathToUrl = {};
 // Process all files to get their URLs
 const processFileUrls = async () => {
     for (const file in data) {
+        // Skip files containing the text "ignore"
+        if (file.toLowerCase().includes('ignore')) {
+            continue;
+        }
+
         const filePath = file.replace("/files/", "");
         filePathToUrl[filePath] = data[file].default;
     }
@@ -200,6 +210,11 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                     if (isFile) {
                         const fileName = value[value.length - 1];
                         const filePath = value.join("/");
+
+                        // Skip files containing the text "ignore"
+                        if (fileName.toLowerCase().includes('ignore')) {
+                            return null;
+                        }
 
                         // Use the processed URL instead of the public path
                         const fileUrl = filePathToUrl[filePath] || `/files/${filePath}`;

@@ -16,7 +16,7 @@ const validSubjects = fs.existsSync(filesPath)
           .filter((file) =>
               fs.statSync(path.join(filesPath, file)).isDirectory(),
           )
-    : ["fizica", "mate", "info", "admitere"]; // Fallback to defaults
+    : ["fizica", "mate", "info", "romana", "admitere"]; // Fallback to defaults
 
 // Define the navStructure type to avoid TypeScript errors
 interface NavStructure {
@@ -49,11 +49,15 @@ validSubjects.forEach((subject) => {
 
 // Ensure 'info' is in the navStructure even if not present in the filesystem
 if (!navStructure.info) {
-    navStructure.info = ["bac", "teste", "simulari", "variante"];
+    navStructure.info = [];
+}
+// Ensure 'romana' is in the navStructure even if not present in the filesystem
+if (!navStructure.romana) {
+    navStructure.romana = [];
 }
 
 // Define the desired order of subjects
-const subjectOrder = ["fizica", "mate", "info", "admitere"];
+const subjectOrder = ["fizica", "mate", "info", "romana", "admitere"];
 
 // Helper function to get display name for navigation items
 function getDisplayName(name: string): string {
@@ -64,6 +68,8 @@ function getDisplayName(name: string): string {
             return "Matematică";
         case "info":
             return "Informatică";
+        case "romana":
+            return "Română";
         case "admitere":
             return "Admitere";
         case "teste":
@@ -125,6 +131,8 @@ function isSubjectActive(subject: string): boolean {
 function shouldHaveDropdown(subject: string): boolean {
     // info should not have a hover menu
     if (subject === "info") return false;
+    // romana should not have a hover menu
+    if (subject === "romana") return false;
 
     // Only show dropdown if the subject has pages
     return navStructure[subject] && navStructure[subject].length > 0;
