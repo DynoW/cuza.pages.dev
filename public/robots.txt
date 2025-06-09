@@ -2,6 +2,5 @@ User-agent: *
 Allow: /
 Disallow: /install
 Disallow: /upload
-Disallow: https://cuza.pages.dev/file/100-variante-electricitate.caf8bbbf.pdf
 
 Sitemap: https://cuza.pages.dev/sitemap-index.xml
