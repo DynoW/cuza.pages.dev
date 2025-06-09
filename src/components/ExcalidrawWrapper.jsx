@@ -11,6 +11,7 @@ const ExcalidrawWrapper = () => {
     const [hasUserChanges, setHasUserChanges] = useState(false);
     const [originalSchemaHash, setOriginalSchemaHash] = useState(null);
     const [isSmallScreen, setIsSmallScreen] = useState(false);
+    const [updateAvailable, setUpdateAvailable] = useState(false);
 
     // Check screen size on mount and when window is resized
     useEffect(() => {
@@ -34,7 +35,27 @@ const ExcalidrawWrapper = () => {
         return elements.map(el => el.id).sort().join('|');
     };
 
-    // Fetch the initial schema from the server
+    // Check if a schema update is available from the server
+    const checkForSchemaUpdates = useCallback(async () => {
+        try {
+            const response = await fetch('/assets/excalidraw/romana.excalidraw');
+            if (!response.ok) {
+                console.error(`Failed to check for updates: ${response.status} ${response.statusText}`);
+                return;
+            }
+
+            const data = await response.json();
+            if (data && data.elements && data.elements.length > 0) {
+                const serverHash = hashElements(data.elements);
+                const localHash = localStorage.getItem(`${LOCAL_STORAGE_KEY}-hash`);
+
+                // If server hash is different from local hash, an update is available
+                setUpdateAvailable(serverHash !== localHash);
+            }
+        } catch (error) {
+            console.error('Error checking for schema updates:', error);
+        }
+    }, []);    // Fetch the initial schema from the server
     const fetchSchema = useCallback(async () => {
         try {
             setIsLoading(true);
@@ -55,7 +76,9 @@ const ExcalidrawWrapper = () => {
                 setOriginalSchemaHash(hash);
                 localStorage.setItem(`${LOCAL_STORAGE_KEY}-hash`, hash);
 
+                // Reset flags
                 setHasUserChanges(false);
+                setUpdateAvailable(false);
             } else {
                 console.error('Fetched schema has no elements');
             }
@@ -85,6 +108,9 @@ const ExcalidrawWrapper = () => {
                             // We don't automatically set hasUserChanges to true when loading
                             // This will only be set to true when the user makes actual changes
                             setHasUserChanges(false);
+
+                            // Check for updates after loading local data
+                            await checkForSchemaUpdates();
                         } else {
                             console.warn('Saved data has no elements, fetching from server instead');
                             await fetchSchema();
@@ -107,8 +133,16 @@ const ExcalidrawWrapper = () => {
         };
 
         loadExcalidrawFile();
-        return () => { };
-    }, [fetchSchema]);
+
+        // Set up periodic update check (every 10 minutes)
+        const updateCheckInterval = setInterval(() => {
+            checkForSchemaUpdates();
+        }, 10 * 60 * 1000);
+
+        return () => {
+            clearInterval(updateCheckInterval);
+        };
+    }, [fetchSchema, checkForSchemaUpdates]);
     // Save changes when user modifies the diagram
     useEffect(() => {
         if (excalidrawAPI) {
@@ -188,12 +222,20 @@ const ExcalidrawWrapper = () => {
                         const hasChanges = currentHash !== originalSchemaHash;
                         setHasUserChanges(hasChanges);
                     }
-                }}
-                renderTopRightUI={() => {
+                }} renderTopRightUI={() => {
+                    // Determine button style and text based on state
+                    const buttonText = updateAvailable
+                        ? "Actualizare schema disponibilă"
+                        : (hasUserChanges ? "Resetează schema română" : "Aceasta este schema initială");
+
+                    const buttonBackground = updateAvailable
+                        ? "#4CAF50" // Green for update available
+                        : "#70b1ec"; // Default blue
+
                     return (
                         <button
                             style={{
-                                background: "#70b1ec",
+                                background: buttonBackground,
                                 border: "none",
                                 color: "#fff",
                                 width: "max-content",
@@ -211,7 +253,7 @@ const ExcalidrawWrapper = () => {
                             }}
                             onClick={handleUpdateSchema}
                         >
-                            {hasUserChanges ? "Resetează schema română" : "Aceasta este schema initială"}
+                            {buttonText}
                         </button>
                     );
                 }}
