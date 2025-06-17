@@ -1,6 +1,6 @@
 import { Fragment, useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useUmami } from '../hooks/useUmami';
-import { useGoogle } from '../hooks/useGoogle';
+// import { useGoogle } from '../hooks/useGoogle';
 
 // Update the glob pattern to look in files instead of public/files
 const data = await import.meta.glob(
@@ -61,7 +61,7 @@ processFileUrls();
 
 const Content = ({ subject, page, expansionMode = "years" }) => {
     const { trackUmami } = useUmami();
-    const { trackGoogle } = useGoogle();
+    // const { trackGoogle } = useGoogle();
 
     // Initialize based on stored preference or default value
     const [currentExpansionMode, setCurrentExpansionMode] = useState(
@@ -181,9 +181,9 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
         trackUmami('toggle_folder', {
             folder: folderPath,
         });
-        trackGoogle('toggle_folder', {
-            folder: folderPath,
-        });
+        // trackGoogle('toggle_folder', {
+        //     folder: folderPath,
+        // });
     }, [expandedFolders, subject, page]);
 
     // In the listDir function, update the file URL generation
@@ -234,11 +234,11 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                                             subject,
                                             page
                                         });
-                                        trackGoogle('download_file', {
-                                            filePath,
-                                            subject,
-                                            page
-                                        });
+                                        // trackGoogle('download_file', {
+                                        //     filePath,
+                                        //     subject,
+                                        //     page
+                                        // });
                                     }}
                                 >
                                     {!isAltele && (

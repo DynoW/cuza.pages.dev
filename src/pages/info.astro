@@ -25,11 +25,11 @@ const courses = await Astro.glob("../content/info/*.md");
                     <li class="altele-link">
                         <a href="https://onecompiler.com/cpp">OneCompiler</a>
                     </li>
-                    <li class="altele-link text-blue-700">
-                        <a href="https://www.pbinfo.ro/articole/16/subiecte-bacalaureat">&gt; Varinate bac pbinfo</a>
+                    <li class="text-slate-400 hover:text-slate-300">
+                        <a href="https://www.pbinfo.ro/articole/16/subiecte-bacalaureat">&gt; Varinate bac (pbinfo)</a>
                     </li>
-                    <li class="altele-link text-blue-700">
-                        <a href="https://www.pbinfo.ro/">&gt; Probleme bac pbinfo</a>
+                    <li class="text-slate-400 hover:text-slate-300">
+                        <a href="https://www.pbinfo.ro/">&gt; Probleme bac (pbinfo)</a>
                     </li>
                 </ul>
             </div>
@@ -37,7 +37,7 @@ const courses = await Astro.glob("../content/info/*.md");
         <CenterContainer />
         <div
             class="basis-4/6 text-white">
-            <h1 class="bg-[#0d1117] rounded-3xl p-5 pr-4 mb-1">Notițe din liceu (2022-2025) by Daniel: <a href="https://github.com/DynoW/CS-files-storage" target="_blank" class="text-blue-500 hover:text-blue-400">Github</a> <span class="text-sm text-slate-400">(cauta fisiere .md sau .excalidraw <a href="https://github.com/search?q=repo%3ADynoW%2FCS-files-storage+%28.md+OR+.excalidraw+NOT+README.md+NOT+C%23%29&type=code" target="_blank" class="text-slate-300 hover:text-slate-100">aici</a>)</span></h1>
+            <h1 class="bg-[#0d1117] rounded-3xl p-5 pr-4 mb-1">Notițe din liceu (2022-2025) by Daniel: <a href="https://github.com/DynoW/CS-files-storage" target="_blank" class="text-blue-500 hover:text-blue-400">Github</a> <span class="text-sm text-slate-400">(caută fisiere .md sau .excalidraw <a href="https://github.com/search?q=repo%3ADynoW%2FCS-files-storage+%28.md+OR+.excalidraw+NOT+README.md+NOT+C%23%29&type=code" target="_blank" class="text-slate-300 hover:text-slate-100">aici</a>)</span></h1>
             <ul>
                 {
                     courses.map((course) => (
