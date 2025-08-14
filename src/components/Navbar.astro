@@ -242,11 +242,11 @@ const sortedNavEntries = Object.entries(navStructure).sort((a, b) => {
                                 <li class="px-2 py-1 xl:px-4 xl:py-2 dropdown-container">
                                     {shouldHaveDropdown(subject) ? (
                                         <>
-                                            <p
-                                                tabindex="0"
-                                                role="button"
+                                            <button
+                                                type="button"
                                                 aria-expanded="false"
                                                 aria-haspopup="true"
+                                                aria-controls={`dropdown-${subject}`}
                                                 class={
                                                     isSubjectActive(subject)
                                                         ? "text-lg font-bold hover:text-lime-400 text-lime-400 dropdown-trigger"
@@ -254,8 +254,8 @@ const sortedNavEntries = Object.entries(navStructure).sort((a, b) => {
                                                 }
                                             >
                                                 {getDisplayName(subject)}
-                                            </p>
-                                            <div class="dropdown-content">
+                                            </button>
+                                            <div class="dropdown-content" id={`dropdown-${subject}`}>
                                                 {/* For Fizica, the main link is special (points to /) */}
                                                 {subject === "fizica" && (
                                                     <a
@@ -451,7 +451,7 @@ const sortedNavEntries = Object.entries(navStructure).sort((a, b) => {
 <script>
     // Add keyboard and touch support for accessible navigation
     document.addEventListener("DOMContentLoaded", () => {
-        const dropdownTriggers = document.querySelectorAll(".dropdown-trigger");
+    const dropdownTriggers = document.querySelectorAll("button.dropdown-trigger");
 
         dropdownTriggers.forEach((trigger) => {
             // Handle click events
