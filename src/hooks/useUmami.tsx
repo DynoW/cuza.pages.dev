@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 // Add type declaration for Umami
 interface UmamiAnalytics {
@@ -14,8 +14,8 @@ declare global {
 }
 
 export function useUmami() {
-  const [isReady, setIsReady] = useState(false);
   const isProd = import.meta.env.PROD === true;
+  const umamiInitialized = useRef(false);
 
   useEffect(() => {
     // Only check for Umami in production
@@ -23,14 +23,14 @@ export function useUmami() {
 
     // Check if Umami is already loaded
     if (typeof window !== 'undefined' && window.umami) {
-      setIsReady(true);
+      umamiInitialized.current = true;
       return;
     }
 
     // If not loaded, wait for it
     const checkUmami = setInterval(() => {
       if (typeof window !== 'undefined' && window.umami) {
-        setIsReady(true);
+        umamiInitialized.current = true;
         clearInterval(checkUmami);
       }
     }, 500);
@@ -38,12 +38,14 @@ export function useUmami() {
     return () => clearInterval(checkUmami);
   }, [isProd]);
 
-  const track = (eventName: string, eventData?: Record<string, unknown>) => {
+  const trackUmami = (eventName: string, eventData?: Record<string, unknown>) => {
     // Only track in production
     if (!isProd) return;
 
     try {
-      if (isReady && window.umami) {
+      // Unlike Google Analytics, Umami doesn't queue events automatically
+      // so we need to check if it's initialized first
+      if (umamiInitialized.current && window.umami) {
         if (typeof window.umami.track === 'function') {
           window.umami.track(eventName, eventData);
         } else if (typeof window.umami.trackEvent === 'function') {
@@ -51,9 +53,9 @@ export function useUmami() {
         }
       }
     } catch (error) {
-      console.debug('Error tracking event:', error);
+      console.debug('Error tracking Umami event:', error);
     }
   };
 
-  return { isReady: isProd && isReady, track };
+  return { trackUmami };
 }

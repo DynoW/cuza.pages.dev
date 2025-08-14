@@ -1,5 +1,6 @@
 import { Fragment, useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useUmami } from '../hooks/useUmami';
+// import { useGoogle } from '../hooks/useGoogle';
 
 // Update the glob pattern to look in files instead of public/files
 const data = await import.meta.glob(
@@ -12,6 +13,11 @@ const buildCategories = () => {
     const categories = {};
 
     for (const file in data) {
+        // Skip files containing the text "ignore"
+        if (file.toLowerCase().includes('ignore')) {
+            continue;
+        }
+
         const filePath = file.replace("/files/", "");
         const pathParts = filePath.split("/");
 
@@ -40,6 +46,11 @@ const filePathToUrl = {};
 // Process all files to get their URLs
 const processFileUrls = async () => {
     for (const file in data) {
+        // Skip files containing the text "ignore"
+        if (file.toLowerCase().includes('ignore')) {
+            continue;
+        }
+
         const filePath = file.replace("/files/", "");
         filePathToUrl[filePath] = data[file].default;
     }
@@ -49,7 +60,8 @@ const processFileUrls = async () => {
 processFileUrls();
 
 const Content = ({ subject, page, expansionMode = "years" }) => {
-    const { isReady, track } = useUmami();
+    const { trackUmami } = useUmami();
+    // const { trackGoogle } = useGoogle();
 
     // Initialize based on stored preference or default value
     const [currentExpansionMode, setCurrentExpansionMode] = useState(
@@ -70,9 +82,6 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
             const { mode } = event.detail;
             setCurrentExpansionMode(mode);
             updateFolderExpansion(mode);
-
-            // Track expansion mode change
-            track('change_expansion_mode', { mode, subject, page });
         };
 
         window.addEventListener('expansionModeChanged', handleExpansionModeChange);
@@ -169,12 +178,12 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
         }));
 
         // Track folder toggle event
-        track('toggle_folder', {
+        trackUmami('toggle_folder', {
             folder: folderPath,
-            action: newState ? 'expand' : 'collapse',
-            subject,
-            page
         });
+        // trackGoogle('toggle_folder', {
+        //     folder: folderPath,
+        // });
     }, [expandedFolders, subject, page]);
 
     // In the listDir function, update the file URL generation
@@ -202,6 +211,11 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                         const fileName = value[value.length - 1];
                         const filePath = value.join("/");
 
+                        // Skip files containing the text "ignore"
+                        if (fileName.toLowerCase().includes('ignore')) {
+                            return null;
+                        }
+
                         // Use the processed URL instead of the public path
                         const fileUrl = filePathToUrl[filePath] || `/files/${filePath}`;
 
@@ -215,12 +229,16 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                                     aria-label={`Open ${fileName} in new tab`}
                                     onClick={() => {
                                         // Track file download event
-                                        track('download_file', {
-                                            fileName,
+                                        trackUmami('download_file', {
                                             filePath,
                                             subject,
                                             page
                                         });
+                                        // trackGoogle('download_file', {
+                                        //     filePath,
+                                        //     subject,
+                                        //     page
+                                        // });
                                     }}
                                 >
                                     {!isAltele && (
@@ -230,9 +248,9 @@ const Content = ({ subject, page, expansionMode = "years" }) => {
                                         </svg>
                                     )}
                                     {fileName.split('_').map((part, i, arr) => (
-                                        i === arr.length - 1 ?
-                                            <span key={`part-${i}`}>{part}</span> :
-                                            <Fragment key={`part-${i}`}>{part}<wbr />_</Fragment>
+                                        <Fragment key={`part-${i}`}>
+                                            {part}{i < arr.length - 1 && <><wbr />_</>}
+                                        </Fragment>
                                     ))}
                                 </a>
                             </li>

@@ -1,8 +1,7 @@
 import { defineConfig } from 'astro/config';
+import tailwindcss from "@tailwindcss/vite";
 import sitemap from '@astrojs/sitemap';
-import tailwind from "@astrojs/tailwind";
 import react from "@astrojs/react";
-import prefetch from "@astrojs/prefetch";
 import compress from "astro-compress";
 
 export default defineConfig({
@@ -16,6 +15,18 @@ export default defineConfig({
     inlineStylesheets: 'always',
     assets: 'file'
   },
+  vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          assetFileNames: `file/[name][extname]`,
+        },
+      },
+    },
+    plugins: [
+      tailwindcss()
+    ]
+  },
   markdown: {
     shikiConfig: {
       theme: 'github-dark'
@@ -25,9 +36,7 @@ export default defineConfig({
     sitemap({
       filter: (page) => !page.includes('/install') && !page.includes('/upload')
     }),
-    tailwind(),
     react(),
-    prefetch(),
     compress()
   ]
 });
