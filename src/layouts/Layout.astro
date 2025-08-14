@@ -1,6 +1,8 @@
 ---
 import { SEO } from "astro-seo";
 import UpArrow from "../icons/UpArrow.astro";
+import "../styles/global.css";
+
 interface Props {
     title: string;
     description?: string;
@@ -67,13 +69,16 @@ const {
                         rel: "preload",
                         href: "/assets/fonts/poppins-medium.woff2",
                         as: "font",
-                        crossorigin: "",
+                        type: "font/woff2",
+                        crossorigin: "anonymous",
+                        fetchpriority: "high",
                     },
                     {
                         rel: "preload",
                         href: "/assets/fonts/inter-medium.woff2",
                         as: "font",
-                        crossorigin: "",
+                        type: "font/woff2",
+                        crossorigin: "anonymous",
                     },
                     {
                         rel: "apple-touch-icon",
@@ -212,7 +217,7 @@ const {
         }
     </head>
     <body
-        class={`font-serif select-none overflow-x-hidden relative min-h-screen p-0${backgroundImage ? " backgroundImage" : ""}${bodyClass ? ` ${bodyClass}` : ""}`}
+        class={`font-sans select-none overflow-x-hidden relative min-h-screen p-0${backgroundImage ? " backgroundImage" : ""}${bodyClass ? ` ${bodyClass}` : ""}`}
     >
         <slot />
         <div class="fixed bottom-4 right-4">
@@ -271,129 +276,4 @@ const {
                 }
             }
         </script>
-    </body>
-    <style is:global>
-        @tailwind utilities;
-
-        @layer utilities {
-            @font-face {
-                font-family: Poppins;
-                src:
-                    url("/assets/fonts/poppins-medium.woff2") format("woff2"),
-                    url("/assets/fonts/poppins-medium.woff") format("woff");
-                font-display: swap;
-            }
-            @font-face {
-                font-family: Inter;
-                src:
-                    url("/assets/fonts/inter-medium.woff2") format("woff2"),
-                    url("/assets/fonts/inter-medium.woff") format("woff");
-                font-display: swap;
-            }
-            :root {
-                --bs-gutter-x: 1.5rem;
-                --bs-gutter-y: 0;
-            }
-            html {
-                scroll-behavior: smooth;
-            }
-            a {
-                transition: 0.2s;
-            }
-            .container {
-                width: 100%;
-                padding-right: calc(var(--bs-gutter-x) * 0.5);
-                padding-left: calc(var(--bs-gutter-x) * 0.5);
-            }
-            .row {
-                display: flex;
-                flex-wrap: wrap;
-            }
-            .row > * {
-                flex-shrink: 0;
-                width: 100%;
-                max-width: 100%;
-                padding-right: calc(var(--bs-gutter-x) * 0.5);
-                padding-left: calc(var(--bs-gutter-x) * 0.5);
-                margin-top: var(--bs-gutter-y);
-            }
-            .col {
-                flex: 1 0 0%;
-            }
-            .backgroundImage {
-                background: url("/assets/img/background/bg-pattern.webp"),
-                    linear-gradient(to left, #212735, #337fd5);
-                background-attachment: fixed;
-
-                /* Christmas update */
-                /* background: url("/assets/img/background/bg-pattern-cr.webp"),
-                    linear-gradient(to left, #330d0d,#cc3333); */
-
-                /* Easter update */
-                /* background: url("/assets/img/background/bg-pattern.webp"),
-                        linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2); */
-            }
-            .grass {
-                z-index: -2;
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                height: 170px;
-                background-image: url("/assets/img/background/grass.webp");
-                background-repeat: repeat-x;
-            }
-            .clouds {
-                z-index: -1;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 275px;
-                background-image: url("/assets/img/background/clouds.webp");
-                background-repeat: repeat-x;
-            }
-            .bunny {
-                z-index: -1;
-                position: fixed;
-                bottom: -1px;
-                left: 0;
-                width: 250px;
-                height: 300px;
-                background-image: url("/assets/img/background/bunny.webp");
-                background-repeat: no-repeat;
-            }
-            .altele-list {
-                @apply flex flex-col space-y-2 lg:space-y-1;
-            }
-            .altele-link {
-                @apply text-slate-500 hover:text-slate-300;
-            }
-            .altele-text {
-                @apply text-white;
-            }
-            .content-list {
-                @apply space-y-4;
-            }
-            .content-link {
-                @apply text-slate-600 hover:text-slate-900 focus:text-slate-900 md:text-lg;
-            }
-            .content-text {
-                @apply text-gray-900 md:text-lg;
-            }
-            .QR {
-                @apply max-md:hidden;
-            }
-            .shortcut-link {
-                @apply text-slate-500 hover:text-slate-300 text-lg;
-            }
-            .shortcut-pipe {
-                @apply text-slate-500 text-lg;
-            }
-            .astro-code {
-                border-radius: 5px;
-                padding: 10px;
-            }
-        }
-    </style>
 </html>
