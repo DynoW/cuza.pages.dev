@@ -148,7 +148,7 @@ const sortedNavEntries = Object.entries(navStructure).sort((a, b) => {
 
 <section class="text-center flex flex-col items-center py-6">
     <div
-        class="container bg-[rgba(10,13,16,.9)] rounded-3xl py-5 max-w-screen-lg"
+        class="container bg-[rgba(10,13,16,.9)] rounded-3xl py-5 max-w-(--breakpoint-lg)"
     >
         <div class="row mx-3">
             <div class="md:basis-1/2 xl:basis-1/3 text-left">
@@ -160,15 +160,14 @@ const sortedNavEntries = Object.entries(navStructure).sort((a, b) => {
                                     href="https://analytics.my-lab.ro/share/l2n3pDhX5KJiyuAp/cuza.pages.dev"
                                     class="focus:outline-hidden"
                                 >
-                                    <span
-                                        class="min-w-min hover:scale-125 hover:rotate-6 duration-300"
-                                        ><img
+                                    <span class="min-w-min hover:scale-125 hover:rotate-6 duration-300">
+                                        <img
                                             src="/assets/img/logo/atom-w.svg"
                                             width="32"
                                             height="35.03"
                                             alt="logo"
-                                        /></span
-                                    >
+                                        />
+                                    </span>
                                 </a>
                             </div>
                             <div class="">
@@ -178,7 +177,7 @@ const sortedNavEntries = Object.entries(navStructure).sort((a, b) => {
                                 >
                                     <h1
                                         id="page-title"
-                                        class="relative container text-3xl italic font-bold !m-0"
+                                        class="relative container text-3xl italic font-bold m-0!"
                                     >
                                         <script>
                                             document.addEventListener(
@@ -223,7 +222,7 @@ const sortedNavEntries = Object.entries(navStructure).sort((a, b) => {
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col !p-0">
+                            <div class="col p-0!">
                                 <h2 class="text-blue-300 text-xs mb-2">
                                     Subiecte de bac din anii anteriori la fizică
                                     și matematică pentru liceeni si profesori.
@@ -233,10 +232,10 @@ const sortedNavEntries = Object.entries(navStructure).sort((a, b) => {
                     </div>
                 </div>
             </div>
-            <div class="col !my-2">
+            <div class="col my-2!">
                 <nav>
                     <ul
-                        class="flex flex-wrap !pl-0 !mb-0 list-none border-none mx-auto lg:justify-end"
+                        class="flex flex-wrap pl-0! mb-0! list-none border-none mx-auto lg:justify-end"
                     >
                         {
                             sortedNavEntries.map(([subject, pages]) => (
