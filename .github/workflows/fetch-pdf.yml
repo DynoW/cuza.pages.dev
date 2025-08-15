@@ -62,38 +62,39 @@ jobs:
       - name: Extract ZIPs
         run: |
           set -euxo pipefail
-          # Clean previous extraction to avoid name collisions (file vs directory)
+          # Clean previous extraction
           rm -rf extracted
           mkdir -p extracted
           shopt -s nullglob
           for z in zips/*.zip; do
             base=$(basename "$z" .zip)
-            target="extracted/$base"
-            mkdir -p "$target"
-            echo "Unzipping $z -> $target"
-            if ! unzip -qq -o "$z" -d "$target"; then
-              echo "Unzip failed for $z" >&2
-            fi
+            echo "Extracting $z"
+            # Extract PDFs directly into flat structure to avoid directory name conflicts
+            unzip -qq -j "$z" "*.pdf" -d extracted/ 2>/dev/null || true
+            # Also try extracting from nested directories
+            unzip -qq -j "$z" "*/*.pdf" -d extracted/ 2>/dev/null || true
+            unzip -qq -j "$z" "*/*/*.pdf" -d extracted/ 2>/dev/null || true
           done
           echo "Extraction complete. Listing PDFs:" || true
-          find extracted -type f -name '*.pdf' -print || true
+          find extracted -type f -name '*.pdf' -print | head -20 || true
 
       - name: Collect target PDFs
         id: collect
         run: |
           set -euxo pipefail
           mkdir -p collected_pdfs
+          # Look for target PDFs directly in extracted folder (now flat structure)
           declare -a patterns=(
-            'extracted/**/E_a_romana_real_tehn_2025_bar_??.pdf'
-            'extracted/**/E_a_romana_real_tehn_2025_var_??.pdf'
-            'extracted/**/E_c_matematica_M_mate-info_2025_bar_??_LRO.pdf'
-            'extracted/**/E_c_matematica_M_mate-info_2025_var_??_LRO.pdf'
-            'extracted/**/E_d_fizica_teoretic_vocational_2025_bar_??_LRO.pdf'
-            'extracted/**/E_d_fizica_teoretic_vocational_2025_var_??_LRO.pdf'
-            'extracted/**/E_d_informatica_2025_sp_MI_bar_??_LRO.pdf'
-            'extracted/**/E_d_informatica_2025_sp_MI_var_??_LRO.pdf'
+            'extracted/E_a_romana_real_tehn_2025_bar_??.pdf'
+            'extracted/E_a_romana_real_tehn_2025_var_??.pdf'
+            'extracted/E_c_matematica_M_mate-info_2025_bar_??_LRO.pdf'
+            'extracted/E_c_matematica_M_mate-info_2025_var_??_LRO.pdf'
+            'extracted/E_d_fizica_teoretic_vocational_2025_bar_??_LRO.pdf'
+            'extracted/E_d_fizica_teoretic_vocational_2025_var_??_LRO.pdf'
+            'extracted/E_d_informatica_2025_sp_MI_bar_??_LRO.pdf'
+            'extracted/E_d_informatica_2025_sp_MI_var_??_LRO.pdf'
           )
-          shopt -s globstar nullglob
+          shopt -s nullglob
           found_any=false
           for p in "${patterns[@]}"; do
             for f in $p; do
