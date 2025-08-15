@@ -18,7 +18,8 @@ jobs:
           in_range=false
           if [[ "$today" =~ ^2025-05-(22|23|24|25|26)$ ]]; then in_range=true; session=speciala; fi
           if [[ "$today" =~ ^2025-06-(10|11|12|13)$ ]]; then in_range=true; session=iunie; fi
-          if [[ "$today" =~ ^2025-08-(14|15|16)$ ]]; then in_range=true; session=august; fi
+          if [[ "$today" =~ ^2025-08-(11|12|13)$ ]]; then in_range=true; session=august; fi
+          if [[ "$today" =~ ^2025-08-(15)$ ]]; then in_range=true; session=august; fi
           echo "Today (Europe/Bucharest): $today session=$session in_range=$in_range"
           echo "run=$in_range" >> $GITHUB_OUTPUT
           echo "session=${session:-none}" >> $GITHUB_OUTPUT
@@ -92,7 +93,7 @@ jobs:
             'extracted/E_d_fizica_teoretic_vocational_2025_bar_??_LRO.pdf'
             'extracted/E_d_fizica_teoretic_vocational_2025_var_??_LRO.pdf'
             'extracted/E_d_informatica_2025_sp_MI_bar_??_LRO.pdf'
-            'extracted/E_d_informatica_2025_sp_MI_var_??_LRO.pdf'
+            'extracted/E_d_informatica_2025_sp_MI_C_var_??_LRO.pdf'
           )
           shopt -s nullglob
           found_any=false
@@ -111,14 +112,12 @@ jobs:
             ls -l collected_pdfs
             echo "no_pdfs=false" >> $GITHUB_OUTPUT
           fi
-          echo "session=${{ steps.daterange.outputs.session }}" > collected_pdfs/SESSION.txt
-          date -u +%Y-%m-%dT%H:%M:%SZ > collected_pdfs/RUN_TIMESTAMP_UTC.txt
 
       - name: Upload artifact
         if: steps.collect.outputs.no_pdfs == 'false'
         uses: actions/upload-artifact@v4
         with:
-          name: bac-subjecte-${{ steps.daterange.outputs.session }}-${{ github.run_number }}
+          name: bac-subjecte-${{ steps.daterange.outputs.session }}-$(date +%Y.%m.%d-%H:%M)
           path: collected_pdfs
           retention-days: 30
 
