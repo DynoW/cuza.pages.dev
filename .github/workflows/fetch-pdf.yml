@@ -4,12 +4,13 @@ on:
   schedule:
     # 15:05 local (Europe/Bucharest) which is 12:05 UTC during DST (all listed 2025 session dates are in DST) Monday-Friday
     - cron: '5 12 * 5-8 1-5'
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 jobs:
-	fetch:
+	fetch-files:
     name: Fetch Bac Subjects PDFs
     runs-on: ubuntu-latest
+    
     steps:
       # - name: Checkout (optional)
       #   uses: actions/checkout@v4
