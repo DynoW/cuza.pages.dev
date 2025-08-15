@@ -23,11 +23,11 @@ jobs:
 					if [[ "$today" =~ ^2025-05-(22|23|24|25|26)$ ]]; then in_range=true; session=speciala; fi
 					if [[ "$today" =~ ^2025-06-(10|11|12|13)$ ]]; then in_range=true; session=iunie; fi
 					# if [[ "$today" =~ ^2025-08-(11|12|13)$ ]]; then in_range=true; session=august; fi
-          if [[ "$today" =~ ^2025-08-(14|15|16)$ ]]; then in_range=true; session=august; fi
+					if [[ "$today" =~ ^2025-08-(14|15|16)$ ]]; then in_range=true; session=august; fi
 					echo "Today (Europe/Bucharest): $today session=$session in_range=$in_range"
 					echo "run=$in_range" >> $GITHUB_OUTPUT
 					echo "session=${session:-none}" >> $GITHUB_OUTPUT
-      
+
 			- name: Skip if not in session window
 				if: steps.daterange.outputs.run != 'true'
 				run: echo "Not within any configured session window. Exiting early." && exit 0
@@ -96,7 +96,7 @@ jobs:
 						'extracted/**/E_d_informatica_2025_sp_MI_var_??_LRO.pdf'
 					)
 					shopt -s globstar nullglob
-					found_any=false
+						found_any=false
 					for p in "${patterns[@]}"; do
 						for f in $p; do
 							[ -e "$f" ] || continue
