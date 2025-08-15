@@ -8,127 +8,129 @@ on:
 
 jobs:
 	fetch:
-		runs-on: ubuntu-latest
-		steps:
-			- name: Checkout (optional)
-				uses: actions/checkout@v4
+    name: Fetch Bac Subjects PDFs
+    runs-on: ubuntu-latest
+    steps:
+      # - name: Checkout (optional)
+      #   uses: actions/checkout@v4
 
-			- name: Determine if today is within target sessions
-				id: daterange
-				run: |
-					TZ="Europe/Bucharest" today=$(date +%Y-%m-%d)
-					year=$(echo "$today" | cut -d- -f1)
-					# Define session date ranges (inclusive) for 2025
-					in_range=false
-					if [[ "$today" =~ ^2025-05-(22|23|24|25|26)$ ]]; then in_range=true; session=speciala; fi
-					if [[ "$today" =~ ^2025-06-(10|11|12|13)$ ]]; then in_range=true; session=iunie; fi
-					# if [[ "$today" =~ ^2025-08-(11|12|13)$ ]]; then in_range=true; session=august; fi
-					if [[ "$today" =~ ^2025-08-(14|15|16)$ ]]; then in_range=true; session=august; fi
-					echo "Today (Europe/Bucharest): $today session=$session in_range=$in_range"
-					echo "run=$in_range" >> $GITHUB_OUTPUT
-					echo "session=${session:-none}" >> $GITHUB_OUTPUT
+      - name: Determine if today is within target sessions
+        id: daterange
+        run: |
+          TZ="Europe/Bucharest" today=$(date +%Y-%m-%d)
+          year=$(echo "$today" | cut -d- -f1)
+          # Define session date ranges (inclusive) for 2025
+          in_range=false
+          if [[ "$today" =~ ^2025-05-(22|23|24|25|26)$ ]]; then in_range=true; session=speciala; fi
+          if [[ "$today" =~ ^2025-06-(10|11|12|13)$ ]]; then in_range=true; session=iunie; fi
+          # if [[ "$today" =~ ^2025-08-(11|12|13)$ ]]; then in_range=true; session=august; fi
+          if [[ "$today" =~ ^2025-08-(14|15|16)$ ]]; then in_range=true; session=august; fi
+          echo "Today (Europe/Bucharest): $today session=$session in_range=$in_range"
+          echo "run=$in_range" >> $GITHUB_OUTPUT
+          echo "session=${session:-none}" >> $GITHUB_OUTPUT
 
-			- name: Skip if not in session window
-				if: steps.daterange.outputs.run != 'true'
-				run: echo "Not within any configured session window. Exiting early." && exit 0
+      - name: Skip if not in session window
+        if: steps.daterange.outputs.run != 'true'
+        run: echo "Not within any configured session window. Exiting early." && exit 0
 
-			- name: Fetch session page
-				id: fetch
-				run: |
-					set -euxo pipefail
-					url="https://subiecte.edu.ro/2025/bacalaureat/Subiecte_si_bareme/"
-					curl -fsSL "$url" -o page.html
-					echo "Downloaded page.html"
-					# Extract zip hrefs for E.a / E.c / E.d (case-insensitive for reserve names)
-					grep -ioE 'href="[^"]*E_[acd]_[0-9]{4}[^" ]*\.zip"' page.html | sed -E 's/href="(.*)"/\1/' | sort -u > zip_links.txt || true
-					echo "Found zip links:"; cat zip_links.txt || true
-					# Prepend base URL (relative paths only)
-					awk '{ if ($0 ~ /^https?:/) print $0; else print "https://subiecte.edu.ro/2025/bacalaureat/Subiecte_si_bareme/" $0 }' zip_links.txt > zip_urls.txt
-					echo "Resolved URLs:"; cat zip_urls.txt || true
+      - name: Fetch session page
+        id: fetch
+        run: |
+          set -euxo pipefail
+          url="https://subiecte.edu.ro/2025/bacalaureat/Subiecte_si_bareme/"
+          curl -fsSL "$url" -o page.html
+          echo "Downloaded page.html"
+          # Extract zip hrefs for E.a / E.c / E.d (case-insensitive for reserve names)
+          grep -ioE 'href="[^"]*E_[acd]_[0-9]{4}[^" ]*\.zip"' page.html | sed -E 's/href="(.*)"/\1/' | sort -u > zip_links.txt || true
+          echo "Found zip links:"; cat zip_links.txt || true
+          # Prepend base URL (relative paths only)
+          awk '{ if ($0 ~ /^https?:/) print $0; else print "https://subiecte.edu.ro/2025/bacalaureat/Subiecte_si_bareme/" $0 }' zip_links.txt > zip_urls.txt
+          echo "Resolved URLs:"; cat zip_urls.txt || true
 
-			- name: Download ZIPs
-				if: steps.daterange.outputs.run == 'true'
-				run: |
-					set -euxo pipefail
-					mkdir -p zips
-					success_any=false
-					while IFS= read -r z; do
-						[ -z "$z" ] && continue
-						fname="zips/$(basename "$z")"
-						echo "Downloading $z"
-						if curl -fSL "$z" -o "$fname"; then
-							echo "Downloaded $fname"
-							success_any=true
-						else
-							echo "Failed (maybe not published yet): $z" >&2
-						fi
-					done < zip_urls.txt
-					if [ "$success_any" = false ]; then
-						echo "No ZIPs downloaded yet. Possibly not published."
-					fi
+      - name: Download ZIPs
+        if: steps.daterange.outputs.run == 'true'
+        run: |
+          set -euxo pipefail
+          mkdir -p zips
+          success_any=false
+          while IFS= read -r z; do
+            [ -z "$z" ] && continue
+            fname="zips/$(basename "$z")"
+            echo "Downloading $z"
+            if curl -fSL "$z" -o "$fname"; then
+              echo "Downloaded $fname"
+              success_any=true
+            else
+              echo "Failed (maybe not published yet): $z" >&2
+            fi
+          done < zip_urls.txt
+          if [ "$success_any" = false ]; then
+            echo "No ZIPs downloaded yet. Possibly not published."
+          fi
 
-			- name: Extract ZIPs
-				run: |
-					set -euxo pipefail
-					mkdir -p extracted
-					shopt -s nullglob
-					for z in zips/*.zip; do
-						echo "Unzipping $z"
-						unzip -o "$z" -d extracted >/dev/null || echo "Unzip failed for $z" >&2
-					done
-					echo "Extraction complete. Listing PDFs:" || true
-					find extracted -maxdepth 2 -type f -name '*.pdf' -print || true
+      - name: Extract ZIPs
+        run: |
+          set -euxo pipefail
+          mkdir -p extracted
+          shopt -s nullglob
+          for z in zips/*.zip; do
+            echo "Unzipping $z"
+            unzip -o "$z" -d extracted >/dev/null || echo "Unzip failed for $z" >&2
+          done
+          echo "Extraction complete. Listing PDFs:" || true
+          find extracted -maxdepth 2 -type f -name '*.pdf' -print || true
 
-			- name: Collect target PDFs
-				id: collect
-				run: |
-					set -euxo pipefail
-					mkdir -p collected_pdfs
-					# Patterns (number is 01-10 unknown) ; use glob with ?? for two digits
-					declare -a patterns=(
-						'extracted/**/E_a_romana_real_tehn_2025_bar_??.pdf'
-						'extracted/**/E_a_romana_real_tehn_2025_var_??.pdf'
-						'extracted/**/E_c_matematica_M_mate-info_2025_bar_??_LRO.pdf'
-						'extracted/**/E_c_matematica_M_mate-info_2025_var_??_LRO.pdf'
-						'extracted/**/E_d_fizica_teoretic_vocational_2025_bar_??_LRO.pdf'
-						'extracted/**/E_d_fizica_teoretic_vocational_2025_var_??_LRO.pdf'
-						'extracted/**/E_d_informatica_2025_sp_MI_bar_??_LRO.pdf'
-						'extracted/**/E_d_informatica_2025_sp_MI_var_??_LRO.pdf'
-					)
-					shopt -s globstar nullglob
-						found_any=false
-					for p in "${patterns[@]}"; do
-						for f in $p; do
-							[ -e "$f" ] || continue
-							cp -n "$f" collected_pdfs/
-							echo "Collected $(basename "$f")"
-							found_any=true
-						done
-					done
-					if [ "$found_any" = false ]; then
-						echo "No target PDFs found yet."
-						echo "no_pdfs=true" >> $GITHUB_OUTPUT
-					else
-						ls -l collected_pdfs
-						echo "no_pdfs=false" >> $GITHUB_OUTPUT
-					fi
-					echo "session=${{ steps.daterange.outputs.session }}" > collected_pdfs/SESSION.txt
-					date -u +%Y-%m-%dT%H:%M:%SZ > collected_pdfs/RUN_TIMESTAMP_UTC.txt
+      - name: Collect target PDFs
+        id: collect
+        run: |
+          set -euxo pipefail
+          mkdir -p collected_pdfs
+          # Patterns (number is 01-10 unknown) ; use glob with ?? for two digits
+          declare -a patterns=(
+            'extracted/**/E_a_romana_real_tehn_2025_bar_??.pdf'
+            'extracted/**/E_a_romana_real_tehn_2025_var_??.pdf'
+            'extracted/**/E_c_matematica_M_mate-info_2025_bar_??_LRO.pdf'
+            'extracted/**/E_c_matematica_M_mate-info_2025_var_??_LRO.pdf'
+            'extracted/**/E_d_fizica_teoretic_vocational_2025_bar_??_LRO.pdf'
+            'extracted/**/E_d_fizica_teoretic_vocational_2025_var_??_LRO.pdf'
+            'extracted/**/E_d_informatica_2025_sp_MI_bar_??_LRO.pdf'
+            'extracted/**/E_d_informatica_2025_sp_MI_var_??_LRO.pdf'
+          )
+          shopt -s globstar nullglob
+          found_any=false
+          for p in "${patterns[@]}"; do
+            for f in $p; do
+              [ -e "$f" ] || continue
+              cp -n "$f" collected_pdfs/
+              echo "Collected $(basename "$f")"
+              found_any=true
+            done
+          done
+          if [ "$found_any" = false ]; then
+            echo "No target PDFs found yet."
+            echo "no_pdfs=true" >> $GITHUB_OUTPUT
+          else
+            ls -l collected_pdfs
+            echo "no_pdfs=false" >> $GITHUB_OUTPUT
+          fi
+          echo "session=${{ steps.daterange.outputs.session }}" > collected_pdfs/SESSION.txt
+          date -u +%Y-%m-%dT%H:%M:%SZ > collected_pdfs/RUN_TIMESTAMP_UTC.txt
 
-			- name: Upload artifact
-				if: steps.collect.outputs.no_pdfs == 'false'
-				uses: actions/upload-artifact@v4
-				with:
-					name: bac-subjecte-${{ steps.daterange.outputs.session }}-${{ github.run_number }}
-					path: collected_pdfs
-					retention-days: 30
+      - name: Upload artifact
+        if: steps.collect.outputs.no_pdfs == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: bac-subjecte-${{ steps.daterange.outputs.session }}-${{ github.run_number }}
+          path: collected_pdfs
+          retention-days: 30
 
-			- name: Summary
-				run: |
-					if [ '${{ steps.collect.outputs.no_pdfs }}' = 'true' ]; then
-						echo "### Bac PDF Fetch" >> $GITHUB_STEP_SUMMARY
-						echo "No PDFs available yet for session '${{ steps.daterange.outputs.session }}' today." >> $GITHUB_STEP_SUMMARY
-					else
-						echo "### Bac PDF Fetch" >> $GITHUB_STEP_SUMMARY
-						echo "Uploaded artifact with collected PDFs for session '${{ steps.daterange.outputs.session }}'." >> $GITHUB_STEP_SUMMARY
-					fi
+      - name: Summary
+        run: |
+          if [ '${{ steps.collect.outputs.no_pdfs }}' = 'true' ]; then
+            echo "### Bac PDF Fetch" >> $GITHUB_STEP_SUMMARY
+            echo "No PDFs available yet for session '${{ steps.daterange.outputs.session }}' today." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### Bac PDF Fetch" >> $GITHUB_STEP_SUMMARY
+            echo "Uploaded artifact with collected PDFs for session '${{ steps.daterange.outputs.session }}'." >> $GITHUB_STEP_SUMMARY
+          fi
+
