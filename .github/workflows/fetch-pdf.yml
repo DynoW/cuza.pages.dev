@@ -62,14 +62,21 @@ jobs:
       - name: Extract ZIPs
         run: |
           set -euxo pipefail
+          # Clean previous extraction to avoid name collisions (file vs directory)
+          rm -rf extracted
           mkdir -p extracted
           shopt -s nullglob
           for z in zips/*.zip; do
-            echo "Unzipping $z"
-            unzip -o "$z" -d extracted >/dev/null || echo "Unzip failed for $z" >&2
+            base=$(basename "$z" .zip)
+            target="extracted/$base"
+            mkdir -p "$target"
+            echo "Unzipping $z -> $target"
+            if ! unzip -qq -o "$z" -d "$target"; then
+              echo "Unzip failed for $z" >&2
+            fi
           done
           echo "Extraction complete. Listing PDFs:" || true
-          find extracted -maxdepth 2 -type f -name '*.pdf' -print || true
+          find extracted -type f -name '*.pdf' -print || true
 
       - name: Collect target PDFs
         id: collect
