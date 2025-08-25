@@ -14,15 +14,29 @@ jobs:
       - name: Determine if today is within target sessions
         id: daterange
         run: |
-          TZ="Europe/Bucharest" today=$(date +%Y-%m-%d)
+          set -euo pipefail
+          TZ="Europe/Bucharest"
+          today=$(TZ="$TZ" date +%Y-%m-%d)
+          YEAR=$(TZ="$TZ" date +%Y)
+          month=$(TZ="$TZ" date +%m)
+          dow=$(TZ="$TZ" date +%u) # 1=Mon ... 7=Sun
+
+          # Broad session windows by month (aligned with cron: May-Aug, weekdays)
           in_range=false
-          if [[ "$today" =~ ^2025-05-(22|23|24|25|26)$ ]]; then in_range=true; session=speciala; fi
-          if [[ "$today" =~ ^2025-06-(10|11|12|13)$ ]]; then in_range=true; session=iunie; fi
-          if [[ "$today" =~ ^2025-08-(11|12|13)$ ]]; then in_range=true; session=august; fi
-          if [[ "$today" =~ ^2025-08-(15)$ ]]; then in_range=true; session=august; fi
-          echo "Today (Europe/Bucharest): $today session=$session in_range=$in_range"
-          echo "run=$in_range" >> $GITHUB_OUTPUT
-          echo "session=${session:-none}" >> $GITHUB_OUTPUT
+          session=none
+          case "$month" in
+            05) in_range=true; session=mai ;;
+            06) in_range=true; session=iunie ;;
+            07) in_range=true; session=iulie ;;
+            08) in_range=true; session=august ;;
+          esac
+          # Weekdays only
+          if [ "$dow" -ge 6 ]; then in_range=false; fi
+
+          echo "Today (Europe/Bucharest): $today year=$YEAR session=$session in_range=$in_range"
+          echo "run=$in_range" >> "$GITHUB_OUTPUT"
+          echo "session=$session" >> "$GITHUB_OUTPUT"
+          echo "year=$YEAR" >> "$GITHUB_OUTPUT"
 
       - name: Skip if not in session window
         if: steps.daterange.outputs.run != 'true'
@@ -30,13 +44,16 @@ jobs:
 
       - name: Fetch session page
         id: fetch
+        env:
+          YEAR: ${{ steps.daterange.outputs.year }}
         run: |
           set -euxo pipefail
-          url="https://subiecte.edu.ro/2025/bacalaureat/Subiecte_si_bareme/"
+          url="https://subiecte.edu.ro/${YEAR}/bacalaureat/Subiecte_si_bareme/"
           curl -fsSL "$url" -o page.html
-          grep -ioE 'href="[^"]*E_[acd]_[0-9]{4}[^" ]*\.zip"' page.html | sed -E 's/href="(.*)"/\1/' | sort -u > zip_links.txt || true
+          # Only pick ZIPs that include the current YEAR in their filename and match E_[a|c|d]_...
+          grep -ioE "href=\"[^\"]*E_[acd]_[^\"]*${YEAR}[^\"]*\.zip\"" page.html | sed -E 's/href="(.*)"/\1/' | sort -u > zip_links.txt || true
           echo "Found zip links:"; cat zip_links.txt || true
-          awk '{ if ($0 ~ /^https?:/) print $0; else print "https://subiecte.edu.ro/2025/bacalaureat/Subiecte_si_bareme/" $0 }' zip_links.txt > zip_urls.txt
+          awk -v base="$url" '{ if ($0 ~ /^https?:/) print $0; else print base $0 }' zip_links.txt > zip_urls.txt
           echo "Resolved URLs:"; cat zip_urls.txt || true
 
       - name: Download ZIPs
@@ -45,17 +62,19 @@ jobs:
           set -euxo pipefail
           mkdir -p zips
           success_any=false
-          while IFS= read -r z; do
-            [ -z "$z" ] && continue
-            fname="zips/$(basename "$z")"
-            echo "Downloading $z"
-            if curl -fSL "$z" -o "$fname"; then
-              echo "Downloaded $fname"
-              success_any=true
-            else
-              echo "Failed (maybe not published yet): $z" >&2
-            fi
-          done < zip_urls.txt
+          if [ -s zip_urls.txt ]; then
+            while IFS= read -r z; do
+              [ -z "$z" ] && continue
+              fname="zips/$(basename "$z")"
+              echo "Downloading $z"
+              if curl -fSL "$z" -o "$fname"; then
+                echo "Downloaded $fname"
+                success_any=true
+              else
+                echo "Failed (maybe not published yet): $z" >&2
+              fi
+            done < zip_urls.txt
+          fi
           if [ "$success_any" = false ]; then
             echo "No ZIPs downloaded yet. Possibly not published."
           fi
@@ -72,45 +91,44 @@ jobs:
             echo "Extracting $z"
             # Extract PDFs directly into flat structure to avoid directory name conflicts
             unzip -qq -j "$z" "*.pdf" -d extracted/ 2>/dev/null || true
-            # Also try extracting from nested directories
-            unzip -qq -j "$z" "*/*.pdf" -d extracted/ 2>/dev/null || true
-            unzip -qq -j "$z" "*/*/*.pdf" -d extracted/ 2>/dev/null || true
           done
           echo "Extraction complete. Listing PDFs:" || true
           find extracted -type f -name '*.pdf' -print | head -20 || true
 
       - name: Collect target PDFs
         id: collect
+        env:
+          YEAR: ${{ steps.daterange.outputs.year }}
         run: |
           set -euxo pipefail
           mkdir -p collected_pdfs
           # Look for target PDFs directly in extracted folder (now flat structure)
           declare -a patterns=(
-            'extracted/E_a_romana_real_tehn_2025_bar_??.pdf'
-            'extracted/E_a_romana_real_tehn_2025_var_??.pdf'
-            'extracted/E_c_matematica_M_mate-info_2025_bar_??_LRO.pdf'
-            'extracted/E_c_matematica_M_mate-info_2025_var_??_LRO.pdf'
-            'extracted/E_d_fizica_teoretic_vocational_2025_bar_??_LRO.pdf'
-            'extracted/E_d_fizica_teoretic_vocational_2025_var_??_LRO.pdf'
-            'extracted/E_d_informatica_2025_sp_MI_bar_??_LRO.pdf'
-            'extracted/E_d_informatica_2025_sp_MI_C_var_??_LRO.pdf'
+            "extracted/E_a_romana_real_tehn_${YEAR}_bar_??.pdf"
+            "extracted/E_a_romana_real_tehn_${YEAR}_var_??.pdf"
+            "extracted/E_c_matematica_M_mate-info_${YEAR}_bar_??_LRO.pdf"
+            "extracted/E_c_matematica_M_mate-info_${YEAR}_var_??_LRO.pdf"
+            "extracted/E_d_fizica_teoretic_vocational_${YEAR}_bar_??_LRO.pdf"
+            "extracted/E_d_fizica_teoretic_vocational_${YEAR}_var_??_LRO.pdf"
+            "extracted/E_d_informatica_${YEAR}_sp_MI_bar_??_LRO.pdf"
+            "extracted/E_d_informatica_${YEAR}_sp_MI_C_var_??_LRO.pdf"
           )
           shopt -s nullglob
           found_any=false
           for p in "${patterns[@]}"; do
             for f in $p; do
               [ -e "$f" ] || continue
-              cp -n "$f" collected_pdfs/
+              cp --update=none "$f" collected_pdfs/
               echo "Collected $(basename "$f")"
               found_any=true
             done
           done
           if [ "$found_any" = false ]; then
             echo "No target PDFs found yet."
-            echo "no_pdfs=true" >> $GITHUB_OUTPUT
+            echo "no_pdfs=true" >> "$GITHUB_OUTPUT"
           else
             ls -l collected_pdfs
-            echo "no_pdfs=false" >> $GITHUB_OUTPUT
+            echo "no_pdfs=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Upload artifact
@@ -130,4 +148,3 @@ jobs:
             echo "### Bac PDF Fetch" >> $GITHUB_STEP_SUMMARY
             echo "Uploaded artifact with collected PDFs for session '${{ steps.daterange.outputs.session }}'." >> $GITHUB_STEP_SUMMARY
           fi
-
