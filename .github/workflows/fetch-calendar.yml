@@ -1,0 +1,26 @@
+name: Fetch Bac Calendar and extract text from PDF
+
+on:
+  workflow_dispatch:
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Install Poppler
+        run: sudo apt-get update && sudo apt-get install -y poppler-utils
+
+      - name: Download BAC calendar PDF
+        run: |
+          curl -fSL -o Calendar_bacalaureat_2025.pdf https://bacalaureat.edu.ro/Info/Calendar_bacalaureat_2025.pdf
+
+      - name: Convert PDF to text
+        run: |
+          pdftotext Calendar_bacalaureat_2025.pdf Calendar_bacalaureat_2025.txt
+
+      - name: Upload text files
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-text
+          path: "*.txt"

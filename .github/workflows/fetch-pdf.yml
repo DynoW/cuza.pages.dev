@@ -33,7 +33,7 @@ jobs:
           # Weekdays only
           if [ "$dow" -ge 6 ]; then in_range=false; fi
 
-          echo "Today (Europe/Bucharest): $today year=$YEAR session=$session in_range=$in_range"
+          echo "Today (Europe/Bucharest): $today session=$session in_range=$in_range"
           echo "run=$in_range" >> "$GITHUB_OUTPUT"
           echo "session=$session" >> "$GITHUB_OUTPUT"
           echo "year=$YEAR" >> "$GITHUB_OUTPUT"
@@ -110,8 +110,8 @@ jobs:
             "extracted/E_c_matematica_M_mate-info_${YEAR}_var_??_LRO.pdf"
             "extracted/E_d_fizica_teoretic_vocational_${YEAR}_bar_??_LRO.pdf"
             "extracted/E_d_fizica_teoretic_vocational_${YEAR}_var_??_LRO.pdf"
-            "extracted/E_d_informatica_${YEAR}_sp_MI_bar_??_LRO.pdf"
-            "extracted/E_d_informatica_${YEAR}_sp_MI_C_var_??_LRO.pdf"
+            "extracted/E_d_[Ii]nformatica_${YEAR}_sp_MI_bar_??_LRO.pdf"
+            "extracted/E_d_[Ii]nformatica_${YEAR}_sp_MI_C_var_??_LRO.pdf"
           )
           shopt -s nullglob
           found_any=false
