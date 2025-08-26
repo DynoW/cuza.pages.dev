@@ -135,7 +135,7 @@ jobs:
         if: steps.collect.outputs.no_pdfs == 'false'
         uses: actions/upload-artifact@v4
         with:
-          name: bac-subjecte-${{ steps.daterange.outputs.session }}-$(date +%Y.%m.%d-%H:%M)
+          name: bac-subjecte-${{ steps.daterange.outputs.session }}-${{ github.run_id }}
           path: collected_pdfs
           retention-days: 30
 
