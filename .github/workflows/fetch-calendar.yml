@@ -1,4 +1,4 @@
-name: Fetch BAC 2025 Calendar
+name: Fetch BAC Calendar
 
 on:
   workflow_dispatch:
@@ -18,10 +18,15 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install PDF tools
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends poppler-utils
+          python -m pip install --upgrade pip
+          pip install pdfminer.six
 
       - name: Download BAC calendar PDF
         run: |
@@ -32,9 +37,23 @@ jobs:
 
       - name: Convert PDF to text
         run: |
-          pdftotext -enc UTF-8 -eol unix tmp/Calendar_bacalaureat_2025.pdf tmp/Calendar_bacalaureat_2025.txt
-          test -s tmp/Calendar_bacalaureat_2025.txt
-          cat tmp/Calendar_bacalaureat_2025.txt
+          set -e
+          python - <<'PY'
+          import sys
+          from pdfminer.high_level import extract_text
+
+          pdf_path = 'tmp/Calendar_bacalaureat_2025.pdf'
+          txt_path = 'tmp/Calendar_bacalaureat_2025.txt'
+
+          text = extract_text(pdf_path) or ''
+          with open(txt_path, 'w', encoding='utf-8') as f:
+            f.write(text)
+          print(f"Wrote {txt_path} via pdfminer, {len(text.encode('utf-8'))} bytes")
+          PY
+          test -s tmp/Calendar_bacalaureat_2025.txt || { echo "Empty text"; exit 1; }
+          echo "--- Begin extracted text preview ---"
+          sed -n '1,120p' tmp/Calendar_bacalaureat_2025.txt | sed 's/\t/ /g'
+          echo "--- End extracted text preview ---"
 
       - name: Parse text and produce JSON
         run: |
@@ -70,7 +89,8 @@ jobs:
           }
 
           function extractSession(block, sessionName) {
-          const re = /(\d{1,2})\s+(ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)\s+(\d{4})[^\n]{0,140}?E\.(a|b|c|d)\)?/gmi;
+          // Allow matches even if the "E.a)" part is on the next line or has spaces like "E. a)"
+          const re = /(\d{1,2})\s+(ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)\s+(\d{4})[\s\S]{0,200}?E\s*\.\s*(a|b|c|d)\)?/gmi;
           const dates = {};
           let m;
           while ((m = re.exec(block)) !== null) {
@@ -100,6 +120,10 @@ jobs:
 
           fs.mkdirSync(outDir, { recursive: true });
           fs.writeFileSync(outPath, JSON.stringify(result, null, 2), 'utf8');
+          console.log('Parsed sessions:');
+          for (const s of result.sessions) {
+            console.log(`- ${s.session}:`, s.dates);
+          }
           console.log(`Wrote ${outPath}`);
           NODE
 
