@@ -34,6 +34,7 @@ jobs:
         run: |
           pdftotext -enc UTF-8 -eol unix tmp/Calendar_bacalaureat_2025.pdf tmp/Calendar_bacalaureat_2025.txt
           test -s tmp/Calendar_bacalaureat_2025.txt
+          cat tmp/Calendar_bacalaureat_2025.txt
 
       - name: Parse text and produce JSON
         run: |
