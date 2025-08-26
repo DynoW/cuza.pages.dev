@@ -103,17 +103,25 @@ jobs:
           console.log(`Wrote ${outPath}`);
           NODE
 
-      - name: Commit and push JSON
-        env:
-          GIT_AUTHOR_NAME: github-actions[bot]
-          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-          GIT_COMMITTER_NAME: github-actions[bot]
-          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-        run: |
-          if git diff --quiet -- public/assets/data/bac-calendar-2025.json; then
-          echo "No changes to commit."
-          exit 0
-          fi
-          git add public/assets/data/bac-calendar-2025.json
-          git commit -m "chore(data): update BAC 2025 calendar E.a/E.c/E.d dates from official PDF"
-          git push
+      - name: Upload calendar JSON artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bac-calendar-2025
+          path: public/assets/data/bac-calendar-2025.json
+          if-no-files-found: error
+          retention-days: 7
+
+      # - name: Commit and push JSON
+      #   env:
+      #     GIT_AUTHOR_NAME: github-actions[bot]
+      #     GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+      #     GIT_COMMITTER_NAME: github-actions[bot]
+      #     GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+      #   run: |
+      #     if git diff --quiet -- public/assets/data/bac-calendar-2025.json; then
+      #       echo "No changes to commit."
+      #       exit 0
+      #     fi
+      #     git add public/assets/data/bac-calendar-2025.json
+      #     git commit -m "chore(data): update BAC 2025 calendar E.a/E.c/E.d dates from official PDF"
+      #     git push

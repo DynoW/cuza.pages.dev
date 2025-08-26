@@ -1,4 +1,4 @@
-name: Fetch Bac Subjects PDFs
+name: Fetch Bac PDFs
 
 on:
   schedule:
@@ -8,7 +8,6 @@ on:
 
 jobs:
   fetch-files:
-    name: Fetch Bac Subjects PDFs
     runs-on: ubuntu-latest
     steps:
       - name: Determine if today is within target sessions
