@@ -10,8 +10,8 @@ jobs:
   fetch-and-parse:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      # - name: Checkout repo
+      #   uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
