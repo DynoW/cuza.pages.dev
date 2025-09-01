@@ -92,13 +92,24 @@ class BacExamScraper:
     
     def extract_links(self, html_content: str, base_url: str) -> list:
         """Extract ZIP file links matching the exam pattern."""
-        # Pattern to match exam ZIP files: E_[acd]_subject_year_type.zip
-        pattern = rf'href=\"([^\"]*E_[acd]_[^\"]*{self.current_year}[^\"]*\.zip)\"'
-        matches = re.findall(pattern, html_content, re.IGNORECASE)
+        # Multiple patterns to match different ZIP file formats:
+        # 1. Standard: E_[abcd]_...2025...zip
+        # 2. Model: Bac_2025_E_[abcd]_...zip  
+        # 3. Various other formats with year
+        patterns = [
+            rf'href=\"([^\"]*E_[abcd]_[^\"]*{self.current_year}[^\"]*\.zip)\"',  # E_a_2025_...
+            rf'href=\"([^\"]*Bac_{self.current_year}_E_[abcd]_[^\"]*\.zip)\"',   # Bac_2025_E_a_...
+            rf'href=\"([^\"]*{self.current_year}[^\"]*E_[abcd][^\"]*\.zip)\"',   # Other formats with year and E_x
+        ]
+        
+        all_matches = []
+        for pattern in patterns:
+            matches = re.findall(pattern, html_content, re.IGNORECASE)
+            all_matches.extend(matches)
         
         # Convert relative URLs to absolute
         zip_links = []
-        for match in matches:
+        for match in all_matches:
             if match.startswith('http') or match.startswith('https'):
                 zip_links.append(match)
             else:
@@ -114,7 +125,11 @@ class BacExamScraper:
         # Check URL first for broad categories
         if 'simulare' in url_lower:
             return 'Simulare'
-        elif 'modeledesubiecte' in url_lower or 'model' in filename_lower:
+        elif 'modeledesubiecte' in url_lower or 'model' in filename_lower or 'modele' in filename_lower:
+            return 'Model'
+        
+        # Check filename patterns for model files
+        if 'bac_' in filename_lower and ('model' in filename_lower or 'modele' in filename_lower):
             return 'Model'
         
         # For regular bac URL, determine based on filename patterns
@@ -124,8 +139,10 @@ class BacExamScraper:
             return 'Sesiunea-I'  # June session
         elif 'sesiune_august' in filename_lower or 'august' in filename_lower:
             return 'Sesiunea-II'  # August session
-        elif 'model' in filename_lower:
+        elif 'model' in filename_lower or 'modele' in filename_lower:
             return 'Model'
+        elif 'simulare' in filename_lower:
+            return 'Simulare'
         elif 'rezerva' in filename_lower:
             # Reserve sessions are typically part of the main session
             if 'iunie' in filename_lower:
