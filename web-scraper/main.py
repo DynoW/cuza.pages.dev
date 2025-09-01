@@ -106,6 +106,22 @@ class BacExamScraper:
         
         return list(set(zip_links))  # Remove duplicates
     
+    def normalize_exam_type(self, exam_type: str) -> str:
+        """Normalize exam type to the new naming convention."""
+        exam_type_mapping = {
+            'Model': 'Model',
+            'Simulare': 'Simulare',
+            'Simulare-XI': 'Simulare',
+            'Simulare-XII': 'Simulare', 
+            'Sesiunea-I': 'Sesiunea-I',
+            'Sesiunea-II': 'Sesiunea-II',
+            'Sesiune-olimpici': 'Sesiunea-speciala',
+            'Sesiune-Olimpici': 'Sesiunea-speciala',
+            'Rezerva': 'Sesiunea-I',  # Reserve sessions typically part of main session
+            'Bac': 'Sesiunea-I'  # Default fallback
+        }
+        return exam_type_mapping.get(exam_type, exam_type)
+
     def determine_exam_type(self, url: str, zip_filename: str = "") -> str:
         """Determine the exam type based on URL and filename."""
         url_lower = url.lower()
@@ -113,45 +129,49 @@ class BacExamScraper:
         
         # Check URL first for broad categories
         if 'simulare' in url_lower:
-            return 'Simulare'
+            exam_type = 'Simulare'
         elif 'modeledesubiecte' in url_lower or 'model' in filename_lower:
-            return 'Model'
+            exam_type = 'Model'
         
         # For regular bac URL, determine based on filename patterns
-        if 'ses_speciala' in filename_lower or 'speciala' in filename_lower:
-            return 'Sesiune-olimpici'
+        elif 'ses_speciala' in filename_lower or 'speciala' in filename_lower:
+            exam_type = 'Sesiune-olimpici'
         elif 'ses_iunie' in filename_lower or 'iunie' in filename_lower:
-            return 'Sesiunea-I'  # June session
+            exam_type = 'Sesiunea-I'  # June session
         elif 'sesiune_august' in filename_lower or 'august' in filename_lower:
-            return 'Sesiunea-II'  # August session
+            exam_type = 'Sesiunea-II'  # August session
         elif 'model' in filename_lower:
-            return 'Model'
+            exam_type = 'Model'
         elif 'rezerva' in filename_lower:
             # Reserve sessions are typically part of the main session
             if 'iunie' in filename_lower:
-                return 'Sesiunea-I'
+                exam_type = 'Sesiunea-I'
             elif 'august' in filename_lower:
-                return 'Sesiunea-II'
+                exam_type = 'Sesiunea-II'
             else:
-                return 'Sesiunea-I'  # Default reserve to Session I
+                exam_type = 'Sesiunea-I'  # Default reserve to Session I
+        else:
+            # Try to detect session by number patterns in filename
+            # Session numbers: 01 = Sesiunea-I (June), 04 = Sesiunea-II (August), 06 = Sesiune-olimpici, etc.
+            import re
+            session_match = re.search(r'_(\d{2})_', filename_lower)
+            if session_match:
+                session_num = session_match.group(1)
+                if session_num == '01':
+                    exam_type = 'Sesiunea-I'
+                elif session_num in ['04', '09']:  # 04 and 09 seem to be August sessions
+                    exam_type = 'Sesiunea-II'
+                elif session_num in ['03', '05', '06']:  # Special sessions
+                    exam_type = 'Sesiune-olimpici'
+                elif session_num in ['07', '08']:  # Reserve sessions
+                    exam_type = 'Sesiunea-I'  # Default reserves to Session I
+                else:
+                    exam_type = 'Bac'  # Default fallback
+            else:
+                exam_type = 'Bac'  # Default fallback
         
-        # Try to detect session by number patterns in filename
-        # Session numbers: 01 = Sesiunea-I (June), 04 = Sesiunea-II (August), 06 = Sesiune-olimpici, etc.
-        import re
-        session_match = re.search(r'_(\d{2})_', filename_lower)
-        if session_match:
-            session_num = session_match.group(1)
-            if session_num == '01':
-                return 'Sesiunea-I'
-            elif session_num in ['04', '09']:  # 04 and 09 seem to be August sessions
-                return 'Sesiunea-II'
-            elif session_num in ['03', '05', '06']:  # Special sessions
-                return 'Sesiune-olimpici'
-            elif session_num in ['07', '08']:  # Reserve sessions
-                return 'Sesiunea-I'  # Default reserves to Session I
-        
-        # Default fallback
-        return 'Bac'
+        # Normalize to new convention
+        return self.normalize_exam_type(exam_type)
     
     def parse_filename_info(self, filename: str) -> dict:
         """Parse exam file information from filename."""
@@ -281,9 +301,9 @@ class BacExamScraper:
         
         return None
     
-    def create_target_path(self, file_info: dict, exam_type: str) -> Path:
-        """Create the target file path based on file information."""
-        subject_dir = self.files_dir / file_info['folder_subject'] / 'bac' / file_info['year'] / exam_type
+    def create_target_path(self, file_info: dict, exam_type: str, specialization: str = 'mate-info') -> Path:
+        """Create the target file path based on file information with specialization."""
+        subject_dir = self.files_dir / file_info['folder_subject'] / specialization / file_info['year'] / exam_type
         subject_dir.mkdir(parents=True, exist_ok=True)
         return subject_dir
     
@@ -349,9 +369,35 @@ class BacExamScraper:
         
         return None
     
+    def get_subject_specializations(self, subject: str) -> list:
+        """Get list of specializations for a given subject."""
+        specialization_mapping = {
+            'fizica': ['mate-info', 'stiinte-ale-naturii'],
+            'mate': ['mate-info', 'stiinte-ale-naturii', 'socio-umane'],
+            'romana': ['toate'],
+            'info': ['mate-info'],
+            'chimie': ['stiinte-ale-naturii'],
+            'bio': ['stiinte-ale-naturii'],
+            'biologie': ['stiinte-ale-naturii'],
+            'geografie': ['socio-umane'],
+            'istorie': ['socio-umane'],
+            'filosofie': ['socio-umane'],
+            'economie': ['socio-umane'],
+            'psihologie': ['socio-umane'],
+            'sociologie': ['socio-umane'],
+            'logica': ['socio-umane'],
+            'anatomie': ['stiinte-ale-naturii']
+        }
+        return specialization_mapping.get(subject, ['mate-info'])  # Default fallback
+
     def organize_pdf_by_subject(self, pdf_path: Path, temp_extract_dir: Path, exam_type: str, year: str) -> bool:
-        """Organize a single PDF file into the correct subject folder."""
+        """Organize a single PDF file into the correct subject folder with specializations."""
         filename = pdf_path.name
+        
+        # Skip files with minority language markers
+        if any(marker in filename for marker in ['_LMA', '_LGE', '_LSK', '_LSR', '_LUA']):
+            print(f"Skipping minority language file: {filename}")
+            return False
         
         # Extract subject from filename
         subject_folder = self.extract_subject_from_pdf_name(filename)
@@ -359,9 +405,8 @@ class BacExamScraper:
             print(f"Could not determine subject for: {filename}")
             return False
         
-        # Create target directory for this subject
-        target_dir = self.files_dir / subject_folder / 'bac' / year / exam_type
-        target_dir.mkdir(parents=True, exist_ok=True)
+        # Get specializations for this subject
+        specializations = self.get_subject_specializations(subject_folder)
         
         # Clean up the filename by removing language suffixes
         clean_filename = filename
@@ -371,17 +416,25 @@ class BacExamScraper:
                 clean_filename = clean_filename.replace(suffix + '.pdf', '.pdf')
                 break
         
-        # Create final file path with cleaned filename
-        target_file = target_dir / clean_filename
+        # Copy file to each relevant specialization
+        success = False
+        for specialization in specializations:
+            # Create target directory for this subject/specialization
+            target_dir = self.files_dir / subject_folder / specialization / year / exam_type
+            target_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Create final file path with cleaned filename
+            target_file = target_dir / clean_filename
+            
+            try:
+                # Copy the file to the correct location
+                shutil.copy2(pdf_path, target_file)
+                print(f"Organized: {clean_filename} -> {subject_folder}/{specialization}")
+                success = True
+            except OSError as e:
+                print(f"Error copying {filename} to {specialization}: {e}")
         
-        try:
-            # Copy the file to the correct location (instead of move to avoid cross-device issues)
-            shutil.copy2(pdf_path, target_file)
-            print(f"Organized: {clean_filename} -> {subject_folder}")
-            return True
-        except OSError as e:
-            print(f"Error copying {filename}: {e}")
-            return False
+        return success
     
     def extract_zip_file(self, zip_path: Path, target_dir: Path, exam_type: str) -> list:
         """Extract ZIP file and organize PDFs by subject."""
