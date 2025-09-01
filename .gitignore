@@ -25,3 +25,14 @@ pnpm-debug.log*
 .wrangler
 
 deploy.yml
+
+# Temporary files from reorganization
+temp/
+files_backup/
+files_old/
+*.tmp
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
