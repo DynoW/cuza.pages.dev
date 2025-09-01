@@ -1,12 +1,33 @@
 import { Octokit } from "@octokit/rest";
 
+// Cloudflare Workers environment
+declare global {
+    const UPLOAD_PASSWORD: string;
+    const GITHUB_TOKEN: string;
+}
+
+// Cloudflare Workers types
+interface FetchEvent extends Event {
+    request: Request;
+    respondWith(response: Promise<Response> | Response): void;
+    waitUntil(promise: Promise<any>): void;
+    passThroughOnException(): void;
+}
+
+interface CloudflareWorkerGlobalScope {
+    addEventListener(type: 'fetch', listener: (event: FetchEvent) => void): void;
+    addEventListener(type: string, listener: (event: Event) => void): void;
+}
+
+declare const self: CloudflareWorkerGlobalScope;
+
 const corsHeaders = {
     'Access-Control-Allow-Origin': 'https://cuza.pages.dev',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization'
 };
 
-addEventListener('fetch', event => {
+self.addEventListener('fetch', (event: FetchEvent) => {
     event.respondWith(handleRequest(event.request));
 });
 
@@ -65,7 +86,6 @@ function isValidAuth(authHeader: string): boolean {
     }
     const decoded = atob(encoded);
     const [username, password] = decoded.split(':');
-    // @ts-ignore
     return password === UPLOAD_PASSWORD;
 }
 
@@ -144,7 +164,6 @@ function generateFilePath(page: string, year: string, title: string, type: strin
 
 async function createPullRequest(storagePath: string, file: File, newFileName: string, page: string, type: string) {
     const octokit = new Octokit({
-        // @ts-ignore
         auth: GITHUB_TOKEN
     });
 
@@ -197,12 +216,13 @@ async function createPullRequest(storagePath: string, file: File, newFileName: s
         const fileContent = await file.arrayBuffer();
         const uint8Array = new Uint8Array(fileContent);
 
-        // Build the binary string in chunks
+        // Convert Uint8Array to base64 properly using chunked processing
+        const chunkSize = 8192;
         let binary = '';
-        for (let i = 0; i < uint8Array.length; i++) {
-            if (uint8Array[i] !== undefined) {
-                binary += String.fromCharCode(uint8Array[i] as number);
-            }
+        
+        for (let i = 0; i < uint8Array.length; i += chunkSize) {
+            const chunk = uint8Array.slice(i, i + chunkSize);
+            binary += String.fromCharCode.apply(null, Array.from(chunk));
         }
 
         // Encode the binary string to Base64
