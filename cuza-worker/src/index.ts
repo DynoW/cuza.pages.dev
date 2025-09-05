@@ -1,4 +1,4 @@
-import { validateFormData, extractFormData, generateFilePath, uploadToR2AndGithub, isValidAuth, UploadEnv } from './upload';
+// import { validateFormData, extractFormData, generateFilePath, uploadToR2AndGithub, isValidAuth, UploadEnv } from './upload';
 import { handleFileList } from './handlers/files';
 import { handleFileServe, handleFileSearch } from './handlers/serve';
 import { handleSubjectPageSearch } from './handlers/search';
@@ -6,7 +6,9 @@ import { handleYearsOnlySearch } from './handlers/years';
 import { corsHeaders } from './handlers/common';
 
 // Environment interface
-interface Env extends UploadEnv {
+export interface Env {
+    UPLOAD_PASSWORD: string;
+    GITHUB_TOKEN: string;
     FILES: R2Bucket;
 }
 

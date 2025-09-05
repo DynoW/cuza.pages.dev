@@ -1,4 +1,5 @@
 import { Octokit } from "@octokit/rest";
+import { Env } from "./index";
 
 // Types for upload functionality
 export interface UploadFormData {
@@ -17,13 +18,6 @@ export interface UploadFormData {
 export interface FilePath {
     storagePath: string;
     newFileName: string;
-}
-
-// Environment bindings for upload
-export interface UploadEnv {
-    UPLOAD_PASSWORD: string;
-    GITHUB_TOKEN: string;
-    CUZA_FILES: R2Bucket;
 }
 
 export function validateFormData(formData: FormData): string | null {
@@ -100,7 +94,7 @@ export function generateFilePath(page: string, year: string, title: string, type
 }
 
 export async function uploadToR2AndGithub(
-    env: UploadEnv,
+    env: Env,
     storagePath: string,
     file: File,
     newFileName: string,
@@ -109,7 +103,7 @@ export async function uploadToR2AndGithub(
 ): Promise<void> {
     // Upload to R2 bucket
     const fileContent = await file.arrayBuffer();
-    await env.CUZA_FILES.put(storagePath, fileContent, {
+    await env.FILES.put(storagePath, fileContent, {
         httpMetadata: {
             contentType: 'application/pdf',
             contentDisposition: `inline; filename="${newFileName}"`

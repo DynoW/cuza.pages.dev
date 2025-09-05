@@ -11,6 +11,6 @@ binding = "FILES"
 bucket_name = "cuza-bucket"
 
 # Environment variables for GitHub integration
-[vars]
-GITHUB_OWNER = "dynow"
-GITHUB_REPO = "cuza.pages.dev"
+# [vars]
+# GITHUB_OWNER = "dynow"
+# GITHUB_REPO = "cuza.pages.dev"

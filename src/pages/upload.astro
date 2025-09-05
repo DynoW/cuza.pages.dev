@@ -334,7 +334,7 @@ import Layout from "../layouts/Layout.astro";
 
                 try {
                     const response = await fetch(
-                        "https://cuza-worker.danutz.workers.dev",
+                        import.meta.env.WORKER_URL + "/upload" || "http://localhost:8787/upload",
                         {
                             method: "POST",
                             headers: {
