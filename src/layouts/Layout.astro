@@ -4,207 +4,205 @@ import UpArrow from "../icons/UpArrow.astro";
 import "../styles/global.css";
 
 interface Props {
-    title: string;
-    description?: string;
-    keywords?: string;
-    noindex?: boolean;
-    nofollow?: boolean;
-    canonicalUrl?: string;
-    extendMeta?: object;
-    extendLink?: object;
-    backgroundImage?: boolean;
-    bodyClass?: string;
-    markdown?: boolean;
-    breadcrumbs?: Array<{ name: string; url: string }>;
+  title: string;
+  description?: string;
+  keywords?: string;
+  noindex?: boolean;
+  nofollow?: boolean;
+  canonicalUrl?: string;
+  extendMeta?: object;
+  extendLink?: object;
+  backgroundImage?: boolean;
+  bodyClass?: string;
+  markdown?: boolean;
+  breadcrumbs?: Array<{ name: string; url: string }>;
 }
 
 const {
-    title,
-    description = "Subiecte de bacalaureat si admitere upb din anii anteriori la fizică, matematică și informatică pentru pregătirea elevilor. Materiale create de elevi pentru elevi din Liceul Teoretic Alexandru Ioan Cuza, București. Exerciții și variante rezolvate.",
-    keywords = "bac, bacalaureat, subiecte, fizica, matematica, informatica, examen, admitere, upb, poli, programare, algoritmi, variante, teste, simulari, mate-fizica, mate-info, info, Liceul Teoretic Alexandru Ioan Cuza, București, LTAIC, cuza",
-    noindex,
-    nofollow,
-    canonicalUrl,
-    extendMeta,
-    extendLink,
-    backgroundImage = true,
-    bodyClass,
-    markdown,
-    breadcrumbs,
+  title,
+  description = "Subiecte de bacalaureat si admitere upb din anii anteriori la fizică, matematică și informatică pentru pregătirea elevilor. Materiale create de elevi pentru elevi din Liceul Teoretic Alexandru Ioan Cuza, București. Exerciții și variante rezolvate.",
+  keywords = "bac, bacalaureat, subiecte, fizica, matematica, informatica, examen, admitere, upb, poli, programare, algoritmi, variante, teste, simulari, mate-fizica, mate-info, info, Liceul Teoretic Alexandru Ioan Cuza, București, LTAIC, cuza",
+  noindex,
+  nofollow,
+  canonicalUrl,
+  extendMeta,
+  extendLink,
+  backgroundImage = true,
+  bodyClass,
+  markdown,
+  breadcrumbs,
 } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="ro">
-    <head>
-        <SEO
-            charset="UTF-8"
-            title={title}
-            description={description}
-            noindex={noindex}
-            nofollow={nofollow}
-            canonical={canonicalUrl || Astro.url.href}
-            openGraph={{
-                basic: {
-                    title: title,
-                    type: "website",
-                    image: "https://cuza.pages.dev/assets/img/site-img.webp",
-                    url: Astro.url.href,
+  <head>
+    <SEO
+      charset="UTF-8"
+      title={title}
+      description={description}
+      noindex={noindex}
+      nofollow={nofollow}
+      canonical={canonicalUrl || Astro.url.href}
+      openGraph={{
+        basic: {
+          title: title,
+          type: "website",
+          image: "https://cuza.pages.dev/assets/img/site-img.webp",
+          url: Astro.url.href,
+        },
+        optional: {
+          description: description,
+          locale: "ro_RO",
+          siteName: "Subiecte bac si admitere upb",
+        },
+        image: {
+          alt: "Subiecte bac si admitere upb",
+        },
+      }}
+      twitter={{
+        creator: "@DynoW",
+      }}
+      extend={{
+        link: [
+          {
+            rel: "preload",
+            href: "/assets/fonts/poppins-medium.woff2",
+            as: "font",
+            type: "font/woff2",
+            crossorigin: "anonymous",
+            fetchpriority: "high",
+          },
+          {
+            rel: "preload",
+            href: "/assets/fonts/inter-medium.woff2",
+            as: "font",
+            type: "font/woff2",
+            crossorigin: "anonymous",
+          },
+          {
+            rel: "apple-touch-icon",
+            type: "image/png",
+            sizes: "180x180",
+            href: "/assets/img/logo/atoms_180px.png",
+          },
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "16x16",
+            href: "/assets/img/logo/atoms_16px.png",
+          },
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "32x32",
+            href: "/assets/img/logo/atoms_32px.png",
+          },
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "180x180",
+            href: "/assets/img/logo/atoms_180px.png",
+          },
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "192x192",
+            href: "/assets/img/logo/atoms_192px.png",
+          },
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "512x512",
+            href: "/assets/img/logo/atoms_512px.png",
+          },
+          {
+            rel: "shortcut icon",
+            type: "image/png",
+            sizes: "32x32",
+            href: "/assets/img/logo/atoms_32px.png",
+          },
+          {
+            rel: "manifest",
+            href: "/manifest.webmanifest",
+          },
+          {
+            rel: "sitemap",
+            type: "application/xml",
+            href: "/sitemap-index.xml",
+          },
+          ...(markdown
+            ? [
+                {
+                  rel: "stylesheet",
+                  href: "/assets/css/github-markdown.css",
                 },
-                optional: {
-                    description: description,
-                    locale: "ro_RO",
-                    siteName: "Subiecte bac si admitere upb",
-                },
-                image: {
-                    alt: "Subiecte bac si admitere upb",
-                },
-            }}
-            twitter={{
-                creator: "@DynoW",
-            }}
-            extend={{
-                link: [
-                    {
-                        rel: "preload",
-                        href: "/assets/fonts/poppins-medium.woff2",
-                        as: "font",
-                        type: "font/woff2",
-                        crossorigin: "anonymous",
-                        fetchpriority: "high",
-                    },
-                    {
-                        rel: "preload",
-                        href: "/assets/fonts/inter-medium.woff2",
-                        as: "font",
-                        type: "font/woff2",
-                        crossorigin: "anonymous",
-                    },
-                    {
-                        rel: "apple-touch-icon",
-                        type: "image/png",
-                        sizes: "180x180",
-                        href: "/assets/img/logo/atoms_180px.png",
-                    },
-                    {
-                        rel: "icon",
-                        type: "image/png",
-                        sizes: "16x16",
-                        href: "/assets/img/logo/atoms_16px.png",
-                    },
-                    {
-                        rel: "icon",
-                        type: "image/png",
-                        sizes: "32x32",
-                        href: "/assets/img/logo/atoms_32px.png",
-                    },
-                    {
-                        rel: "icon",
-                        type: "image/png",
-                        sizes: "180x180",
-                        href: "/assets/img/logo/atoms_180px.png",
-                    },
-                    {
-                        rel: "icon",
-                        type: "image/png",
-                        sizes: "192x192",
-                        href: "/assets/img/logo/atoms_192px.png",
-                    },
-                    {
-                        rel: "icon",
-                        type: "image/png",
-                        sizes: "512x512",
-                        href: "/assets/img/logo/atoms_512px.png",
-                    },
-                    {
-                        rel: "shortcut icon",
-                        type: "image/png",
-                        sizes: "32x32",
-                        href: "/assets/img/logo/atoms_32px.png",
-                    },
-                    {
-                        rel: "manifest",
-                        href: "/manifest.webmanifest",
-                    },
-                    {
-                        rel: "sitemap",
-                        type: "application/xml",
-                        href: "/sitemap-index.xml",
-                    },
-                    ...(markdown
-                        ? [
-                              {
-                                  rel: "stylesheet",
-                                  href: "/assets/css/github-markdown.css",
-                              },
-                          ]
-                        : []),
-                    ...(Array.isArray(extendLink) ? extendLink : []),
-                ],
-                meta: [
-                    {
-                        name: "viewport",
-                        content:
-                            "width=device-width, initial-scale=1.0, shrink-to-fit=no",
-                    },
-                    {
-                        name: "keywords",
-                        content: keywords,
-                    },
-                    {
-                        name: "twitter:image",
-                        content:
-                            "https://cuza.pages.dev/assets/img/site-img.webp",
-                    },
-                    {
-                        name: "twitter:title",
-                        content: title,
-                    },
-                    {
-                        name: "twitter:description",
-                        content: description,
-                    },
-                    {
-                        name: "theme-color",
-                        content: "#0e1720",
-                    },
-                    ...(Array.isArray(extendMeta) ? extendMeta : []),
-                ],
-            }}
+              ]
+            : []),
+          ...(Array.isArray(extendLink) ? extendLink : []),
+        ],
+        meta: [
+          {
+            name: "viewport",
+            content: "width=device-width, initial-scale=1.0, shrink-to-fit=no",
+          },
+          {
+            name: "keywords",
+            content: keywords,
+          },
+          {
+            name: "twitter:image",
+            content: "https://cuza.pages.dev/assets/img/site-img.webp",
+          },
+          {
+            name: "twitter:title",
+            content: title,
+          },
+          {
+            name: "twitter:description",
+            content: description,
+          },
+          {
+            name: "theme-color",
+            content: "#0e1720",
+          },
+          ...(Array.isArray(extendMeta) ? extendMeta : []),
+        ],
+      }}
+    />
+    {
+      breadcrumbs && (
+        <script
+          type="application/ld+json"
+          set:html={JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: breadcrumbs.map((crumb, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              name: crumb.name,
+              item: crumb.url,
+            })),
+          })}
         />
-        {
-            breadcrumbs && (
-                <script
-                    type="application/ld+json"
-                    set:html={JSON.stringify({
-                        "@context": "https://schema.org",
-                        "@type": "BreadcrumbList",
-                        itemListElement: breadcrumbs.map((crumb, index) => ({
-                            "@type": "ListItem",
-                            position: index + 1,
-                            name: crumb.name,
-                            item: crumb.url,
-                        })),
-                    })}
-                />
-            )
-        }
-        {/* Excalidraw asset path */}
-        <script is:inline>
-            window.EXCALIDRAW_ASSET_PATH = "/assets";
-        </script>
+      )
+    }
+    {/* Excalidraw asset path */}
+    <script is:inline>
+      window.EXCALIDRAW_ASSET_PATH = "/assets";
+    </script>
 
-        {
-            import.meta.env.PROD === true ? (
-                <>
-                    {/* Umami tag */}
-                    <script
-                        defer
-                        src="https://analytics.my-lab.ro/script.js"
-                        data-website-id="afbd7bf4-d2a2-41f7-a401-5c7b73a3b42e"
-                    />
-                    {/* <!-- Google tag (gtag.js) --> */}
-                    {/* <script async src="https://www.googletagmanager.com/gtag/js?id=G-PS1EBGH4HS"></script>
+    {
+      import.meta.env.PROD === true ? (
+        <>
+          {/* Umami tag */}
+          <script
+            defer
+            src="https://analytics.my-lab.ro/script.js"
+            data-website-id="afbd7bf4-d2a2-41f7-a401-5c7b73a3b42e"
+          />
+          {/* <!-- Google tag (gtag.js) --> */}
+          {/* <script async src="https://www.googletagmanager.com/gtag/js?id=G-PS1EBGH4HS"></script>
                     <script is:inline>
                       window.dataLayer = window.dataLayer || [];
                       function gtag(){dataLayer.push(arguments);}
@@ -212,68 +210,70 @@ const {
                     
                       gtag('config', 'G-PS1EBGH4HS');
                     </script> */}
-                </>
-            ) : null
+        </>
+      ) : null
+    }
+  </head>
+  <body
+    class={`font-family-sans select-none overflow-x-hidden relative min-h-screen p-0${backgroundImage ? " backgroundImage" : ""}${bodyClass ? ` ${bodyClass}` : ""}`}
+  >
+    <slot />
+    <div class="fixed bottom-4 right-4">
+      <button
+        id="scrollToTop"
+        title="Du-te sus"
+        aria-label="Du-te sus"
+        type="button"
+        class="bg-white font-bold p-4 rounded-full transition ease-in-out hover:scale-105 duration-200 cursor-pointer"
+        style="display: none;"
+        onclick="scrollToTop()"
+      >
+        <UpArrow />
+      </button>
+      <script is:inline>
+        function scrollToTop() {
+          window.scrollTo({ top: 0, behavior: "smooth" });
         }
-    </head>
-    <body
-        class={`font-family-sans select-none overflow-x-hidden relative min-h-screen p-0${backgroundImage ? " backgroundImage" : ""}${bodyClass ? ` ${bodyClass}` : ""}`}
-    >
-        <slot />
-        <div class="fixed bottom-4 right-4">
-            <button
-                id="scrollToTop"
-                title="Du-te sus"
-                aria-label="Du-te sus"
-                type="button"
-                class="bg-white font-bold p-4 rounded-full transition ease-in-out hover:scale-105 duration-200"
-                onclick="scrollToTop()"
-            >
-                <UpArrow />
-            </button>
-            <script is:inline>
-                function scrollToTop() {
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                }
-                window.addEventListener("scroll", function () {
-                    const button = document.getElementById("scrollToTop");
-                    if (window.scrollY > 0) {
-                        button.style.display = "block";
-                    } else {
-                        button.style.display = "none";
-                    }
-                });
-                document.addEventListener("DOMContentLoaded", function () {
-                    const button = document.getElementById("scrollToTop");
-                    button.style.display = "none";
-                });
-            </script>
-        </div>
-        <script>
-            // Background update
-            const backgroundImageElement = document.querySelector(
-                ".backgroundImage",
-            ) as HTMLElement;
-            if (backgroundImageElement) {
-                const month = new Date().getMonth();
-                if (month === 11) {
-                    backgroundImageElement.style.background =
-                        'url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d,#cc3333)';
-                    backgroundImageElement.style.backgroundAttachment = "fixed";
-                }
-                if (month === 2 || month === 3) {
-                    backgroundImageElement.style.background =
-                        'url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2)';
-                    backgroundImageElement.style.backgroundAttachment = "fixed";
-                    const container = document.querySelector("body");
-                    if (container) {
-                        ["clouds", "bunny", "grass"].forEach((className) => {
-                            const element = document.createElement("div");
-                            element.className = className;
-                            container.appendChild(element);
-                        });
-                    }
-                }
-            }
-        </script>
+        window.addEventListener("scroll", function () {
+          const button = document.getElementById("scrollToTop");
+          if (window.scrollY > 0) {
+            button.style.display = "block";
+          } else {
+            button.style.display = "none";
+          }
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+          const button = document.getElementById("scrollToTop");
+          button.style.display = "none";
+        });
+      </script>
+    </div>
+    <script>
+      // Background update
+      const backgroundImageElement = document.querySelector(
+        ".backgroundImage"
+      ) as HTMLElement;
+      if (backgroundImageElement) {
+        const month = new Date().getMonth();
+        if (month === 11) {
+          backgroundImageElement.style.background =
+            'url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d,#cc3333)';
+          backgroundImageElement.style.backgroundAttachment = "fixed";
+        }
+        if (month === 2 || month === 3) {
+          backgroundImageElement.style.background =
+            'url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2)';
+          backgroundImageElement.style.backgroundAttachment = "fixed";
+          const container = document.querySelector("body");
+          if (container) {
+            ["clouds", "bunny", "grass"].forEach((className) => {
+              const element = document.createElement("div");
+              element.className = className;
+              container.appendChild(element);
+            });
+          }
+        }
+      }
+    </script>
+  </body>
 </html>

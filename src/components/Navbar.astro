@@ -10,586 +10,542 @@ const currentPath: string[] = pathname.replace(".html", "").split("/");
 const filesPath = path.join(process.cwd(), "files");
 
 // Read directories in the files path to get subjects
-const validSubjects = fs.existsSync(filesPath)
-    ? fs
-          .readdirSync(filesPath)
-          .filter((file) =>
-              fs.statSync(path.join(filesPath, file)).isDirectory(),
-          )
-    : ["fizica", "mate", "info", "romana", "admitere"]; // Fallback to defaults
+const validSubjects = fs
+  .readdirSync(filesPath)
+  .filter((file) => fs.statSync(path.join(filesPath, file)).isDirectory());
 
 // Define the navStructure type to avoid TypeScript errors
 interface NavStructure {
-    [key: string]: string[];
+  [key: string]: string[];
 }
 
 // Generate navigation structure dynamically
 const navStructure: NavStructure = {};
 
 validSubjects.forEach((subject) => {
-    const subjectPath = path.join(filesPath, subject);
+  let subjectPath;
 
-    // Read subdirectories to get pages
-    let subPages: string[] = [];
-    if (fs.existsSync(subjectPath)) {
-        subPages = fs.readdirSync(subjectPath).filter((file) => {
-            const filePath = path.join(subjectPath, file);
-            return fs.statSync(filePath).isDirectory() && file !== "altele";
-        });
-    } else {
-        // Fallback values based on subject
-        subPages =
-            subject === "admitere"
-                ? ["mate", "fizica", "info"]
-                : ["bac", "teste", "simulari", "variante"];
-    }
+  if (subject === "admitere") {
+    subjectPath = path.join(filesPath, subject);
+  } else {
+    subjectPath = path.join(filesPath, `${subject}/pages`);
+  }
 
-    navStructure[subject] = subPages;
+  // Read subdirectories to get pages
+  const subPages = fs.readdirSync(subjectPath).filter((file) => {
+    const filePath = path.join(subjectPath, file);
+    return fs.statSync(filePath).isDirectory();
+  });
+
+  navStructure[subject] = subPages;
 });
 
-// Ensure 'info' is in the navStructure even if not present in the filesystem
-if (!navStructure.info) {
-    navStructure.info = [];
-}
-// Ensure 'romana' is in the navStructure even if not present in the filesystem
-if (!navStructure.romana) {
-    navStructure.romana = [];
-}
+// // Ensure 'info' is in the navStructure even if not present in the filesystem
+// if (!navStructure.info) {
+//   navStructure.info = [];
+// }
+// // Ensure 'romana' is in the navStructure even if not present in the filesystem
+// if (!navStructure.romana) {
+//   navStructure.romana = [];
+// }
+
+navStructure.notite = ["info", "romana"];
 
 // Define the desired order of subjects
-const subjectOrder = ["fizica", "mate", "info", "romana", "admitere"];
+// const subjectOrder = ["fizica", "mate", "info", "romana", "admitere"];
 
 // Helper function to get display name for navigation items
 function getDisplayName(name: string): string {
-    switch (name) {
-        case "fizica":
-            return "Fizică";
-        case "mate":
-            return "Matematică";
-        case "info":
-            return "Informatică";
-        case "romana":
-            return "Română";
-        case "admitere":
-            return "Admitere";
-        case "teste":
-            return "Teste de antrenament";
-        case "simulari":
-            return "Simulări județene/locale";
-        case "variante":
-            return "100 Variante";
-        case "bac":
-            return "Bac";
-        default:
-            return name.charAt(0).toUpperCase() + name.slice(1);
-    }
+  switch (name) {
+    case "fizica":
+      return "Fizică";
+    case "mate":
+      return "Matematică";
+    case "info":
+      return "Informatică";
+    case "romana":
+      return "Română";
+    case "simulari-judetene":
+      return "Simulări județene/locale";
+    default:
+      return name.charAt(0).toUpperCase() + name.replace(/-/g, " ").slice(1);
+  }
 }
 
 // Helper function to get the URL for a nav item
 function getNavUrl(subject: string, page: string | null): string {
-    if (subject === "fizica" && !page) return "/";
-    if (!page) return `/${subject}`;
-    return `/${subject}/${page}`;
+  if (subject === "fizica" && !page) return "/";
+  if (!page) return `/${subject}`;
+  return `/${subject}/${page}`;
 }
 
 // Helper function to determine if a nav link is active
 function isActive(subject: string, page: string | null): boolean {
-    // Special case for home page
-    if (
-        subject === "fizica" &&
-        !page &&
-        (currentPath[1] === "" || currentPath[1] === "index")
-    ) {
-        return true;
-    }
+  // Special case for home page
+  if (
+    subject === "fizica" &&
+    !page &&
+    (currentPath[1] === "" || currentPath[1] === "index")
+  ) {
+    return true;
+  }
 
-    // Check if we're on the subject's section with the exact page
-    if (currentPath[1] === subject) {
-        // For main subject links with no specific page
-        if (!page && !currentPath[2]) return true;
+  // Check if we're on the subject's section with the exact page
+  if (currentPath[1] === subject) {
+    // For main subject links with no specific page
+    if (!page && !currentPath[2]) return true;
 
-        // For specific page links - only highlight the exact match
-        if (page && currentPath[2] === page) return true;
-    }
+    // For specific page links - only highlight the exact match
+    if (page && currentPath[2] === page) return true;
+  }
 
-    return false;
+  return false;
 }
 
 // Helper function to check if a subject item should be highlighted (for dropdowns)
 function isSubjectActive(subject: string): boolean {
-    // Special case for home page - treat as 'fizica'
-    if (
-        (currentPath[1] === "" || currentPath[1] === "index") &&
-        subject === "fizica"
-    ) {
-        return true;
-    }
-    return currentPath[1] === subject;
+  // Special case for home page - treat as 'fizica'
+  if (
+    (currentPath[1] === "" || currentPath[1] === "index") &&
+    subject === "fizica"
+  ) {
+    return true;
+  }
+  return currentPath[1] === subject;
 }
 
 // Determine which subjects should have dropdown menus
 function shouldHaveDropdown(subject: string): boolean {
-    // info should not have a hover menu
-    if (subject === "info") return false;
-    // romana should not have a hover menu
-    if (subject === "romana") return false;
+  // info should not have a hover menu
+  // if (subject === "info") return false;
+  // romana should not have a hover menu
+  // if (subject === "romana") return false;
 
-    // Only show dropdown if the subject has pages
-    return navStructure[subject] && navStructure[subject].length > 0;
+  // Only show dropdown if the subject has pages
+  return navStructure[subject] && navStructure[subject].length > 0;
 }
-
-// Sort the navStructure entries according to our desired order
-const sortedNavEntries = Object.entries(navStructure).sort((a, b) => {
-    const indexA = subjectOrder.indexOf(a[0]);
-    const indexB = subjectOrder.indexOf(b[0]);
-    return indexA - indexB;
-});
 ---
 
-<section class="text-center flex flex-col items-center py-6">
+<>
+  <section class="text-center flex flex-col items-center py-6">
     <div
-        class="container bg-[rgba(10,13,16,.9)] rounded-3xl py-5 max-w-(--breakpoint-lg)"
+      class="container bg-[rgba(10,13,16,.9)] rounded-3xl py-5 max-w-(--breakpoint-lg)"
     >
-        <div class="row mx-3">
-            <div class="md:basis-1/2 xl:basis-1/3 text-left">
-                <div class="row">
-                    <div class="col">
-                        <div class="flex">
-                            <div class="me-3">
-                                <a
-                                    href="https://analytics.my-lab.ro/share/l2n3pDhX5KJiyuAp/cuza.pages.dev"
-                                    class="focus:outline-hidden"
-                                >
-                                    <span class="min-w-min hover:scale-125 hover:rotate-6 duration-300">
-                                        <img
-                                            src="/assets/img/logo/atom-w.svg"
-                                            width="32"
-                                            height="35.03"
-                                            alt="logo"
-                                        />
-                                    </span>
-                                </a>
-                            </div>
-                            <div class="">
-                                <a
-                                    class="text-white hover:text-white no-underline flex align-items-center"
-                                    href="https://github.com/DynoW/cuza.pages.dev"
-                                >
-                                    <h1
-                                        id="page-title"
-                                        class="relative container text-3xl italic font-bold m-0!"
-                                    >
-                                        <script>
-                                            document.addEventListener(
-                                                "DOMContentLoaded",
-                                                () => {
-                                                    if (
-                                                        new Date().getMonth() ===
-                                                        11
-                                                    ) {
-                                                        const logoContainer =
-                                                            document.getElementById(
-                                                                "page-title",
-                                                            );
-                                                        if (logoContainer) {
-                                                            const img =
-                                                                document.createElement(
-                                                                    "img",
-                                                                );
-                                                            img.src =
-                                                                "/assets/img/logo/sapca.png";
-                                                            img.width = 32;
-                                                            img.height = 35.03;
-                                                            img.alt = "sapca";
-                                                            img.classList.add(
-                                                                "absolute",
-                                                                "-top-[10px]",
-                                                                "left-[6px]",
-                                                            );
-                                                            logoContainer.insertBefore(
-                                                                img,
-                                                                logoContainer.firstChild,
-                                                            );
-                                                        }
-                                                    }
-                                                },
-                                            );
-                                        </script>
-                                        Cuza<span class="text-lg">.</span
-                                        >Pages<span class="text-lg">.dev</span>
-                                    </h1>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col p-0!">
-                                <h2 class="text-blue-300 text-xs mb-2">
-                                    Subiecte de bac din anii anteriori la fizică
-                                    și matematică pentru liceeni si profesori.
-                                </h2>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col my-2!">
-                <nav>
-                    <ul
-                        class="flex flex-wrap pl-0! mb-0! list-none border-none mx-auto lg:justify-end"
+      <div class="row mx-3">
+        <div class="md:basis-1/2 xl:basis-1/3 text-left">
+          <div class="row">
+            <div class="col">
+              <div class="flex">
+                <div class="me-3">
+                  <a
+                    href="https://analytics.my-lab.ro/share/l2n3pDhX5KJiyuAp/cuza.pages.dev"
+                    class="focus:outline-hidden"
+                  >
+                    <span
+                      class="min-w-min hover:scale-125 hover:rotate-6 duration-300"
                     >
-                        {
-                            sortedNavEntries.map(([subject, pages]) => (
-                                <li class="px-2 py-1 xl:px-4 xl:py-2 dropdown-container">
-                                    {shouldHaveDropdown(subject) ? (
-                                        <>
-                                            <button
-                                                type="button"
-                                                aria-expanded="false"
-                                                aria-haspopup="true"
-                                                aria-controls={`dropdown-${subject}`}
-                                                class={
-                                                    isSubjectActive(subject)
-                                                        ? "text-lg font-bold hover:text-lime-400 text-lime-400 dropdown-trigger"
-                                                        : "text-lg font-bold hover:text-lime-400 text-blue-500 dropdown-trigger"
-                                                }
-                                            >
-                                                {getDisplayName(subject)}
-                                            </button>
-                                            <div class="dropdown-content" id={`dropdown-${subject}`}>
-                                                {/* For Fizica, the main link is special (points to /) */}
-                                                {subject === "fizica" && (
-                                                    <a
-                                                        class={
-                                                            isActive(
-                                                                subject,
-                                                                null,
-                                                            )
-                                                                ? "text-lg font-bold hover:text-lime-400 text-lime-400"
-                                                                : "text-lg font-bold hover:text-lime-400 text-blue-500"
-                                                        }
-                                                        rel="prefetch"
-                                                        href="/"
-                                                    >
-                                                        Bac
-                                                    </a>
-                                                )}
-                                                {/* For other subjects with no page (except admitere), it points to /subject */}
-                                                {subject !== "fizica" &&
-                                                    subject !== "admitere" && (
-                                                        <a
-                                                            class={
-                                                                isActive(
-                                                                    subject,
-                                                                    null,
-                                                                )
-                                                                    ? "text-lg font-bold hover:text-lime-400 text-lime-400"
-                                                                    : "text-lg font-bold hover:text-lime-400 text-blue-500"
-                                                            }
-                                                            rel="prefetch"
-                                                            href={`/${subject}`}
-                                                        >
-                                                            Bac
-                                                        </a>
-                                                    )}
-                                                {/* Render subpages except 'bac' which we handled above for non-admitere subjects */}
-                                                {subject !== "admitere"
-                                                    ? pages
-                                                          .filter(
-                                                              (page: string) =>
-                                                                  page !==
-                                                                  "bac",
-                                                          )
-                                                          .map(
-                                                              (
-                                                                  page: string,
-                                                              ) => (
-                                                                  <a
-                                                                      class={
-                                                                          isActive(
-                                                                              subject,
-                                                                              page,
-                                                                          )
-                                                                              ? "text-lg font-bold hover:text-lime-400 text-lime-400"
-                                                                              : "text-lg font-bold hover:text-lime-400 text-blue-500"
-                                                                      }
-                                                                      rel="prefetch"
-                                                                      href={getNavUrl(
-                                                                          subject,
-                                                                          page,
-                                                                      )}
-                                                                  >
-                                                                      {getDisplayName(
-                                                                          page,
-                                                                      )}
-                                                                  </a>
-                                                              ),
-                                                          )
-                                                    : pages.map(
-                                                          (page: string) => (
-                                                              <a
-                                                                  class={
-                                                                      isActive(
-                                                                          subject,
-                                                                          page,
-                                                                      )
-                                                                          ? "text-lg font-bold hover:text-lime-400 text-lime-400"
-                                                                          : "text-lg font-bold hover:text-lime-400 text-blue-500"
-                                                                  }
-                                                                  rel="prefetch"
-                                                                  href={getNavUrl(
-                                                                      subject,
-                                                                      page,
-                                                                  )}
-                                                              >
-                                                                  {getDisplayName(
-                                                                      page,
-                                                                  )}
-                                                              </a>
-                                                          ),
-                                                      )}
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <a
-                                            class={
-                                                isActive(subject, null)
-                                                    ? "text-lg font-bold hover:text-lime-400 text-lime-400"
-                                                    : "text-lg font-bold hover:text-lime-400 text-blue-500"
-                                            }
-                                            rel="prefetch"
-                                            href={`/${subject}`}
-                                        >
-                                            {getDisplayName(subject)}
-                                        </a>
-                                    )}
-                                </li>
-                            ))
-                        }
-                    </ul>
-                </nav>
+                      <img
+                        src="/assets/img/logo/atom-w.svg"
+                        width="32"
+                        height="35.03"
+                        alt="logo"
+                      />
+                    </span>
+                  </a>
+                </div>
+                <div class="">
+                  <a
+                    class="text-white hover:text-white no-underline flex align-items-center"
+                    href="https://github.com/DynoW/cuza.pages.dev"
+                  >
+                    <h1
+                      id="page-title"
+                      class="relative container text-3xl italic font-bold m-0!"
+                    >
+                      <script>
+                        document.addEventListener("DOMContentLoaded", () => {
+                          if (new Date().getMonth() === 11) {
+                            const logoContainer =
+                              document.getElementById("page-title");
+                            if (logoContainer) {
+                              const img = document.createElement("img");
+                              img.src = "/assets/img/logo/sapca.png";
+                              img.width = 32;
+                              img.height = 35.03;
+                              img.alt = "sapca";
+                              img.classList.add(
+                                "absolute",
+                                "-top-[10px]",
+                                "left-[6px]"
+                              );
+                              logoContainer.insertBefore(
+                                img,
+                                logoContainer.firstChild
+                              );
+                            }
+                          }
+                        });
+                      </script>
+                      Cuza<span class="text-lg">.</span>Pages<span
+                        class="text-lg">.dev</span
+                      >
+                    </h1>
+                  </a>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col p-0!">
+                  <h2 class="text-blue-300 text-xs mb-2">
+                    Subiecte de bac din anii anteriori la fizică și matematică
+                    pentru liceeni si profesori.
+                  </h2>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
-        <div class="row">
-            <div id="container-banner" class="col mb-[6px]">
-                <img
-                    alt="banner"
-                    src="/assets/img/banner/fizica.webp"
-                    class="max-h-32 object-cover w-full"
-                    height="160"
-                    width="800"
-                />
-            </div>
+        <div class="col my-2!">
+          <nav>
+            <ul
+              class="flex flex-wrap pl-0! mb-0! list-none border-none mx-auto lg:justify-end"
+            >
+              {
+                Object.entries(navStructure).map(
+                  ([subject, pages]: [string, string[]]) => (
+                    <li class="px-2 py-1 xl:px-4 xl:py-2 dropdown-container">
+                      {shouldHaveDropdown(subject) ? (
+                        <>
+                          <button
+                            type="button"
+                            aria-expanded="false"
+                            aria-haspopup="true"
+                            aria-controls={`dropdown-${subject}`}
+                            class={
+                              isSubjectActive(subject)
+                                ? "text-lg font-bold hover:text-lime-400 text-lime-400 dropdown-trigger"
+                                : "text-lg font-bold hover:text-lime-400 text-blue-500 dropdown-trigger"
+                            }
+                          >
+                            {getDisplayName(subject)}
+                          </button>
+                          <div
+                            class="dropdown-content"
+                            id={`dropdown-${subject}`}
+                          >
+                            {/* For Fizica, the main link is special (points to /) */}
+                            {subject === "fizica" && (
+                              <a
+                                class={
+                                  isActive(subject, null)
+                                    ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                    : "text-lg font-bold hover:text-lime-400 text-blue-500"
+                                }
+                                rel="prefetch"
+                                href="/"
+                              >
+                                Bac
+                              </a>
+                            )}
+                            {/* For other subjects with no page (except admitere), it points to /subject */}
+                            {subject !== "fizica" &&
+                              subject !== "admitere" &&
+                              subject !== "notite" && (
+                                <a
+                                  class={
+                                    isActive(subject, null)
+                                      ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                      : "text-lg font-bold hover:text-lime-400 text-blue-500"
+                                  }
+                                  rel="prefetch"
+                                  href={`/${subject}`}
+                                >
+                                  Bac
+                                </a>
+                              )}
+                            {/* Render subpages except 'bac' which we handled above for non-admitere subjects */}
+                            {pages
+                              .filter((page: string) => page !== "bac")
+                              .map((page: string) => (
+                                <a
+                                  class={
+                                    isActive(subject, page)
+                                      ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                                      : "text-lg font-bold hover:text-lime-400 text-blue-500"
+                                  }
+                                  rel="prefetch"
+                                  href={getNavUrl(subject, page)}
+                                >
+                                  {getDisplayName(page)}
+                                </a>
+                              ))}
+                          </div>
+                        </>
+                      ) : (
+                        <a
+                          class={
+                            isActive(subject, null)
+                              ? "text-lg font-bold hover:text-lime-400 text-lime-400"
+                              : "text-lg font-bold hover:text-lime-400 text-blue-500"
+                          }
+                          rel="prefetch"
+                          href={`/${subject}`}
+                        >
+                          {getDisplayName(subject)}
+                        </a>
+                      )}
+                    </li>
+                  )
+                )
+              }
+            </ul>
+          </nav>
         </div>
+      </div>
+      <div class="row">
+        <div id="container-banner" class="col mb-[6px]">
+          <img
+            alt="banner"
+            src="/assets/img/banner/fizica.webp"
+            class="max-h-32 object-cover w-full"
+            height="160"
+            width="800"
+          />
+        </div>
+      </div>
     </div>
-</section>
+  </section>
 
-<style>
+  <style>
     /* Improved dropdown positioning */
     .dropdown-container {
-        position: relative;
+      position: relative;
     }
 
     .dropdown-trigger {
-        cursor: pointer;
+      cursor: pointer;
     }
 
     .dropdown-content {
-        position: absolute;
-        left: 0;
-        display: none;
-        flex-direction: column;
-        min-width: 200px;
-        background-color: #1e293b;
-        border-radius: 0.5rem;
-        overflow: hidden;
-        padding: 0.5rem 0;
-        margin-top: 0.5rem;
-        box-shadow:
-            0 10px 15px -3px rgba(0, 0, 0, 0.1),
-            0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        z-index: 50;
+      position: absolute;
+      left: 0;
+      display: none;
+      flex-direction: column;
+      min-width: 200px;
+      background-color: #1e293b;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      padding: 0.5rem 0;
+      margin-top: 0.5rem;
+      box-shadow:
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      z-index: 50;
     }
 
     .dropdown-content a {
-        padding: 0.5rem 1rem;
-        white-space: nowrap;
-        display: block;
-        text-align: left;
+      padding: 0.5rem 1rem;
+      white-space: nowrap;
+      display: block;
+      text-align: left;
     }
 
     /* Show dropdown on hover for non-touch devices */
     @media (hover: hover) {
-        .dropdown-container:hover .dropdown-content {
-            display: flex;
-        }
+      .dropdown-container:hover .dropdown-content {
+        display: flex;
+      }
     }
 
     /* Dropdown positioning for different screen sizes */
     @media (min-width: 768px) {
-        .dropdown-content {
-            left: 50%;
-            transform: translateX(-50%);
-        }
+      .dropdown-content {
+        left: 50%;
+        transform: translateX(-50%);
+      }
     }
 
     /* Prevent dropdowns from going off-screen on mobile */
     @media (max-width: 767px) {
-        .dropdown-container {
-            position: static;
-        }
+      .dropdown-container {
+        position: static;
+      }
 
-        .dropdown-content {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 300px;
-        }
+      .dropdown-content {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 300px;
+      }
     }
-</style>
+  </style>
 
-<script>
+  <script>
     // Add keyboard and touch support for accessible navigation
     document.addEventListener("DOMContentLoaded", () => {
-    const dropdownTriggers = document.querySelectorAll("button.dropdown-trigger");
+      const dropdownTriggers = document.querySelectorAll(
+        "button.dropdown-trigger"
+      );
 
-        dropdownTriggers.forEach((trigger) => {
-            // Handle click events
-            trigger.addEventListener("click", (e) => handleDropdownToggle(e, trigger));
-            
-            // Handle keyboard events for accessibility
-            trigger.addEventListener("keydown", (e: Event) => {
-                const keyEvent = e as KeyboardEvent;
-                if (keyEvent.key === "Enter" || keyEvent.key === " " || keyEvent.key === "Space") {
-                    e.preventDefault();
-                    handleDropdownToggle(e, trigger);
-                }
-                
-                // Close on Escape key
-                if (keyEvent.key === "Escape") {
-                    const container = trigger.closest(".dropdown-container");
-                    if (!container) return;
-                    
-                    const content = container.querySelector(".dropdown-content") as HTMLElement | null;
-                    if (!content) return;
-                    
-                    closeDropdown(content);
-                    (trigger as HTMLElement).focus(); // Cast to HTMLElement for focus
-                }
-            });
-        });
+      dropdownTriggers.forEach((trigger) => {
+        // Handle click events
+        trigger.addEventListener("click", (e) =>
+          handleDropdownToggle(e, trigger)
+        );
 
-        // Helper function to handle dropdown toggling
-        function handleDropdownToggle(e: Event, trigger: Element) {
+        // Handle keyboard events for accessibility
+        trigger.addEventListener("keydown", (e: Event) => {
+          const keyEvent = e as KeyboardEvent;
+          if (
+            keyEvent.key === "Enter" ||
+            keyEvent.key === " " ||
+            keyEvent.key === "Space"
+          ) {
             e.preventDefault();
+            handleDropdownToggle(e, trigger);
+          }
+
+          // Close on Escape key
+          if (keyEvent.key === "Escape") {
             const container = trigger.closest(".dropdown-container");
             if (!container) return;
 
-            const content = container.querySelector(".dropdown-content") as HTMLElement | null;
+            const content = container.querySelector(
+              ".dropdown-content"
+            ) as HTMLElement | null;
             if (!content) return;
 
-            // Close all other dropdowns
-            document.querySelectorAll(".dropdown-content.active").forEach((dropdown) => {
-                if (dropdown !== content && dropdown instanceof HTMLElement) {
-                    closeDropdown(dropdown);
-                }
-            });
-
-            // Toggle current dropdown
-            if (content.classList.contains("active")) {
-                closeDropdown(content);
-            } else {
-                openDropdown(content, trigger);
-            }
-        }
-        
-        // Helper function to open dropdown
-        function openDropdown(content: HTMLElement, trigger: Element) {
-            content.classList.add("active");
-            content.style.display = "flex";
-            
-            // Update ARIA attributes
-            if (trigger instanceof HTMLElement) {
-                trigger.setAttribute("aria-expanded", "true");
-            }
-            
-            // Ensure dropdown is within viewport
-            const rect = content.getBoundingClientRect();
-            const viewportWidth = window.innerWidth;
-
-            if (rect.right > viewportWidth) {
-                content.style.left = "auto";
-                content.style.right = "0";
-                content.style.transform = "none";
-            }
-
-            if (rect.left < 0) {
-                content.style.left = "0";
-                content.style.right = "auto";
-                content.style.transform = "none";
-            }
-            
-            // Add keyboard navigation within dropdown
-            setupDropdownNavigation(content);
-        }
-        
-        // Helper function to close dropdown
-        function closeDropdown(content: HTMLElement) {
-            content.classList.remove("active");
-            content.style.display = "none";
-            
-            // Update ARIA attributes
-            const container = content.closest(".dropdown-container");
-            if (container) {
-                const trigger = container.querySelector("[aria-haspopup]");
-                if (trigger instanceof HTMLElement) {
-                    trigger.setAttribute("aria-expanded", "false");
-                }
-            }
-        }
-        
-        // Setup keyboard navigation within dropdown
-        function setupDropdownNavigation(dropdown: HTMLElement) {
-            const focusableElements = dropdown.querySelectorAll('a, button') as NodeListOf<HTMLElement>;
-            if (focusableElements.length === 0) return;
-            
-            // Enable arrow key navigation between items
-            focusableElements.forEach((el, index) => {
-                el.addEventListener('keydown', (e: Event) => {
-                    const keyEvent = e as KeyboardEvent;
-                    if (keyEvent.key === "ArrowDown") {
-                        e.preventDefault();
-                        const nextIndex = (index + 1) % focusableElements.length;
-                        focusableElements[nextIndex].focus();
-                    } else if (keyEvent.key === "ArrowUp") {
-                        e.preventDefault();
-                        const prevIndex = (index - 1 + focusableElements.length) % focusableElements.length;
-                        focusableElements[prevIndex].focus();
-                    } else if (keyEvent.key === "Escape") {
-                        e.preventDefault();
-                        closeDropdown(dropdown);
-                        const container = dropdown.closest(".dropdown-container");
-                        if (container) {
-                            const trigger = container.querySelector(".dropdown-trigger");
-                            if (trigger instanceof HTMLElement) trigger.focus();
-                        }
-                    }
-                });
-            });
-        }
-
-        // Close dropdowns when clicking outside
-        document.addEventListener("click", (event) => {
-            const e = event as Event;
-            const target = e.target;
-
-            if (!(target instanceof Element) || !target.closest(".dropdown-container")) {
-                document.querySelectorAll(".dropdown-content.active").forEach((dropdown) => {
-                    if (dropdown instanceof HTMLElement) {
-                        closeDropdown(dropdown);
-                    }
-                });
-            }
+            closeDropdown(content);
+            (trigger as HTMLElement).focus(); // Cast to HTMLElement for focus
+          }
         });
+      });
+
+      // Helper function to handle dropdown toggling
+      function handleDropdownToggle(e: Event, trigger: Element) {
+        e.preventDefault();
+        const container = trigger.closest(".dropdown-container");
+        if (!container) return;
+
+        const content = container.querySelector(
+          ".dropdown-content"
+        ) as HTMLElement | null;
+        if (!content) return;
+
+        // Close all other dropdowns
+        document
+          .querySelectorAll(".dropdown-content.active")
+          .forEach((dropdown) => {
+            if (dropdown !== content && dropdown instanceof HTMLElement) {
+              closeDropdown(dropdown);
+            }
+          });
+
+        // Toggle current dropdown
+        if (content.classList.contains("active")) {
+          closeDropdown(content);
+        } else {
+          openDropdown(content, trigger);
+        }
+      }
+
+      // Helper function to open dropdown
+      function openDropdown(content: HTMLElement, trigger: Element) {
+        content.classList.add("active");
+        content.style.display = "flex";
+
+        // Update ARIA attributes
+        if (trigger instanceof HTMLElement) {
+          trigger.setAttribute("aria-expanded", "true");
+        }
+
+        // Ensure dropdown is within viewport
+        const rect = content.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+
+        if (rect.right > viewportWidth) {
+          content.style.left = "auto";
+          content.style.right = "0";
+          content.style.transform = "none";
+        }
+
+        if (rect.left < 0) {
+          content.style.left = "0";
+          content.style.right = "auto";
+          content.style.transform = "none";
+        }
+
+        // Add keyboard navigation within dropdown
+        setupDropdownNavigation(content);
+      }
+
+      // Helper function to close dropdown
+      function closeDropdown(content: HTMLElement) {
+        content.classList.remove("active");
+        content.style.display = "none";
+
+        // Update ARIA attributes
+        const container = content.closest(".dropdown-container");
+        if (container) {
+          const trigger = container.querySelector("[aria-haspopup]");
+          if (trigger instanceof HTMLElement) {
+            trigger.setAttribute("aria-expanded", "false");
+          }
+        }
+      }
+
+      // Setup keyboard navigation within dropdown
+      function setupDropdownNavigation(dropdown: HTMLElement) {
+        const focusableElements = dropdown.querySelectorAll(
+          "a, button"
+        ) as NodeListOf<HTMLElement>;
+        if (focusableElements.length === 0) return;
+
+        // Enable arrow key navigation between items
+        focusableElements.forEach((el, index) => {
+          el.addEventListener("keydown", (e: Event) => {
+            const keyEvent = e as KeyboardEvent;
+            if (keyEvent.key === "ArrowDown") {
+              e.preventDefault();
+              const nextIndex = (index + 1) % focusableElements.length;
+              focusableElements[nextIndex].focus();
+            } else if (keyEvent.key === "ArrowUp") {
+              e.preventDefault();
+              const prevIndex =
+                (index - 1 + focusableElements.length) %
+                focusableElements.length;
+              focusableElements[prevIndex].focus();
+            } else if (keyEvent.key === "Escape") {
+              e.preventDefault();
+              closeDropdown(dropdown);
+              const container = dropdown.closest(".dropdown-container");
+              if (container) {
+                const trigger = container.querySelector(".dropdown-trigger");
+                if (trigger instanceof HTMLElement) trigger.focus();
+              }
+            }
+          });
+        });
+      }
+
+      // Close dropdowns when clicking outside
+      document.addEventListener("click", (event) => {
+        const e = event as Event;
+        const target = e.target;
+
+        if (
+          !(target instanceof Element) ||
+          !target.closest(".dropdown-container")
+        ) {
+          document
+            .querySelectorAll(".dropdown-content.active")
+            .forEach((dropdown) => {
+              if (dropdown instanceof HTMLElement) {
+                closeDropdown(dropdown);
+              }
+            });
+        }
+      });
     });
-</script>
+  </script>
+</>

@@ -2,13 +2,13 @@
   "name": "cuza-worker",
   "version": "0.0.0",
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250831.0",
-    "@types/node": "^22.18.0",
+    "@cloudflare/workers-types": "^4.20250904.0",
+    "@types/node": "^24.3.0",
     "typescript": "^5.9.2",
-    "wrangler": "3.86.1"
+    "wrangler": "4.33.2"
   },
   "private": true,
   "dependencies": {
-    "@octokit/rest": "^21.1.1"
+    "@octokit/rest": "^22.0.0"
   }
 }

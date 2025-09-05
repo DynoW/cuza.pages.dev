@@ -1,0 +1,29 @@
+---
+interface Props {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+const { days, hours, minutes, seconds } = Astro.props;
+---
+
+<div class="flex gap-2 text-center">
+  <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 flex-1 min-w-0">
+    <span id="days">{days.toString()}</span>
+    <span class="text-xs block text-center">Zile</span>
+  </div>
+  <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 flex-1 min-w-0">
+    <span id="hours">{hours < 10 ? `0${hours}` : hours}</span>
+    <span class="text-xs block text-center">Ore</span>
+  </div>
+  <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 flex-1 min-w-0">
+    <span id="minutes">{minutes < 10 ? `0${minutes}` : minutes}</span>
+    <span class="text-xs block text-center">Minute</span>
+  </div>
+  <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 flex-1 min-w-0">
+    <span id="seconds">{seconds < 10 ? `0${seconds}` : seconds}</span>
+    <span class="text-xs block text-center">Secunde</span>
+  </div>
+</div>

@@ -1,52 +1,31 @@
 ---
 // Add props to customize shortcuts for each page
 interface Props {
-  subject?: string;
-  page?: string;
+  subject: string;
+  page: string;
 }
+
+import { apiService } from '../utils/api';
 
 const { subject, page } = Astro.props;
 
-// Get all PDF files in the file structure
-const data = await import.meta.glob("/files/**/*.pdf");
+// Fetch years from the API using the efficient years-only endpoint
+let availableYears: number[] = [];
+let apiError: string | null = null;
 
-// Extract years from the file paths that match current subject and page
-const extractYears = () => {
-  const years: Set<number> = new Set();
-  
-  for (const file in data) {
-    // Filter by subject and page if provided
-    if (subject && !file.includes(`/files/${subject}/`)) {
-      continue;
-    }
-    
-    if (page && !file.includes(`/${page}/`) && page !== 'bac') {
-      continue;
-    }
-
-    // Find years in the path (4 digit numbers that might be years)
-    const yearMatches = file.match(/\/20\d{2}\//g);
-    if (yearMatches) {
-      yearMatches.forEach(match => {
-        // Extract just the year (4 digits) and convert to number
-        const year = parseInt(match.replace(/\//g, ''), 10);
-        years.add(year);
-      });
-    }
-  }
-  
-  // Return years in descending order
-  return Array.from(years).sort((a, b) => b - a);
-};
-
-const availableYears = extractYears();
+try {
+  availableYears = await apiService.getYears(subject, page);
+} catch (error) {
+  apiError = `Failed to fetch years: ${error instanceof Error ? error.message : String(error)}`;
+  console.warn("API fetch failed for shortcuts:", error);
+}
 
 // Function to determine the URL for a year shortcut
 function getShortcutUrl(year: number) {
   // Special case: if subject is fizica, page is bac, and year is 2007, link to /fizica/variante
-  if (subject === 'fizica' && (page === 'bac' || !page) && year === 2007) {
-    return '/fizica/variante';
-  }
+  // if (subject === 'fizica' && (page === 'bac' || !page) && year === 2007) {
+  //   return '/fizica/variante';
+  // }
   
   // Default behavior: link to anchor tag for the year
   return `#${year}`;
@@ -56,19 +35,35 @@ function getShortcutUrl(year: number) {
 <div class="shortcuts-container">
   <span class="text-lg font-bold text-white mb-2">Accesare rapidă</span>
   
-  <div class="shortcuts-grid">
-    {availableYears.map((year) => (
-      <a 
-        href={getShortcutUrl(year)}
-        class="shortcut-button"
-        title={year === 2007 && subject === 'fizica' && (page === 'bac' || !page) 
-          ? 'Salt la variante' 
-          : `Salt la documentele din ${year}`}
-      >
-        {year}
-      </a>
-    ))}
-  </div>
+  {
+    apiError && (
+      <div class="text-xs text-red-400 mb-2">
+        Nu s-au putut încărca scurtăturile
+      </div>
+    )
+  }
+  
+  {
+    availableYears.length > 0 ? (
+      <div class="shortcuts-grid">
+        {availableYears.map((year) => (
+          <a 
+            href={getShortcutUrl(year)}
+            class="shortcut-button"
+            title={`Salt la documentele din ${year}`}
+          >
+            {year}
+          </a>
+        ))}
+      </div>
+    ) : (
+      !apiError && (
+        <div class="text-xs text-slate-400">
+          Niciun an disponibil
+        </div>
+      )
+    )
+  }
 </div>
 
 <style>

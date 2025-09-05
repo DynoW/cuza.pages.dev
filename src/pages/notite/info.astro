@@ -1,0 +1,67 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Navbar from "../../components/Navbar.astro";
+import Footer from "../../components/Footer.astro";
+import MainContainer from "../../layouts/MainContainer.astro";
+import Curs from "../../components/Curs.astro";
+const courses = import.meta.glob("../../content/info/*.md");
+---
+
+<Layout title="informatica | cuza.pages.dev">
+  <Navbar>
+    <Navbar />
+  </Navbar>
+  <MainContainer>
+    <div class="bg-[rgba(10,13,16,.9)] rounded-3xl p-5 mb-2.5 w-full basis-1/4">
+      <span class="text-lg text-white">Linkuri utile:</span>
+      <ul class="extra-list">
+        <li class="extra-link">
+          <a href="https://www.w3schools.com/cpp/default.asp">Learn C++</a>
+        </li>
+        <li class="extra-link">
+          <a href="https://onecompiler.com/cpp">OneCompiler</a>
+        </li>
+        <li class="text-slate-400 hover:text-slate-300">
+          <a href="https://www.pbinfo.ro/articole/16/subiecte-bacalaureat"
+            >&gt; Varinate bac (pbinfo)</a
+          >
+        </li>
+        <li class="text-slate-400 hover:text-slate-300">
+          <a href="https://www.pbinfo.ro/">&gt; Probleme bac (pbinfo)</a>
+        </li>
+      </ul>
+    </div>
+    <div class="flex grow shrink"></div>
+    <div class="basis-4/6 text-white">
+      <h1 class="bg-[#0d1117] rounded-3xl p-5 pr-4 mb-1">
+        Notițe din liceu (2022-2025) by Daniel: <a
+          href="https://github.com/DynoW/CS-files-storage"
+          target="_blank"
+          class="text-blue-500 hover:text-blue-400">Github</a
+        >
+        <span class="text-sm text-slate-400"
+          >(caută fisiere .md sau .excalidraw <a
+            href="https://github.com/search?q=repo%3ADynoW%2FCS-files-storage+%28.md+OR+.excalidraw+NOT+README.md+NOT+C%23%29&type=code"
+            target="_blank"
+            class="text-slate-300 hover:text-slate-100">aici</a
+          >)</span>
+      </h1>
+      <ul>
+        {
+          Object.keys(courses).map((path) => {
+            // Extract filename without extension from the path
+            // path will be something like "../../content/info/curs-1.md"
+            const filename = path.split('/').pop()?.replace('.md', '') || '';
+            
+            return (
+              <li class="bg-[#0d1117] rounded-3xl p-5 pr-4 mb-2 max-w-[95vw] select-text">
+                <Curs curs={filename} />
+              </li>
+            );
+          })
+        }
+      </ul>
+    </div>
+  </MainContainer>
+  <Footer />
+</Layout>

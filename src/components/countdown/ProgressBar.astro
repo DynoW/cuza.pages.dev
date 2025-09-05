@@ -1,0 +1,17 @@
+---
+interface Props {
+  progress: number;
+}
+
+const { progress } = Astro.props;
+---
+
+<div class="w-full bg-[rgba(30,33,36,.9)] rounded-full h-5 mb-2">
+  <div
+    id="progress-bar"
+    class="bg-blue-600 h-5 rounded-full text-xs text-center leading-5 text-white transition-all duration-300"
+    style={`width: ${progress}%`}
+  >
+    {progress}%
+  </div>
+</div>

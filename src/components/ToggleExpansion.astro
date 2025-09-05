@@ -1,32 +1,32 @@
-<div class="mb-4 bg-slate-800 p-3 rounded-lg">
-    <div class="flex items-center justify-between flex-row gap-2 md:flex-col lg:flex-row lg:gap-0">
-        <span class="text-sm font-medium text-slate-300"
-            >Vizualizare dosare:</span
-        >
-        <div class="flex gap-2">
-            <button
-                id="collapse-all"
-                class="expansion-option text-xs px-2 py-1 rounded bg-slate-700"
-                title="Închide toate folderele"
-            >
-                Închise
-            </button>
-            <button
-                id="expand-years"
-                class="expansion-option text-xs px-2 py-1 rounded bg-slate-700"
-                title="Deschide doar folderele de ani"
-            >
-                Ani
-            </button>
-            <button
-                id="expand-all"
-                class="expansion-option text-xs px-2 py-1 rounded bg-slate-700"
-                title="Deschide toate folderele"
-            >
-                Toate
-            </button>
-        </div>
+<div class="bg-slate-800 p-3 rounded-lg">
+  <div
+    class="flex items-center justify-between flex-row gap-2 md:flex-col lg:flex-row lg:gap-0"
+  >
+    <span class="text-sm font-medium text-slate-300">Vizualizare dosare:</span>
+    <div class="flex gap-2">
+      <button
+        id="collapse-all"
+        class="expansion-option text-xs px-2 py-1 rounded bg-slate-700 cursor-pointer"
+        title="Închide toate folderele"
+      >
+        Închise
+      </button>
+      <button
+        id="expand-years"
+        class="expansion-option text-xs px-2 py-1 rounded bg-slate-700 cursor-pointer"
+        title="Deschide doar folderele de ani"
+      >
+        Ani
+      </button>
+      <button
+        id="expand-all"
+        class="expansion-option text-xs px-2 py-1 rounded bg-slate-700 cursor-pointer"
+        title="Deschide toate folderele"
+      >
+        Toate
+      </button>
     </div>
+  </div>
 </div>
 
 <style>
@@ -34,13 +34,13 @@
   .expansion-option:not(.active) {
     transition: all 0.2s ease;
   }
-  
+
   /* Hover styles only apply to non-active buttons */
   .expansion-option:not(.active):hover {
     background-color: #475569 !important; /* slate-600 */
     color: white !important;
   }
-  
+
   /* Active button style */
   .expansion-option.active {
     background-color: #2563eb !important; /* blue-600 */
@@ -49,71 +49,74 @@
 </style>
 
 <script>
-    // Client-side script to handle expansion preferences
-    document.addEventListener('DOMContentLoaded', () => {
-      // Define a type for expansion modes
-      type ExpansionMode = 'none' | 'years' | 'all';
-      
-      // Get buttons
-      const collapseAll = document.getElementById('collapse-all');
-      const expandYears = document.getElementById('expand-years');
-      const expandAll = document.getElementById('expand-all');
-      
-      // Get saved preference or default to 'years'
-      const savedMode = (localStorage.getItem('folderExpansionMode') || 'years') as ExpansionMode;
-      
-      // Set initial active state
-      updateActiveButton(savedMode);
-      
-      // Add click event listeners with null checks
-      if (collapseAll) {
-        collapseAll.addEventListener('click', () => setExpansionMode('none'));
+  // Client-side script to handle expansion preferences
+  document.addEventListener("DOMContentLoaded", () => {
+    // Define a type for expansion modes
+    type ExpansionMode = "none" | "years" | "all";
+
+    // Get buttons
+    const collapseAll = document.getElementById("collapse-all");
+    const expandYears = document.getElementById("expand-years");
+    const expandAll = document.getElementById("expand-all");
+
+    // Get saved preference or default to 'years'
+    const savedMode = (localStorage.getItem("folderExpansionMode") ||
+      "years") as ExpansionMode;
+
+    function updateActiveButton(mode: ExpansionMode): void {
+      // Remove active class from all buttons
+      document.querySelectorAll(".expansion-option").forEach((btn) => {
+        btn.classList.remove("active", "bg-blue-600", "text-white");
+        btn.classList.add("bg-slate-700");
+      });
+
+      // Add active class to selected button
+      let activeButton: HTMLElement | null = null;
+      switch (mode) {
+        case "none":
+          activeButton = collapseAll;
+          break;
+        case "years":
+          activeButton = expandYears;
+          break;
+        case "all":
+          activeButton = expandAll;
+          break;
       }
-      
-      if (expandYears) {
-        expandYears.addEventListener('click', () => setExpansionMode('years'));
+
+      if (activeButton) {
+        activeButton.classList.remove("bg-slate-700");
+        activeButton.classList.add("active", "bg-blue-600", "text-white");
       }
-      
-      if (expandAll) {
-        expandAll.addEventListener('click', () => setExpansionMode('all'));
-      }
-      
-      function setExpansionMode(mode: ExpansionMode): void {
-        // Save preference
-        localStorage.setItem('folderExpansionMode', mode);
-        
-        // Update UI
-        updateActiveButton(mode);
-        
-        // Emit custom event for Content component to listen for
-        window.dispatchEvent(new CustomEvent('expansionModeChanged', { detail: { mode } }));
-      }
-      
-      function updateActiveButton(mode: ExpansionMode): void {
-        // Remove active class from all buttons
-        document.querySelectorAll('.expansion-option').forEach(btn => {
-          btn.classList.remove('active', 'bg-blue-600', 'text-white');
-          btn.classList.add('bg-slate-700');
-        });
-        
-        // Add active class to selected button
-        let activeButton: HTMLElement | null = null;
-        switch(mode) {
-          case 'none':
-            activeButton = collapseAll;
-            break;
-          case 'years':
-            activeButton = expandYears;
-            break;
-          case 'all':
-            activeButton = expandAll;
-            break;
-        }
-        
-        if (activeButton) {
-          activeButton.classList.remove('bg-slate-700');
-          activeButton.classList.add('active', 'bg-blue-600', 'text-white');
-        }
-      }
-    });
+    }
+
+    // Set initial active state
+    updateActiveButton(savedMode);
+
+    // Add click event listeners with null checks
+    if (collapseAll) {
+      collapseAll.addEventListener("click", () => setExpansionMode("none"));
+    }
+
+    if (expandYears) {
+      expandYears.addEventListener("click", () => setExpansionMode("years"));
+    }
+
+    if (expandAll) {
+      expandAll.addEventListener("click", () => setExpansionMode("all"));
+    }
+
+    function setExpansionMode(mode: ExpansionMode): void {
+      // Save preference
+      localStorage.setItem("folderExpansionMode", mode);
+
+      // Update UI
+      updateActiveButton(mode);
+
+      // Emit custom event for Content component to listen for
+      window.dispatchEvent(
+        new CustomEvent("expansionModeChanged", { detail: { mode } })
+      );
+    }
+  });
 </script>

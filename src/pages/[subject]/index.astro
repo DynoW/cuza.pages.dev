@@ -1,23 +1,23 @@
 ---
-import CustomPage from "../../components/CustomPage.astro";
-import fs from 'fs';
-import path from 'path';
+import Page from "../../components/Page.astro";
+import fs from "fs";
+import path from "path";
 
 export function getStaticPaths() {
   // Get the absolute path to the files directory
-  const filesPath = path.join(process.cwd(), 'files');
-  
+  const filesPath = path.join(process.cwd(), "files");
+
   // Read directories in the files path to get subjects
-  const validSubjects = fs.existsSync(filesPath) 
-    ? fs.readdirSync(filesPath).filter(file => 
-        fs.statSync(path.join(filesPath, file)).isDirectory())
-    : ['fizica', 'mate', 'admitere']; // Fallback to defaults if directory doesn't exist
-  
-  const removedSubjects = ['fizica', 'admitere'];
-  const filteredSubjects = validSubjects.filter(subject => !removedSubjects.includes(subject));
-  
-  return filteredSubjects.map(subject => ({
-    params: { subject }
+  const validSubjects = fs
+    .readdirSync(filesPath)
+    .filter((file) => fs.statSync(path.join(filesPath, file)).isDirectory());
+  const removedSubjects = ["fizica", "admitere"];
+  const filteredSubjects = validSubjects.filter(
+    (subject) => !removedSubjects.includes(subject)
+  );
+
+  return filteredSubjects.map((subject) => ({
+    params: { subject },
   }));
 }
 
@@ -25,4 +25,4 @@ export function getStaticPaths() {
 const { subject } = Astro.params;
 ---
 
-<CustomPage subject={subject} page="bac" />
+<Page subject={subject} page="bac" />

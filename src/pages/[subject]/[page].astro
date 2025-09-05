@@ -1,40 +1,41 @@
 ---
-import CustomPage from "../../components/CustomPage.astro";
-import fs from 'fs';
-import path from 'path';
+import PageComponent from "../../components/Page.astro";
+import fs from "fs";
+import path from "path";
 
 export function getStaticPaths() {
   // Get the absolute path to the files directory
-  const filesPath = path.join(process.cwd(), 'files');
-  
+  const filesPath = path.join(process.cwd(), "files");
+
   // Read directories in the files path to get subjects
-  const validSubjects = fs.existsSync(filesPath) 
-    ? fs.readdirSync(filesPath).filter(file => 
-        fs.statSync(path.join(filesPath, file)).isDirectory())
-    : ['fizica', 'mate', 'admitere']; // Fallback to defaults if directory doesn't exist
-  
-  const paths: { params: { subject: string, page: string } }[] = [];
-  
+  const validSubjects = fs
+    .readdirSync(filesPath)
+    .filter((file) => fs.statSync(path.join(filesPath, file)).isDirectory());
+
+  const paths: { params: { subject: string; page: string } }[] = [];
+
   // For each subject, get its valid pages from subdirectories
-  validSubjects.forEach(subject => {
-    const subjectPath = path.join(filesPath, subject);
-    
-    // Read subdirectories to get valid pages
-    // Use different fallback values based on the subject
-    let validPages;
-    if (subject === 'admitere') {
-      validPages = fs.existsSync(subjectPath)
-        ? fs.readdirSync(subjectPath).filter(file => 
-            fs.statSync(path.join(subjectPath, file)).isDirectory())
-        : ['mate', 'fizica', 'info']; // Custom fallback for admitere
+  validSubjects.forEach((subject) => {
+    let subjectPath;
+
+    if (subject === "admitere") {
+      subjectPath = path.join(filesPath, subject);
     } else {
-      validPages = fs.existsSync(subjectPath)
-        ? fs.readdirSync(subjectPath).filter(file => 
-        fs.statSync(path.join(subjectPath, file)).isDirectory() && file !== 'bac' && file !== 'altele')
-        : ['teste', 'simulari', 'variante']; // Default fallback excluding 'bac'
+      subjectPath = path.join(filesPath, `${subject}/pages`);
     }
-    
-    validPages.forEach(page => {
+
+    // Read subdirectories to get valid pages
+    let validPages;
+
+    validPages = fs
+      .readdirSync(subjectPath)
+      .filter(
+        (file) =>
+          fs.statSync(path.join(subjectPath, file)).isDirectory() &&
+          file !== "bac"
+      );
+
+    validPages.forEach((page) => {
       paths.push({ params: { subject, page } });
     });
   });
@@ -46,4 +47,4 @@ export function getStaticPaths() {
 const { subject, page } = Astro.params;
 ---
 
-<CustomPage subject={subject} page={page} />
+<PageComponent subject={subject} page={page} />

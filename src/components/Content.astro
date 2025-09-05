@@ -1,0 +1,148 @@
+---
+import { apiService, type FileStructure } from '../utils/api';
+import { formatKey, isYearFolder } from '../utils/data';
+
+interface Props {
+  subject: string;
+  page: string;
+  data?: FileStructure;
+  isRoot?: boolean;
+  depth?: number;
+}
+
+const {
+  subject,
+  page,
+  data,
+  isRoot = true,
+  depth = 0,
+} = Astro.props;
+
+const expansionMode = "years" as "none" | "years" | "all"; // Default expansion mode: 'none', 'years', 'all'
+
+// Only fetch at the root level
+let content: FileStructure = {};
+let workerError: string | null = null;
+
+if (isRoot && !data) {
+  try {
+    content = await apiService.getContent(subject, page) || {};
+  } catch (error) {
+    workerError = `Failed to fetch from API: ${error instanceof Error ? error.message : String(error)}`;
+    console.warn("API fetch failed, falling back to empty structure:", error);
+  }
+} else {
+  // Use the passed data for nested calls
+  content = data || {};
+}
+
+// Check if this is an extra page
+const isExtra = page === "extra" || page.endsWith("/extra");
+  
+// CSS classes based on page type (computed once)
+const classNames = {
+  list: isExtra ? "extra-list" : "content-list",
+  link: isExtra ? "extra-link" : "content-link",
+  text: isExtra ? "extra-text" : "content-text",
+} as const;
+
+// Calculate padding based on depth
+const paddingLeft = `${depth * 1.5}rem`;
+---
+
+<div class="w-full" id={`content-${subject}-${page.replace("/", "-")}`}>
+  {
+    workerError && (
+      <div class="text-sm text-red-500">
+        <p>Failed to load content from worker: {workerError}</p>
+      </div>
+    )
+  }
+
+  <div>
+    {
+      Object.keys(content).length > 0 ? (
+        <ul class={classNames.list} style={`padding-left: ${paddingLeft}`}>
+          {
+            Object.entries(content).map(([key, value]) => {
+              if (typeof value === "string") {
+                // It's a file
+                return (
+                  <li>
+                    <a
+                      class={classNames.link}
+                      href={value}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {key}
+                    </a>
+                  </li>
+                );
+              } else if (typeof value === "object" && value !== null) {
+                // It's a directory
+                const isYear = isYearFolder(key);
+                return (
+                  <li>
+                    <details 
+                      open={expansionMode === "all" || (expansionMode === "years" && isYear)} 
+                      class="cursor-pointer folder-details"
+                      data-folder-type={isYear ? "year" : "folder"}
+                      data-folder-name={key}
+                    >
+                      <summary class={classNames.text}>
+                        {formatKey(key)}
+                      </summary>
+                      <Astro.self 
+                        subject={subject} 
+                        page={key}
+                        data={value}
+                        isRoot={false}
+                        depth={depth + 1}
+                      />
+                    </details>
+                  </li>
+                );
+              }
+            })
+          }
+        </ul>
+      ) : (
+        <p class={classNames.text} style={`padding-left: ${paddingLeft}`}>Fără conținut</p>
+      )
+    }
+  </div>
+</div>
+
+<script>
+  // Client-side script to handle expansion mode changes
+  document.addEventListener("DOMContentLoaded", () => {
+    // Get saved preference or default to 'years'
+    const savedMode = localStorage.getItem('folderExpansionMode') || 'years';
+    
+    // Apply initial expansion mode
+    applyExpansionMode(savedMode);
+    
+    // Listen for expansion mode changes from ToggleExpansion component
+    window.addEventListener('expansionModeChanged', (event) => {
+      const customEvent = event as CustomEvent;
+      const { mode } = customEvent.detail;
+      applyExpansionMode(mode);
+    });
+    
+    function applyExpansionMode(mode: string): void {
+      const allDetails = document.querySelectorAll('.folder-details') as NodeListOf<HTMLDetailsElement>;
+      
+      allDetails.forEach((details) => {
+        const folderType = details.getAttribute('data-folder-type');
+        const shouldBeOpen = mode === 'all' || (mode === 'years' && folderType === 'year');
+        
+        if (shouldBeOpen && !details.open) {
+          details.open = true;
+        } else if (!shouldBeOpen && details.open) {
+          details.open = false;
+        }
+      });
+    }
+  });
+</script>
