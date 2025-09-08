@@ -1,50 +1,15 @@
 ---
 import PageComponent from "../../components/Page.astro";
-import fs from "fs";
-import path from "path";
+import { generateSubjectPagePaths } from "../../utils/paths";
 
-export function getStaticPaths() {
-  // Get the absolute path to the files directory
-  const filesPath = path.join(process.cwd(), "files");
+export const getStaticPaths = generateSubjectPagePaths;
 
-  // Read directories in the files path to get subjects
-  const validSubjects = fs
-    .readdirSync(filesPath)
-    .filter((file) => fs.statSync(path.join(filesPath, file)).isDirectory());
+const subject = Astro.params?.subject;
+const page = Astro.params?.page;
 
-  const paths: { params: { subject: string; page: string } }[] = [];
-
-  // For each subject, get its valid pages from subdirectories
-  validSubjects.forEach((subject) => {
-    let subjectPath;
-
-    if (subject === "admitere") {
-      subjectPath = path.join(filesPath, subject);
-    } else {
-      subjectPath = path.join(filesPath, `${subject}/pages`);
-    }
-
-    // Read subdirectories to get valid pages
-    let validPages;
-
-    validPages = fs
-      .readdirSync(subjectPath)
-      .filter(
-        (file) =>
-          fs.statSync(path.join(subjectPath, file)).isDirectory() &&
-          file !== "bac"
-      );
-
-    validPages.forEach((page) => {
-      paths.push({ params: { subject, page } });
-    });
-  });
-  
-  return paths;
+if (!subject || !page) {
+  throw new Error(`Subject and page parameters are required. Received params: ${JSON.stringify(Astro.params)}`);
 }
-
-// Get the dynamic route parameters
-const { subject, page } = Astro.params;
 ---
 
 <PageComponent subject={subject} page={page} />

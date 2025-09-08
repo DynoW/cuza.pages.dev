@@ -34,6 +34,7 @@ export class ApiService {
   async getContent(subject: string, page: string): Promise<FileStructure | null> {
     const url = `${this.baseUrl}/api/files?subject=${encodeURIComponent(subject)}&page=${encodeURIComponent(page)}`;
     const response = await this.fetchJson<ApiResponse>(url);
+    console.log('Fetched content:', response);
     return response?.content || null;
   }
 

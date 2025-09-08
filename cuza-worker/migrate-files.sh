@@ -94,7 +94,7 @@ migrate_files() {
         echo "   pnpm wrangler r2 object list cuza-bucket --prefix files/"
         echo ""
         echo "🌐 Test the API:"
-        echo "   curl https://cuza-worker.dynow.workers.dev/api/files"
+        echo "   curl https://???-worker.???.workers.dev/api/files"
     else
         echo ""
         echo "⚠️  Migration completed with errors. Please check the failed uploads manually."

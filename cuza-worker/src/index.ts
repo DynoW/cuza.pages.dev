@@ -1,8 +1,7 @@
 // import { validateFormData, extractFormData, generateFilePath, uploadToR2AndGithub, isValidAuth, UploadEnv } from './upload';
 import { handleFileList } from './handlers/files';
-import { handleFileServe, handleFileSearch } from './handlers/serve';
-import { handleSubjectPageSearch } from './handlers/search';
-import { handleYearsOnlySearch } from './handlers/years';
+import { handleFileServe } from './handlers/serve';
+import { handleFileSearch, handlePage } from './handlers/search';
 import { corsHeaders } from './handlers/common';
 
 // Environment interface
@@ -29,9 +28,9 @@ export default {
             
             if (subject && page) {
                 if (yearsOnly === 'true') {
-                    return handleYearsOnlySearch(env, subject, page);
+                    return handlePage(env, subject, page, true);
                 }
-                return handleSubjectPageSearch(env, subject, page);
+                return handlePage(env, subject, page);
             }
             if (query) {
                 return handleFileSearch(env, query);
@@ -41,6 +40,7 @@ export default {
 
         // Route: GET /api/files/* - Serve individual files
         if (request.method === 'GET' && url.pathname.startsWith('/api/files/')) {
+            console.log('Serving file:', url.pathname);
             const filePath = url.pathname.replace('/api/', '');
             return handleFileServe(env, filePath);
         }

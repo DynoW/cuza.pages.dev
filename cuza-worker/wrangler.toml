@@ -9,6 +9,7 @@ main = "src/index.ts"
 [[r2_buckets]]
 binding = "FILES"
 bucket_name = "cuza-bucket"
+preview_bucket_name = "cuza-bucket"
 
 # Environment variables for GitHub integration
 # [vars]

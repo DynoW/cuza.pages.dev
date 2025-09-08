@@ -1,70 +1,57 @@
-import { corsHeaders, filterFilesByPath } from './common';
+import { corsHeaders, filterFilesByPage, extractYears } from './common';
 import { FileStructure } from '../types';
 
-export async function handleSubjectPageSearch(env: { FILES: R2Bucket }, subject: string, page: string): Promise<Response> {
+export async function handleFileSearch(env: { FILES: R2Bucket }, query: string): Promise<Response> {
     try {
         const objects = await env.FILES.list();
-        const matchingObjects = filterFilesByPath(objects.objects, subject, page);
+        const queryLower = query.toLowerCase();
         
-        // Build hierarchical structure for the matching files, but only the relevant part
-        const targetStructure: FileStructure = {};
-        const subjectLower = subject.toLowerCase();
-        const pageLower = page.toLowerCase();
+        // Filter files in a single pass
+        const matchingFiles = objects.objects
+            .filter(obj => !obj.key.toLowerCase().includes('ignore'))
+            .filter(obj => obj.key.toLowerCase().includes(queryLower))
+            .map(obj => obj.key);
         
-        for (const obj of matchingObjects) {
-            const pathParts = obj.key.split('/');
-            let relevantParts: string[] = [];
-            
-            if (subjectLower === 'admitere') {
-                // For admitere: start from after the admitere type (admitere/extra)
-                let admitereTypeIndex = -1;
-                for (let i = pathParts.length - 1; i >= 0; i--) {
-                    if (pathParts[i] === 'admitere' || pathParts[i] === 'extra') {
-                        admitereTypeIndex = i;
-                        break;
-                    }
-                }
-                if (admitereTypeIndex !== -1 && admitereTypeIndex + 1 < pathParts.length) {
-                    relevantParts = pathParts.slice(admitereTypeIndex + 1);
-                }
-            } else if (pageLower === 'extra') {
-                // For extra pages: start from after "extra"
-                const extraIndex = pathParts.indexOf('extra');
-                if (extraIndex !== -1 && extraIndex + 1 < pathParts.length) {
-                    relevantParts = pathParts.slice(extraIndex + 1);
-                }
-            } else {
-                // For other subjects: start from after the page
-                const pageIndex = pathParts.indexOf(pageLower);
-                if (pageIndex !== -1 && pageIndex + 1 < pathParts.length) {
-                    relevantParts = pathParts.slice(pageIndex + 1);
-                }
+        return new Response(JSON.stringify({ 
+            query, 
+            files: matchingFiles 
+        }, null, 2), {
+            status: 200,
+            headers: {
+                ...corsHeaders,
+                'Content-Type': 'application/json',
+                'Cache-Control': 'public, max-age=300'
             }
-            
-            if (relevantParts.length > 0) {
-                let current = targetStructure;
-                
-                // Navigate through the relevant path parts, creating nested objects
-                for (let i = 0; i < relevantParts.length - 1; i++) {
-                    const part = relevantParts[i];
-                    if (!current[part]) {
-                        current[part] = {};
-                    }
-                    current = current[part] as FileStructure;
-                }
-                
-                // Add the file to the final directory
-                const fileName = relevantParts[relevantParts.length - 1];
-                current[fileName] = obj.key; // Store the full path for downloading
+        });
+    } catch (error) {
+        console.error('Error searching files:', error);
+        return new Response('Error searching files', { 
+            status: 500, 
+            headers: corsHeaders 
+        });
+    }
+}
+
+
+export async function handlePage(env: { FILES: R2Bucket }, subject: string, page: string, yearsOnly?: boolean): Promise<Response> {
+    try {
+        const objects = await env.FILES.list();
+
+        const filteredData = filterFilesByPage(objects.objects, subject, page);
+
+        if (yearsOnly) {
+            const sortedYears = extractYears(filteredData);
+            return new Response(JSON.stringify({ years: sortedYears }, null, 2), {
+            status: 200,
+            headers: {
+                ...corsHeaders,
+                'Content-Type': 'application/json',
+                'Cache-Control': 'public, max-age=600'
             }
+        });
         }
-        
-        // Build structured response
-        const structuredResponse = {
-            content: targetStructure
-        };
-        
-        return new Response(JSON.stringify(structuredResponse, null, 2), {
+
+        return new Response(JSON.stringify({ content: filteredData }, null, 2), {
             status: 200,
             headers: {
                 ...corsHeaders,

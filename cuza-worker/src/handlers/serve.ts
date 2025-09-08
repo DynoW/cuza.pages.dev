@@ -34,34 +34,3 @@ export async function handleFileServe(env: { FILES: R2Bucket }, filePath: string
         });
     }
 }
-
-export async function handleFileSearch(env: { FILES: R2Bucket }, query: string): Promise<Response> {
-    try {
-        const objects = await env.FILES.list();
-        const queryLower = query.toLowerCase();
-        
-        // Filter files in a single pass
-        const matchingFiles = objects.objects
-            .filter(obj => !obj.key.toLowerCase().includes('ignore'))
-            .filter(obj => obj.key.toLowerCase().includes(queryLower))
-            .map(obj => obj.key);
-        
-        return new Response(JSON.stringify({ 
-            query, 
-            files: matchingFiles 
-        }, null, 2), {
-            status: 200,
-            headers: {
-                ...corsHeaders,
-                'Content-Type': 'application/json',
-                'Cache-Control': 'public, max-age=300'
-            }
-        });
-    } catch (error) {
-        console.error('Error searching files:', error);
-        return new Response('Error searching files', { 
-            status: 500, 
-            headers: corsHeaders 
-        });
-    }
-}

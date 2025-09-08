@@ -47,7 +47,9 @@ const classNames = {
 } as const;
 
 // Calculate padding based on depth
-const paddingLeft = `${depth * 1.5}rem`;
+const paddingLeft = `${depth * 1}rem`;
+
+const host = import.meta.env.WORKER_URL || 'http://localhost:8787';
 ---
 
 <div class="w-full" id={`content-${subject}-${page.replace("/", "-")}`}>
@@ -61,46 +63,85 @@ const paddingLeft = `${depth * 1.5}rem`;
 
   <div>
     {
-      Object.keys(content).length > 0 ? (
+       Object.keys(content).length > 0 ? (
         <ul class={classNames.list} style={`padding-left: ${paddingLeft}`}>
           {
-            Object.entries(content).map(([key, value]) => {
+            Object.entries(content).reverse().map(([key, value]) => {
               if (typeof value === "string") {
                 // It's a file
                 return (
                   <li>
                     <a
-                      class={classNames.link}
-                      href={value}
+                      class={`${classNames.link} flex items-center break-normal`}
+                      href={host + "/" + value}
                       target="_blank"
                       rel="noopener noreferrer"
+                      aria-label={`Open ${key} in new tab`}
                     >
-                      {key}
+                      {!isExtra && (
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+                          <path fill="currentColor" d="M8 10a1 1 0 100-2 1 1 0 000 2zm0 2a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1z" />
+                        </svg>
+                      )}
+                      {key.split('_').map((part, i, arr) => (
+                        <Fragment>
+                          {part}{i < arr.length - 1 && <>&#8203;_</>}
+                        </Fragment>
+                      ))}
                     </a>
                   </li>
                 );
               } else if (typeof value === "object" && value !== null) {
                 // It's a directory
                 const isYear = isYearFolder(key);
+                const showDivider = depth === 1 && key === Object.keys(content)[Object.keys(content).length - 1];
+                const folderId = `folder-${subject}-${page}-${key}-${depth}`;
+                
+                // Determine if folder should be expanded by default
+                const shouldBeExpanded = expansionMode === "all" || (expansionMode === "years" && isYear);
+                const arrowRotation = shouldBeExpanded ? "rotate(90deg)" : "rotate(0deg)";
+                const displayStyle = shouldBeExpanded ? "display: block;" : "display: none;";
+                
                 return (
-                  <li>
-                    <details 
-                      open={expansionMode === "all" || (expansionMode === "years" && isYear)} 
-                      class="cursor-pointer folder-details"
-                      data-folder-type={isYear ? "year" : "folder"}
-                      data-folder-name={key}
-                    >
-                      <summary class={classNames.text}>
-                        {formatKey(key)}
-                      </summary>
-                      <Astro.self 
-                        subject={subject} 
-                        page={key}
-                        data={value}
-                        isRoot={false}
-                        depth={depth + 1}
-                      />
-                    </details>
+                  <li class="space-y-2" id={isYear ? key : undefined}>
+                    {showDivider && <hr class="border-black m-2" />}
+                    <div class="folder-container">
+                      <div 
+                        class={`${classNames.text} flex items-center cursor-pointer folder-toggle`}
+                        data-folder-id={folderId}
+                        data-folder-type={isYear ? "year" : "folder"}
+                        data-expanded={shouldBeExpanded ? "true" : "false"}
+                      >
+                        <svg
+                          class="w-5 h-5 mr-2 transition-transform duration-200 folder-arrow"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          style={`transform: ${arrowRotation}`}
+                        >
+                          <path d="M6 6L14 10L6 14V6Z" />
+                        </svg>
+                        <div class="flex items-center">
+                          <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+                          </svg>
+                          <span>{formatKey(key)}</span>
+                        </div>
+                      </div>
+                      <div 
+                        id={folderId}
+                        class="folder-content mt-2"
+                        style={displayStyle}
+                      >
+                        <Astro.self 
+                          subject={subject} 
+                          page={key}
+                          data={value}
+                          isRoot={false}
+                          depth={depth + 1}
+                        />
+                      </div>
+                    </div>
                   </li>
                 );
               }
@@ -115,34 +156,108 @@ const paddingLeft = `${depth * 1.5}rem`;
 </div>
 
 <script>
-  // Client-side script to handle expansion mode changes
+  // Simple folder toggle functionality
   document.addEventListener("DOMContentLoaded", () => {
-    // Get saved preference or default to 'years'
     const savedMode = localStorage.getItem('folderExpansionMode') || 'years';
     
-    // Apply initial expansion mode
-    applyExpansionMode(savedMode);
+    // Initialize folders
+    initializeFolders(savedMode);
     
-    // Listen for expansion mode changes from ToggleExpansion component
+    // Add click listeners
+    addClickListeners();
+    
+    // Listen for expansion mode changes
     window.addEventListener('expansionModeChanged', (event) => {
       const customEvent = event as CustomEvent;
       const { mode } = customEvent.detail;
       applyExpansionMode(mode);
     });
     
-    function applyExpansionMode(mode: string): void {
-      const allDetails = document.querySelectorAll('.folder-details') as NodeListOf<HTMLDetailsElement>;
+    function addClickListeners(): void {
+      const folderToggles = document.querySelectorAll('.folder-toggle') as NodeListOf<HTMLElement>;
       
-      allDetails.forEach((details) => {
-        const folderType = details.getAttribute('data-folder-type');
+      folderToggles.forEach((toggle) => {
+        toggle.addEventListener('click', () => {
+          const folderId = toggle.getAttribute('data-folder-id');
+          const folderContent = document.getElementById(folderId!);
+          const arrow = toggle.querySelector('.folder-arrow') as HTMLElement;
+          const isExpanded = toggle.getAttribute('data-expanded') === 'true';
+          
+          if (folderContent && arrow) {
+            if (isExpanded) {
+              folderContent.style.display = 'none';
+              arrow.style.transform = 'rotate(0deg)';
+              toggle.setAttribute('data-expanded', 'false');
+            } else {
+              folderContent.style.display = 'block';
+              arrow.style.transform = 'rotate(90deg)';
+              toggle.setAttribute('data-expanded', 'true');
+            }
+          }
+        });
+      });
+    }
+    
+    function initializeFolders(mode: string): void {
+      const folderToggles = document.querySelectorAll('.folder-toggle') as NodeListOf<HTMLElement>;
+      
+      folderToggles.forEach((toggle) => {
+        const folderType = toggle.getAttribute('data-folder-type');
+        const folderId = toggle.getAttribute('data-folder-id');
+        const folderContent = document.getElementById(folderId!);
+        const arrow = toggle.querySelector('.folder-arrow') as HTMLElement;
+        
+        if (folderContent && arrow) {
+          const shouldBeOpen = mode === 'all' || (mode === 'years' && folderType === 'year');
+          
+          if (shouldBeOpen) {
+            folderContent.style.display = 'block';
+            arrow.style.transform = 'rotate(90deg)';
+            toggle.setAttribute('data-expanded', 'true');
+          } else {
+            folderContent.style.display = 'none';
+            arrow.style.transform = 'rotate(0deg)';
+            toggle.setAttribute('data-expanded', 'false');
+          }
+        }
+      });
+    }
+    
+    function applyExpansionMode(mode: string): void {
+      const folderToggles = document.querySelectorAll('.folder-toggle') as NodeListOf<HTMLElement>;
+      
+      folderToggles.forEach((toggle) => {
+        const folderType = toggle.getAttribute('data-folder-type');
         const shouldBeOpen = mode === 'all' || (mode === 'years' && folderType === 'year');
         
-        if (shouldBeOpen && !details.open) {
-          details.open = true;
-        } else if (!shouldBeOpen && details.open) {
-          details.open = false;
+        const folderId = toggle.getAttribute('data-folder-id');
+        const folderContent = document.getElementById(folderId!);
+        const arrow = toggle.querySelector('.folder-arrow') as HTMLElement;
+        
+        if (folderContent && arrow) {
+          if (shouldBeOpen) {
+            folderContent.style.display = 'block';
+            arrow.style.transform = 'rotate(90deg)';
+            toggle.setAttribute('data-expanded', 'true');
+          } else {
+            folderContent.style.display = 'none';
+            arrow.style.transform = 'rotate(0deg)';
+            toggle.setAttribute('data-expanded', 'false');
+          }
         }
       });
     }
   });
 </script>
+
+<style>
+  /* Arrow rotation animation */
+  .folder-arrow {
+    transition: transform 0.2s ease;
+  }
+  
+  /* Hover effect */
+  .folder-toggle:hover {
+    opacity: 0.8;
+  }
+</style>
