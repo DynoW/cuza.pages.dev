@@ -19,8 +19,8 @@ export default {
             return handleOptions();
         }
 
-        // Route: GET /api/files?subject=X&page=Y - Search by subject and page
-        if (request.method === 'GET' && url.pathname === '/api/files') {
+        // Route: GET /files?subject=X&page=Y - Search by subject and page
+        if (request.method === 'GET' && url.pathname === '/files') {
             const subject = url.searchParams.get('subject');
             const page = url.searchParams.get('page');
             const query = url.searchParams.get('q');
@@ -38,10 +38,9 @@ export default {
             return handleFileList(env);
         }
 
-        // Route: GET /api/files/* - Serve individual files
-        if (request.method === 'GET' && url.pathname.startsWith('/api/files/')) {
-            console.log('Serving file:', url.pathname);
-            const filePath = url.pathname.replace('/api/', '');
+        // Route: GET /files/* - Serve individual files
+        if (request.method === 'GET' && url.pathname.startsWith('/files/')) {
+            const filePath = url.pathname.slice(1);
             return handleFileServe(env, filePath);
         }
 

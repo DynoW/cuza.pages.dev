@@ -32,20 +32,20 @@ export class ApiService {
   }
 
   async getContent(subject: string, page: string): Promise<FileStructure | null> {
-    const url = `${this.baseUrl}/api/files?subject=${encodeURIComponent(subject)}&page=${encodeURIComponent(page)}`;
+    const url = `${this.baseUrl}/files?subject=${encodeURIComponent(subject)}&page=${encodeURIComponent(page)}`;
     const response = await this.fetchJson<ApiResponse>(url);
     console.log('Fetched content:', response);
     return response?.content || null;
   }
 
   async getYears(subject: string, page: string): Promise<number[]> {
-    const url = `${this.baseUrl}/api/files?subject=${encodeURIComponent(subject)}&page=${encodeURIComponent(page)}&years=true`;
+    const url = `${this.baseUrl}/files?subject=${encodeURIComponent(subject)}&page=${encodeURIComponent(page)}&years=true`;
     const response = await this.fetchJson<{ years: number[] }>(url);
     return response?.years || [];
   }
 
   async searchFiles(query: string): Promise<string[]> {
-    const url = `${this.baseUrl}/api/files?q=${encodeURIComponent(query)}`;
+    const url = `${this.baseUrl}/files?q=${encodeURIComponent(query)}`;
     const response = await this.fetchJson<{ files: string[] }>(url);
     return response?.files || [];
   }

@@ -11,7 +11,7 @@ This Cloudflare Worker provides R2 bucket integration for the cuza.pages.dev pro
 
 ## API Endpoints
 
-### GET /api/files
+### GET /files
 Returns a structured JSON object containing all files in the R2 bucket organized by folder hierarchy.
 
 **Response Format:**
@@ -34,11 +34,11 @@ Returns a structured JSON object containing all files in the R2 bucket organized
 }
 ```
 
-### GET /api/files/{path}
+### GET /files/{path}
 Serves individual files from the R2 bucket.
 
 **Example:**
-- `/api/files/files/fizica/pages/bac/2024/test.pdf`
+- `/files/files/fizica/pages/bac/2024/test.pdf`
 
 **Features:**
 - Proper Content-Type headers
@@ -134,10 +134,10 @@ wrangler dev
 ### Testing Endpoints
 ```bash
 # Test file listing
-curl https://cuza-worker.dynow.workers.dev/api/files
+curl https://???-worker.???.workers.dev/files
 
 # Test file serving
-curl https://cuza-worker.dynow.workers.dev/api/files/files/fizica/pages/bac/2024/test.pdf
+curl https://???-worker.???.workers.dev/files/files/fizica/pages/bac/2024/test.pdf
 ```
 
 ## Migration Notes
