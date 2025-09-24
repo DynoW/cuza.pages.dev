@@ -3,6 +3,7 @@ import "@excalidraw/excalidraw/index.css";
 import { useEffect, useState, useCallback } from "react";
 
 const LOCAL_STORAGE_KEY = "excalidraw-romana";
+const EXCALIDRAW_FILE = "/assets/excalidraw/romana.excalidraw";
 
 const ExcalidrawWrapper = () => {
     const [excalidrawData, setExcalidrawData] = useState(null);
@@ -38,7 +39,7 @@ const ExcalidrawWrapper = () => {
     // Check if a schema update is available from the server
     const checkForSchemaUpdates = useCallback(async () => {
         try {
-            const response = await fetch('/assets/excalidraw/romana.excalidraw');
+            const response = await fetch(EXCALIDRAW_FILE);
             if (!response.ok) {
                 console.error(`Failed to check for updates: ${response.status} ${response.statusText}`);
                 return;
@@ -59,17 +60,20 @@ const ExcalidrawWrapper = () => {
     const fetchSchema = useCallback(async () => {
         try {
             setIsLoading(true);
-            const response = await fetch('/assets/excalidraw/romana.excalidraw');
+            const response = await fetch(EXCALIDRAW_FILE);
             if (!response.ok) {
                 throw new Error(`Failed to fetch schema: ${response.status} ${response.statusText}`);
             }
             const data = await response.json();
             // Validate the data has elements before setting it
             if (data && data.elements && data.elements.length > 0) {
-                // Only save the elements to localStorage
-                const elementsOnly = { elements: data.elements };
-                setExcalidrawData(elementsOnly);
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(elementsOnly));
+                // Save both elements and files to localStorage
+                const dataToSave = { 
+                    elements: data.elements,
+                    files: data.files || {}
+                };
+                setExcalidrawData(dataToSave);
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
 
                 // Store the original schema hash for comparison
                 const hash = hashElements(data.elements);
@@ -155,11 +159,13 @@ const ExcalidrawWrapper = () => {
                 try {
                     if (excalidrawAPI) {
                         const elements = excalidrawAPI.getSceneElements();
+                        const files = excalidrawAPI.getFiles();
 
                         // Only save if we have elements to prevent blank page
                         if (elements && elements.length > 0) {
-                            // Save only the elements to localStorage
-                            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ elements }));
+                            // Save both elements and files to localStorage
+                            const dataToSave = { elements, files };
+                            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
 
                             // Compare with original schema to determine if there are changes
                             const currentHash = hashElements(elements);
@@ -212,7 +218,7 @@ const ExcalidrawWrapper = () => {
                         currentItemType: "hand",
                         ...(excalidrawData?.appState || {})
                     }, scrollToContent: true,
-                    files: {}
+                    files: excalidrawData?.files || {}
                 }}
                 onChange={(elements, appState, files) => {
                     // This is a backup to ensure UI stays responsive
