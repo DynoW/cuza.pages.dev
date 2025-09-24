@@ -215,6 +215,10 @@ const ExcalidrawWrapper = () => {
                     appState: {
                         theme: "dark",
                         gridSize: null,
+                        activeTool: {
+                            type: "hand",
+                            locked: true
+                        },
                         currentItemType: "hand",
                         ...(excalidrawData?.appState || {})
                     }, scrollToContent: true,
