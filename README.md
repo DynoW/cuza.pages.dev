@@ -1,8 +1,10 @@
-# Help us add more content to the site 😀!
+# CuzaPages
+
+## Largest archive for romanian baccalaureate with multiple-choice training quizzes
 
 > (This is Cuza highschool's non-official site _by students for students_)
 
-<font size="1">For help contact **Danutz** or send an email ✉️ (slower response 🐌).</font>
+<font size="1">For help contact [**Danutz**](https://github.com/DynoW).</font>
 
 ## Why to contribute:
 
