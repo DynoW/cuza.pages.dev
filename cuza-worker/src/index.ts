@@ -2,6 +2,13 @@
 import { handleFileList } from './handlers/files';
 import { handleFileServe } from './handlers/serve';
 import { handleFileSearch, handlePage } from './handlers/search';
+import { 
+    handleFileManagerList,
+    handleFileManagerRename,
+    handleFileManagerDelete,
+    handleFileManagerMove,
+    handleFileManagerCreateFolder
+} from './handlers/filemanager';
 import { corsHeaders } from './handlers/common';
 
 // Environment interface
@@ -36,6 +43,36 @@ export default {
                 return handleFileSearch(env, query);
             }
             return handleFileList(env);
+        }
+
+        // Route: GET /files/list?path=X - File manager list files
+        if (request.method === 'GET' && url.pathname === '/files/list') {
+            const path = url.searchParams.get('path') || '';
+            return handleFileManagerList(env, path);
+        }
+
+        // Route: POST /files/rename - Rename file/folder
+        if (request.method === 'POST' && url.pathname === '/files/rename') {
+            const body = await request.json() as { oldPath: string; newName: string };
+            return handleFileManagerRename(env, body.oldPath, body.newName);
+        }
+
+        // Route: POST /files/delete - Delete files/folders
+        if (request.method === 'POST' && url.pathname === '/files/delete') {
+            const body = await request.json() as { paths: string[] };
+            return handleFileManagerDelete(env, body.paths);
+        }
+
+        // Route: POST /files/move - Move files/folders
+        if (request.method === 'POST' && url.pathname === '/files/move') {
+            const body = await request.json() as { items: string[]; destination: string };
+            return handleFileManagerMove(env, body.items, body.destination);
+        }
+
+        // Route: POST /files/create-folder - Create new folder
+        if (request.method === 'POST' && url.pathname === '/files/create-folder') {
+            const body = await request.json() as { path: string };
+            return handleFileManagerCreateFolder(env, body.path);
         }
 
         // Route: GET /files/* - Serve individual files
