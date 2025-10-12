@@ -21,11 +21,22 @@ interface CloudflareWorkerGlobalScope {
 
 declare const self: CloudflareWorkerGlobalScope;
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://cuza.pages.dev',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-};
+function getCorsHeaders(request: Request): Record<string, string> {
+    const origin = request.headers.get('Origin');
+    const allowedOrigins = ['https://cuza.pages.dev', 'http://localhost:4321'];
+
+    const headers: Record<string, string> = {
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    };
+
+    if (origin && allowedOrigins.includes(origin)) {
+        headers['Access-Control-Allow-Origin'] = origin;
+    }
+
+    return headers;
+}
+
 
 self.addEventListener('fetch', (event: FetchEvent) => {
     event.respondWith(handleRequest(event.request));
@@ -40,20 +51,20 @@ async function handleRequest(request: Request): Promise<Response> {
         const authHeader = request.headers.get('Authorization');
         if (!authHeader || !isValidAuth(authHeader)) {
             console.log('Authorization failed');
-            return new Response('Neautorizat', { status: 401, headers: corsHeaders });
+            return new Response('Neautorizat', { status: 401, headers: getCorsHeaders(request) });
         }
 
         const contentType = request.headers.get('Content-Type') || '';
         if (!contentType.includes('multipart/form-data')) {
             console.log('Invalid content type:', contentType);
-            return new Response('Tip de conținut neacceptat', { status: 415, headers: corsHeaders });
+            return new Response('Tip de conținut neacceptat', { status: 415, headers: getCorsHeaders(request) });
         }
 
         const formData = await request.formData();
         const validationError = validateFormData(formData);
         if (validationError) {
             console.log('Validation error:', validationError);
-            return new Response(`Date lipsă: ${validationError}`, { status: 400, headers: corsHeaders });
+            return new Response(`Date lipsă: ${validationError}`, { status: 400, headers: getCorsHeaders(request) });
         }
 
         const { page, year, title, type, type2, testNumber, simulation, county, local, file } = extractFormData(formData);
@@ -62,20 +73,20 @@ async function handleRequest(request: Request): Promise<Response> {
 
         try {
             await createPullRequest(storagePath, file, newFileName, page, type);
-            return new Response('Fișier încărcat cu succes', { status: 200, headers: corsHeaders });
+            return new Response('Fișier încărcat cu succes', { status: 200, headers: getCorsHeaders(request) });
         } catch (error) {
             console.log('Error creating pull request:', error);
-            return new Response('Eroare la crearea pull request-ului', { status: 500, headers: corsHeaders });
+            return new Response('Eroare la crearea pull request-ului', { status: 500, headers: getCorsHeaders(request) });
         }
     }
 
-    return new Response('Metodă nepermisă', { status: 405, headers: corsHeaders });
+    return new Response('Metodă nepermisă', { status: 405, headers: getCorsHeaders(request) });
 }
 
 function handleOptions(): Response {
     return new Response(null, {
         status: 204,
-        headers: corsHeaders
+        headers: getCorsHeaders(request)
     });
 }
 
