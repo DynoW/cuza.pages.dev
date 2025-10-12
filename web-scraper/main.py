@@ -40,10 +40,14 @@ class BacExamScraper:
         self.current_year = year if year is not None else datetime.now().year
         
         # URL patterns for the current year
+        self.archive_on = True
+
+        self.set_archive = self.current_year if self.archive_on else ""
+
         self.urls = [
-            f"https://subiecte.edu.ro/{self.current_year}/bacalaureat/modeledesubiecte/probescrise/",
-            f"https://subiecte.edu.ro/{self.current_year}/simulare/simulare_bac_XII/",
-            f"https://subiecte.edu.ro/{self.current_year}/bacalaureat/Subiecte_si_bareme/"
+            f"http://subiecte{self.set_archive}.edu.ro/{self.current_year}/bacalaureat/modeledesubiecte/probescrise/",
+            f"http://subiecte{self.set_archive}.edu.ro/{self.current_year}/simulare/simulare_bac_XII/",
+            f"http://subiecte{self.set_archive}.edu.ro/{self.current_year}/bacalaureat/Subiecte_si_bareme/"
         ]
         
         # Subject mapping for file organization
