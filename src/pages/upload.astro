@@ -122,13 +122,42 @@ import Layout from "../layouts/Layout.astro";
             <label for="file" class="font-bold">Selectează PDF:</label>
             <input type="file" id="file" name="file" accept="application/pdf" required class="p-2 border border-gray-300 rounded" />
 
+            <style>
+                /* Style the native file input button where supported */
+                input[type=file]::-webkit-file-upload-button {
+                    background-color: #3b82f6; /* blue-500 */
+                    color: white;
+                    border: none;
+                    padding: 0.5rem 0.75rem;
+                    margin-right: 0.5rem;
+                    border-radius: 0.375rem; /* rounded */
+                    cursor: pointer;
+                }
+
+                /* Newer spec */
+                input[type=file]::file-selector-button {
+                    background-color: #3b82f6;
+                    color: white;
+                    border: none;
+                    padding: 0.5rem 0.75rem;
+                    margin-right: 0.5rem;
+                    border-radius: 0.375rem;
+                    cursor: pointer;
+                }
+
+                /* Keep the rest of the input looking consistent */
+                input[type=file] {
+                    display: inline-block;
+                }
+            </style>
+
             <button type="submit" class="bg-blue-500 text-white p-2 rounded mt-4 cursor-pointer hover:bg-blue-600">Încarcă</button>
         </form>
         <div id="message" class="mt-4 text-center"></div>
     </div>
 
     <!-- The Modal -->
-    <div id="passwordModal" class="modal fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div id="passwordModal" class="modal fixed inset-0 items-center justify-center backdrop-blur-sm bg-black/50 opacity-0 pointer-events-none transition-opacity duration-200">
         <div class="modal-content bg-white p-6 rounded-lg shadow-lg w-80">
             <div class="modal-content-heading flex justify-between items-center">
                 <label for="passwordInput" class="passwordInputText font-bold">Introdu parola</label>
@@ -283,16 +312,22 @@ import Layout from "../layouts/Layout.astro";
         if (form && messageDiv && modal && closeModal && submitPasswordBtn) {
             form.addEventListener("submit", async (event) => {
                 event.preventDefault();
-                modal.classList.remove("hidden");
+                // show modal: enable flex layout and make it visible
+                modal.classList.add("flex");
+                // trigger visible state
+                modal.classList.remove("opacity-0", "pointer-events-none");
             });
 
             (closeModal as HTMLElement).onclick = function () {
-                modal.classList.add("hidden");
+                // hide modal: reverse visible state then remove flex after transition
+                modal.classList.add("opacity-0", "pointer-events-none");
+                setTimeout(() => modal.classList.remove("flex"), 200);
             };
 
             window.onclick = function (event) {
                 if (event.target == modal) {
-                    modal.classList.add("hidden");
+                    modal.classList.add("opacity-0", "pointer-events-none");
+                    setTimeout(() => modal.classList.remove("flex"), 200);
                 }
             };
 
