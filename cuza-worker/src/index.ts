@@ -44,7 +44,7 @@ self.addEventListener('fetch', (event: FetchEvent) => {
 
 async function handleRequest(request: Request): Promise<Response> {
     if (request.method === 'OPTIONS') {
-        return handleOptions();
+        return handleOptions(request);
     }
 
     if (request.method === 'POST') {
@@ -83,7 +83,7 @@ async function handleRequest(request: Request): Promise<Response> {
     return new Response('Metodă nepermisă', { status: 405, headers: getCorsHeaders(request) });
 }
 
-function handleOptions(): Response {
+function handleOptions(request: Request): Response {
     return new Response(null, {
         status: 204,
         headers: getCorsHeaders(request)
