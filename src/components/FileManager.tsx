@@ -1,770 +1,675 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Folder,
-  File,
-  Upload,
-  Download,
-  Edit2,
-  Trash2,
-  Move,
-  X,
-  Check,
-  ChevronRight,
-  Home,
-  RotateCcw,
-  MoreVertical,
-  Search,
-  Plus,
-  FolderPlus,
+	ArrowUpDown,
+	Download,
+	Folder,
+	File as FileIcon,
+	Loader2,
+	Pencil,
+	Plus,
+	RefreshCcw,
+	Trash2,
+	UploadCloud,
+	X
 } from 'lucide-react';
 
-interface FileItem {
-  name: string;
-  path: string;
-  type: 'file' | 'folder';
-  size?: number;
-  lastModified?: string;
+type EntryType = 'file' | 'folder';
+
+interface FileManagerEntry {
+	type: EntryType;
+	name: string;
+	key: string;
+	size: number | null;
+	uploaded: string | null;
+	contentType: string | null;
 }
 
-interface ContextMenuPosition {
-  x: number;
-  y: number;
+interface BreadcrumbItem {
+	name: string;
+	prefix: string;
 }
 
-interface FileManagerProps {
-  workerUrl?: string;
+interface ListResponse {
+	prefix: string;
+	parentPrefix: string | null;
+	breadcrumbs: BreadcrumbItem[];
+	entries: FileManagerEntry[];
 }
 
-const FileManager: React.FC<FileManagerProps> = ({ 
-  workerUrl = 'http://localhost:8787' 
-}) => {
-  const [currentPath, setCurrentPath] = useState<string>('');
-  const [files, setFiles] = useState<FileItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
-  const [contextMenu, setContextMenu] = useState<{
-    visible: boolean;
-    position: ContextMenuPosition;
-    item?: FileItem;
-  }>({ visible: false, position: { x: 0, y: 0 } });
-  
-  // Modal states
-  const [showRenameModal, setShowRenameModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showMoveModal, setShowMoveModal] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
-  
-  // Operation states
-  const [renameItem, setRenameItem] = useState<FileItem | null>(null);
-  const [deleteItems, setDeleteItems] = useState<FileItem[]>([]);
-  const [moveItems, setMoveItems] = useState<FileItem[]>([]);
-  const [newName, setNewName] = useState('');
-  const [newFolderName, setNewFolderName] = useState('');
-  const [moveDestination, setMoveDestination] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  // File upload
-  const [uploadFiles, setUploadFiles] = useState<FileList | null>(null);
-  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
-  const [isDragging, setIsDragging] = useState(false);
-  
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const contextMenuRef = useRef<HTMLDivElement>(null);
+type BannerState = { type: 'success' | 'error'; message: string } | null;
+type ActionState = { message: string } | null;
 
-  // Drag and drop handlers
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
+const workerBase = (import.meta.env.WORKER_URL as string | undefined)?.replace(/\/$/, '') || 'http://localhost:8787';
+const managerEndpoint = `${workerBase}/file-manager`;
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    // Only set dragging to false if we're leaving the entire file manager
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setIsDragging(false);
-    }
-  };
+const formatSize = (value: number | null): string => {
+	if (!value || value <= 0) {
+		return '—';
+	}
+	const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+	let size = value;
+	let unitIndex = 0;
+	while (size >= 1024 && unitIndex < units.length - 1) {
+		size /= 1024;
+		unitIndex += 1;
+	}
+	return `${size.toFixed(size < 10 && unitIndex > 0 ? 1 : 0)} ${units[unitIndex]}`;
+};
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      setUploadFiles(files);
-      setShowUploadModal(true);
-    }
-  };
+const formatUploaded = (value: string | null): string => {
+	if (!value) {
+		return '—';
+	}
+	const date = new Date(value);
+	if (Number.isNaN(date.getTime())) {
+		return '—';
+	}
+	const day = date.toLocaleDateString('ro-RO', {
+		day: '2-digit',
+		month: 'short'
+	});
+	const time = date.toLocaleTimeString('ro-RO', {
+		hour: '2-digit',
+		minute: '2-digit'
+	});
+	return `${day}, ${time}`;
+};
 
-  // Load files for current path
-  const loadFiles = async (path: string = currentPath) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch(`${workerUrl}/files/list?path=${encodeURIComponent(path)}`);
-      if (!response.ok) {
-        throw new Error(`Failed to load files: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      setFiles(data.files || []);
-      setCurrentPath(path);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load files');
-    } finally {
-      setLoading(false);
-    }
-  };
+const encodeKeyForUrl = (key: string): string => key.split('/').map(encodeURIComponent).join('/');
 
-  // Navigate to folder
-  const navigateToFolder = (folderPath: string) => {
-    loadFiles(folderPath);
-    setSelectedFiles(new Set());
-  };
+const ensureTrailingSlash = (prefix: string): string => {
+	if (!prefix) {
+		return '';
+	}
+	return prefix.endsWith('/') ? prefix : `${prefix}/`;
+};
 
-  // Navigate up one level
-  const navigateUp = () => {
-    if (currentPath) {
-      const parentPath = currentPath.split('/').slice(0, -1).join('/');
-      navigateToFolder(parentPath);
-    }
-  };
+const getFolderName = (key: string): string => key.split('/').filter(Boolean).at(-1) ?? '';
 
-  // Get breadcrumb items
-  const getBreadcrumbs = () => {
-    if (!currentPath) return [{ name: 'Root', path: '' }];
-    
-    const parts = currentPath.split('/').filter(Boolean);
-    const breadcrumbs = [{ name: 'Root', path: '' }];
-    
-    let currentPathBuilder = '';
-    for (const part of parts) {
-      currentPathBuilder += (currentPathBuilder ? '/' : '') + part;
-      breadcrumbs.push({ name: part, path: currentPathBuilder });
-    }
-    
-    return breadcrumbs;
-  };
+const FileManager: React.FC = () => {
+	const [entries, setEntries] = useState<FileManagerEntry[]>([]);
+	const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([{ name: 'Drive', prefix: '' }]);
+	const [currentPrefix, setCurrentPrefix] = useState<string>('');
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [searchTerm, setSearchTerm] = useState<string>('');
+	const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+	const [toast, setToast] = useState<BannerState>(null);
+	const [actionState, setActionState] = useState<ActionState>(null);
+	const [highlightedFolder, setHighlightedFolder] = useState<string | null>(null);
+	const [highlightedBreadcrumb, setHighlightedBreadcrumb] = useState<string | null>(null);
+	const [isDropActive, setIsDropActive] = useState<boolean>(false);
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle file selection
-  const toggleFileSelection = (filePath: string) => {
-    const newSelection = new Set(selectedFiles);
-    if (newSelection.has(filePath)) {
-      newSelection.delete(filePath);
-    } else {
-      newSelection.add(filePath);
-    }
-    setSelectedFiles(newSelection);
-  };
+	const showBanner = useCallback((state: BannerState) => {
+		setToast(state);
+		if (state) {
+			window.setTimeout(() => setToast(null), 4000);
+		}
+	}, []);
 
-  // Handle context menu
-  const handleContextMenu = (e: React.MouseEvent, item?: FileItem) => {
-    e.preventDefault();
-    setContextMenu({
-      visible: true,
-      position: { x: e.clientX, y: e.clientY },
-      item,
-    });
-  };
+	const fetchEntries = useCallback(
+		async (prefix: string, options?: { showLoadingToast?: boolean; loadingMessage?: string }) => {
+			const showLoadingToast = options?.showLoadingToast ?? false;
+			const loadingMessage = options?.loadingMessage ?? 'Se încarcă fișierele...';
+			if (showLoadingToast) {
+				setToast(null);
+				setActionState({ message: loadingMessage });
+			}
+			setIsLoading(true);
+			try {
+				const url = new URL(managerEndpoint);
+				if (prefix) {
+					url.searchParams.set('prefix', prefix);
+				}
+				const response = await fetch(url.toString());
+				if (!response.ok) {
+					throw new Error(`Nu pot încărca conținutul (status ${response.status})`);
+				}
+				const data = (await response.json()) as ListResponse;
+				setEntries(data.entries);
+				setBreadcrumbs(data.breadcrumbs);
+				setCurrentPrefix(data.prefix ?? prefix ?? '');
+				setSelectedKeys(new Set());
+			} catch (error) {
+				console.error(error);
+				showBanner({ type: 'error', message: 'Nu am reușit să obțin lista de fișiere.' });
+			} finally {
+				if (showLoadingToast) {
+					setActionState(null);
+				}
+				setIsLoading(false);
+			}
+		},
+		[showBanner]
+	);
 
-  // Close context menu
-  const closeContextMenu = () => {
-    setContextMenu({ visible: false, position: { x: 0, y: 0 } });
-  };
+	useEffect(() => {
+			void fetchEntries('', { showLoadingToast: true });
+	}, [fetchEntries]);
 
-  // File operations
-  const handleRename = (item: FileItem) => {
-    setRenameItem(item);
-    setNewName(item.name);
-    setShowRenameModal(true);
-    closeContextMenu();
-  };
+	const filteredEntries = useMemo(() => {
+		if (!searchTerm.trim()) {
+			return entries;
+		}
+		const term = searchTerm.toLowerCase();
+		return entries.filter((entry) => entry.name.toLowerCase().includes(term));
+	}, [entries, searchTerm]);
 
-  const handleDelete = (items: FileItem[]) => {
-    setDeleteItems(items);
-    setShowDeleteModal(true);
-    closeContextMenu();
-  };
+	const toggleSelection = useCallback(
+		(entry: FileManagerEntry, multi: boolean) => {
+			setSelectedKeys((prev) => {
+				const next = new Set(prev);
+				if (!multi) {
+					next.clear();
+				}
+				if (next.has(entry.key)) {
+					next.delete(entry.key);
+				} else {
+					next.add(entry.key);
+				}
+				return next;
+			});
+		},
+		[]
+	);
 
-  const handleMove = (items: FileItem[]) => {
-    setMoveItems(items);
-    setMoveDestination(currentPath);
-    setShowMoveModal(true);
-    closeContextMenu();
-  };
+	const selectedEntries = useMemo(() => {
+		if (!selectedKeys.size) {
+			return [] as FileManagerEntry[];
+		}
+		return entries.filter((entry) => selectedKeys.has(entry.key));
+	}, [entries, selectedKeys]);
 
-  const handleDownload = (item: FileItem) => {
-    if (item.type === 'file') {
-      const link = document.createElement('a');
-      link.href = `${workerUrl}/${item.path}`;
-      link.download = item.name;
-      link.click();
-    }
-    closeContextMenu();
-  };
+	const openEntry = useCallback(
+		(entry: FileManagerEntry) => {
+			if (entry.type === 'folder') {
+				fetchEntries(entry.key);
+				return;
+			}
+			const url = `${workerBase}/files/${encodeKeyForUrl(entry.key)}`;
+			window.open(url, '_blank');
+		},
+		[fetchEntries]
+	);
 
-  // Perform rename operation
-  const performRename = async () => {
-    if (!renameItem || !newName.trim()) return;
-    
-    try {
-      const response = await fetch(`${workerUrl}/files/rename`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          oldPath: renameItem.path,
-          newName: newName.trim(),
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Rename failed: ${response.statusText}`);
-      }
-      
-      await loadFiles();
-      setShowRenameModal(false);
-      setRenameItem(null);
-      setNewName('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Rename failed');
-    }
-  };
+	const handleCreateFolder = useCallback(async () => {
+		const name = window.prompt('Numele noului folder');
+		if (!name) {
+			return;
+		}
+		try {
+			const response = await fetch(managerEndpoint, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ action: 'create-folder', prefix: currentPrefix, name })
+			});
+			if (!response.ok) {
+				throw new Error('Nu pot crea folderul');
+			}
+			showBanner({ type: 'success', message: `Folderul „${name}” a fost creat.` });
+			await fetchEntries(currentPrefix);
+		} catch (error) {
+			console.error(error);
+			showBanner({ type: 'error', message: 'Crearea folderului a eșuat.' });
+		}
+	}, [currentPrefix, fetchEntries, showBanner]);
 
-  // Perform delete operation
-  const performDelete = async () => {
-    if (deleteItems.length === 0) return;
-    
-    try {
-      const response = await fetch(`${workerUrl}/files/delete`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          paths: deleteItems.map(item => item.path),
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Delete failed: ${response.statusText}`);
-      }
-      
-      await loadFiles();
-      setShowDeleteModal(false);
-      setDeleteItems([]);
-      setSelectedFiles(new Set());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Delete failed');
-    }
-  };
+	const handleRename = useCallback(async (entry?: FileManagerEntry) => {
+		const target = entry ?? selectedEntries[0];
+		if (!target) {
+			return;
+		}
+		const proposed = window.prompt('Numele nou', target.name);
+		if (!proposed || proposed === target.name) {
+			return;
+		}
+		try {
+			const response = await fetch(managerEndpoint, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ action: 'rename', key: target.key, newName: proposed, type: target.type })
+			});
+			if (!response.ok) {
+				throw new Error('Nu pot redenumi elementul');
+			}
+			showBanner({ type: 'success', message: `„${target.name}” a devenit „${proposed}”.` });
+			await fetchEntries(currentPrefix);
+		} catch (error) {
+			console.error(error);
+			showBanner({ type: 'error', message: 'Redenumirea a eșuat.' });
+		}
+	}, [currentPrefix, fetchEntries, selectedEntries, showBanner]);
 
-  // Perform move operation
-  const performMove = async () => {
-    if (moveItems.length === 0 || !moveDestination) return;
-    
-    try {
-      const response = await fetch(`${workerUrl}/files/move`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: moveItems.map(item => item.path),
-          destination: moveDestination,
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Move failed: ${response.statusText}`);
-      }
-      
-      await loadFiles();
-      setShowMoveModal(false);
-      setMoveItems([]);
-      setSelectedFiles(new Set());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Move failed');
-    }
-  };
+const handleDelete = useCallback(async (entry?: FileManagerEntry) => {
+	const targets = entry
+		? [entry]
+		: selectedEntries;
+	if (!targets.length) {
+		return;
+	}
+	const confirmation = window.confirm(
+		targets.length === 1
+			? `Sigur vrei să ștergi „${targets[0].name}”?`
+			: 'Sigur vrei să ștergi elementele selectate?'
+	);
+		if (!confirmation) {
+			return;
+		}
+		try {
+			const response = await fetch(managerEndpoint, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					action: 'delete',
+				items: targets.map((item) => ({ key: item.key, type: item.type }))
+				})
+			});
+			if (!response.ok) {
+				throw new Error('Nu pot șterge elementele');
+			}
+		showBanner({
+			type: 'success',
+			message: targets.length === 1 ? 'Elementul a fost șters.' : 'Elementele au fost șterse.'
+		});
+			await fetchEntries(currentPrefix);
+		} catch (error) {
+			console.error(error);
+			showBanner({ type: 'error', message: 'Ștergerea a eșuat.' });
+		}
+	}, [currentPrefix, fetchEntries, selectedEntries, showBanner]);
 
-  // Handle file upload
-  const handleFileUpload = async () => {
-    if (!uploadFiles) return;
-    
-    try {
-      const files = Array.from(uploadFiles);
-      
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('path', `${currentPath ? currentPath + '/' : ''}${file.name}`);
-        
-        setUploadProgress(prev => ({ ...prev, [file.name]: 0 }));
-        
-        const response = await fetch(`${workerUrl}/upload`, {
-          method: 'POST',
-          body: formData,
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Upload failed for ${file.name}: ${response.statusText}`);
-        }
-        
-        setUploadProgress(prev => ({ ...prev, [file.name]: 100 }));
-      }
-      
-      await loadFiles();
-      setShowUploadModal(false);
-      setUploadFiles(null);
-      setUploadProgress({});
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
-    }
-  };
+const handleDownload = useCallback((entry?: FileManagerEntry) => {
+	const files = entry ? (entry.type === 'file' ? [entry] : []) : selectedEntries.filter((item) => item.type === 'file');
+	files.forEach((file) => {
+			const url = `${workerBase}/files/${encodeKeyForUrl(file.key)}`;
+			const anchor = document.createElement('a');
+			anchor.href = url;
+			anchor.download = file.name;
+			anchor.rel = 'noopener';
+			anchor.click();
+		});
+	}, [selectedEntries]);
 
-  // Create new folder
-  const createFolder = async () => {
-    if (!newFolderName.trim()) return;
-    
-    try {
-      const response = await fetch(`${workerUrl}/files/create-folder`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          path: `${currentPath ? currentPath + '/' : ''}${newFolderName.trim()}`,
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Create folder failed: ${response.statusText}`);
-      }
-      
-      await loadFiles();
-      setShowCreateFolderModal(false);
-      setNewFolderName('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Create folder failed');
-    }
-  };
+	const refresh = useCallback(() => {
+		fetchEntries(currentPrefix);
+	}, [currentPrefix, fetchEntries]);
 
-  // Format file size
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return '-';
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
-  };
+	const uploadFiles = useCallback(
+		async (files: FileList | File[] | null, targetPrefix: string) => {
+			if (!files || (files instanceof FileList && files.length === 0)) {
+				return;
+			}
+			const workingSet = files instanceof FileList ? Array.from(files) : files;
+			if (!workingSet.length) {
+				return;
+			}
+			const formData = new FormData();
+			formData.append('prefix', targetPrefix);
+			workingSet.forEach((file) => formData.append('files', file));
+			try {
+				const response = await fetch(managerEndpoint, {
+					method: 'POST',
+					body: formData
+				});
+				if (!response.ok) {
+					throw new Error('Nu pot încărca fișierele');
+				}
+				showBanner({ type: 'success', message: `${workingSet.length} fișier(e) încărcate.` });
+				await fetchEntries(currentPrefix);
+			} catch (error) {
+				console.error(error);
+				showBanner({ type: 'error', message: 'Încărcarea a eșuat.' });
+			}
+		},
+		[currentPrefix, fetchEntries, showBanner]
+	);
 
-  // Filter files based on search query
-  const filteredFiles = files.filter(file =>
-    file.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+	const handleFileInput = useCallback(
+		(event: React.ChangeEvent<HTMLInputElement>) => {
+			uploadFiles(event.target.files, currentPrefix);
+			event.target.value = '';
+		},
+		[currentPrefix, uploadFiles]
+	);
 
-  // Handle click outside context menu
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (contextMenuRef.current && !contextMenuRef.current.contains(event.target as Node)) {
-        closeContextMenu();
-      }
-    };
+	const performMove = useCallback(
+		async (items: Array<{ key: string; type: EntryType }>, destination: string) => {
+			if (!items.length) {
+				return;
+			}
+			const destinationBase = ensureTrailingSlash(destination);
+			let selfMoveAttempt = false;
+			const movableItems = items.filter((item) => {
+				if (item.type === 'folder') {
+					const sourcePrefix = ensureTrailingSlash(item.key);
+					const folderName = getFolderName(item.key);
+					if (!folderName) {
+						return false;
+					}
+					const destPrefix = destinationBase + ensureTrailingSlash(folderName);
+					if (destPrefix === sourcePrefix) {
+						return false;
+					}
+					if (destPrefix.startsWith(sourcePrefix)) {
+						selfMoveAttempt = true;
+						return false;
+					}
+					return true;
+				}
+				const fileName = item.key.split('/').pop() || item.key;
+				const targetKey = `${destinationBase}${fileName}`;
+				return targetKey !== item.key;
+			});
 
-    if (contextMenu.visible) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
+			if (!movableItems.length) {
+				if (selfMoveAttempt) {
+					showBanner({ type: 'error', message: 'Nu poți muta un folder în interiorul său.' });
+				}
+				return;
+			}
+			try {
+				setToast(null);
+				setActionState({ message: 'Mut elementele selectate...' });
+				const response = await fetch(managerEndpoint, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ action: 'move', destination, items: movableItems })
+				});
+				if (!response.ok) {
+					throw new Error('Nu pot muta elementele');
+				}
+				setActionState(null);
+				showBanner({ type: 'success', message: 'Elementele au fost mutate.' });
+				await fetchEntries(currentPrefix);
+			} catch (error) {
+				console.error(error);
+				setActionState(null);
+				showBanner({ type: 'error', message: 'Mutarea a eșuat.' });
+			} finally {
+				setActionState(null);
+			}
+		},
+		[currentPrefix, fetchEntries, showBanner]
+	);
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [contextMenu.visible]);
+	const collectDraggedItems = useCallback(
+		(anchor: FileManagerEntry): Array<{ key: string; type: EntryType }> => {
+			if (selectedKeys.has(anchor.key)) {
+				return entries
+					.filter((entry) => selectedKeys.has(entry.key))
+					.map((entry) => ({ key: entry.key, type: entry.type }));
+			}
+			return [{ key: anchor.key, type: anchor.type }];
+		},
+		[entries, selectedKeys]
+	);
 
-  // Load files on mount
-  useEffect(() => {
-    loadFiles('');
-  }, []);
+	const handleDragStart = useCallback(
+		(event: React.DragEvent<HTMLDivElement>, entry: FileManagerEntry) => {
+			const items = collectDraggedItems(entry);
+			event.dataTransfer.effectAllowed = 'move';
+			event.dataTransfer.setData('application/x-filemanager-items', JSON.stringify(items));
+		},
+		[collectDraggedItems]
+	);
 
-  const getSelectedItems = () => {
-    return files.filter(file => selectedFiles.has(file.path));
-  };
+	const handleRowDrop = useCallback(
+		async (event: React.DragEvent<HTMLDivElement>, target: FileManagerEntry) => {
+			event.preventDefault();
+			setHighlightedFolder(null);
+			setIsDropActive(false);
+			setHighlightedBreadcrumb(null);
+			const raw = event.dataTransfer.getData('application/x-filemanager-items');
+			if (raw) {
+				try {
+					const items = JSON.parse(raw) as Array<{ key: string; type: EntryType }>;
+					await performMove(items, target.key);
+				} catch (error) {
+					console.error(error);
+					showBanner({ type: 'error', message: 'Nu pot muta elementele.' });
+				}
+				return;
+			}
+			if (event.dataTransfer.files?.length) {
+				uploadFiles(event.dataTransfer.files, target.key);
+			}
+		},
+		[performMove, showBanner, uploadFiles]
+	);
 
-  return (
-    <div 
-      className={`file-manager ${isDragging ? 'dragging' : ''}`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      {/* Header */}
-      <div className="file-manager-header">
-        <div className="file-manager-toolbar">
-          <button onClick={() => navigateToFolder('')} className="toolbar-btn" title="Home">
-            <Home />
-          </button>
-          <button onClick={() => loadFiles()} className="toolbar-btn" title="Refresh">
-            <RotateCcw className={loading ? 'animate-spin' : ''} />
-          </button>
-          <button onClick={() => setShowUploadModal(true)} className="toolbar-btn" title="Upload Files">
-            <Upload />
-          </button>
-          <button onClick={() => setShowCreateFolderModal(true)} className="toolbar-btn" title="Create Folder">
-            <FolderPlus />
-          </button>
-          
-          {selectedFiles.size > 0 && (
-            <>
-              <div className="toolbar-separator" />
-              <button
-                onClick={() => handleDelete(getSelectedItems())}
-                className="toolbar-btn text-red-400 hover:text-red-300"
-                title="Delete Selected"
-              >
-                <Trash2 />
-              </button>
-              <button
-                onClick={() => handleMove(getSelectedItems())}
-                className="toolbar-btn"
-                title="Move Selected"
-              >
-                <Move />
-              </button>
-            </>
-          )}
-        </div>
-        
-        <div className="search-box">
-          <Search className="search-icon" />
-          <input
-            type="text"
-            placeholder="Search files..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
-          />
-        </div>
-      </div>
+	const handleBackgroundDrop = useCallback(
+		async (event: React.DragEvent<HTMLDivElement>) => {
+			event.preventDefault();
+			setIsDropActive(false);
+			setHighlightedFolder(null);
+			setHighlightedBreadcrumb(null);
+			const raw = event.dataTransfer.getData('application/x-filemanager-items');
+			if (raw) {
+				try {
+					const items = JSON.parse(raw) as Array<{ key: string; type: EntryType }>;
+					await performMove(items, currentPrefix);
+				} catch (error) {
+					console.error(error);
+					showBanner({ type: 'error', message: 'Nu pot muta elementele.' });
+				}
+				return;
+			}
+			const files = event.dataTransfer.files;
+			if (files?.length) {
+				uploadFiles(files, currentPrefix);
+			}
+		},
+		[currentPrefix, performMove, showBanner, uploadFiles]
+	);
 
-      {/* Breadcrumbs */}
-      <div className="breadcrumbs">
-        {getBreadcrumbs().map((crumb, index) => (
-          <React.Fragment key={crumb.path}>
-            {index > 0 && <ChevronRight className="breadcrumb-separator" />}
-            <button
-              onClick={() => navigateToFolder(crumb.path)}
-              className={`breadcrumb ${index === getBreadcrumbs().length - 1 ? 'active' : ''}`}
-            >
-              {crumb.name}
-            </button>
-          </React.Fragment>
-        ))}
-      </div>
+	return (
+		<>
+			<div className="drive-shell">
+			<input ref={fileInputRef} type="file" multiple hidden onChange={handleFileInput} />
+			<div className="drive-header">
+				<div className="drive-header-left">
+					<div className="drive-title">Contul meu Drive</div>
+					<div className="drive-breadcrumbs">
+						{breadcrumbs.map((crumb, index) => {
+							const crumbPrefix = crumb.prefix ?? '';
+							const isActiveDrop = highlightedBreadcrumb === crumbPrefix;
+							return (
+								<button
+									key={crumb.prefix + index}
+									className={`drive-breadcrumb ${isActiveDrop ? 'drive-breadcrumb-drop' : ''}`}
+									onClick={() => fetchEntries(crumb.prefix)}
+									onDragOver={(event) => {
+										if (event.dataTransfer.types.includes('application/x-filemanager-items') || event.dataTransfer.types.includes('Files')) {
+											event.preventDefault();
+											event.dataTransfer.dropEffect = event.dataTransfer.types.includes('application/x-filemanager-items') ? 'move' : 'copy';
+											setHighlightedBreadcrumb(crumbPrefix);
+										}
+									}}
+									onDragLeave={() => {
+										setHighlightedBreadcrumb((current) => (current === crumbPrefix ? null : current));
+									}}
+									onDrop={(event) => {
+										event.preventDefault();
+										setHighlightedBreadcrumb(null);
+										setIsDropActive(false);
+										setHighlightedFolder(null);
+										const raw = event.dataTransfer.getData('application/x-filemanager-items');
+										if (raw) {
+											try {
+												const items = JSON.parse(raw) as Array<{ key: string; type: EntryType }>;
+												void performMove(items, crumbPrefix);
+											} catch (error) {
+												console.error(error);
+												showBanner({ type: 'error', message: 'Nu pot muta elementele.' });
+											}
+											return;
+										}
+										const files = event.dataTransfer.files;
+										if (files?.length) {
+											uploadFiles(files, crumbPrefix);
+										}
+									}}
+								>
+									{crumb.name}
+									{index < breadcrumbs.length - 1 ? <span className="drive-breadcrumb-separator">›</span> : null}
+								</button>
+							);
+						})}
+					</div>
+				</div>
+				<div className="drive-header-right">
+					<div className="drive-search">
+						<input
+							value={searchTerm}
+							placeholder="Caută în Drive"
+							onChange={(event) => setSearchTerm(event.target.value)}
+						/>
+					</div>
+					<div className="drive-main-actions">
+						<button className="drive-action" onClick={handleCreateFolder}>
+							<Plus size={16} />
+							Nou
+						</button>
+						<button className="drive-action" onClick={() => fileInputRef.current?.click()}>
+							<UploadCloud size={16} />
+							Încarcă
+						</button>
+						<button className="drive-icon-button" onClick={refresh} title="Reîncarcă">
+							<RefreshCcw size={16} />
+						</button>
+					</div>
+				</div>
+			</div>
 
-      {/* Error display */}
-      {error && (
-        <div className="error-message">
-          <span>{error}</span>
-          <button onClick={() => setError(null)} className="error-close">
-            <X />
-          </button>
-        </div>
-      )}
+			<div
+				className={`drive-content ${isDropActive ? 'drive-content-drop' : ''}`}
+				onDragOver={(event) => {
+					if (event.dataTransfer.types.includes('application/x-filemanager-items') || event.dataTransfer.types.includes('Files')) {
+						event.preventDefault();
+						event.dataTransfer.dropEffect = event.dataTransfer.types.includes('application/x-filemanager-items') ? 'move' : 'copy';
+						setIsDropActive(true);
+					}
+				}}
+				onDragLeave={(event) => {
+					if (event.currentTarget === event.target) {
+						setIsDropActive(false);
+						setHighlightedFolder(null);
+						setHighlightedBreadcrumb(null);
+					}
+				}}
+				onDrop={handleBackgroundDrop}
+			>
+				<div className="drive-table-header">
+					<div className="drive-col-name">
+						<ArrowUpDown size={16} />
+						Nume
+					</div>
+					<div className="drive-col-owner">Proprietar</div>
+					<div className="drive-col-modified">Data modificării</div>
+					<div className="drive-col-size">Dimensiune</div>
+				</div>
 
-      {/* File list */}
-      <div className="file-list">
-        {loading ? (
-          <div className="loading">Loading files...</div>
-        ) : filteredFiles.length === 0 ? (
-          <div className="empty-state">
-            {searchQuery ? 'No files match your search' : 'This folder is empty'}
-          </div>
-        ) : (
-          filteredFiles.map((file) => (
-            <div
-              key={file.path}
-              className={`file-item ${selectedFiles.has(file.path) ? 'selected' : ''}`}
-              onClick={(e) => {
-                if (e.ctrlKey || e.metaKey) {
-                  toggleFileSelection(file.path);
-                } else if (file.type === 'folder') {
-                  navigateToFolder(file.path);
-                } else {
-                  setSelectedFiles(new Set([file.path]));
-                }
-              }}
-              onContextMenu={(e) => handleContextMenu(e, file)}
-            >
-              <div className="file-icon">
-                {file.type === 'folder' ? <Folder /> : <File />}
-              </div>
-              <div className="file-info">
-                <div className="file-name">{file.name}</div>
-                <div className="file-meta">
-                  {file.type === 'file' && (
-                    <>
-                      <span>{formatFileSize(file.size)}</span>
-                      {file.lastModified && (
-                        <span>{new Date(file.lastModified).toLocaleDateString()}</span>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-              <button
-                className="file-actions"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleContextMenu(e, file);
-                }}
-              >
-                <MoreVertical />
-              </button>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Context Menu */}
-      {contextMenu.visible && (
-        <div
-          ref={contextMenuRef}
-          className="context-menu"
-          style={{
-            left: contextMenu.position.x,
-            top: contextMenu.position.y,
-          }}
-        >
-          {contextMenu.item && (
-            <>
-              <button
-                onClick={() => handleRename(contextMenu.item!)}
-                className="context-menu-item"
-              >
-                <Edit2 /> Rename
-              </button>
-              {contextMenu.item.type === 'file' && (
-                <button
-                  onClick={() => handleDownload(contextMenu.item!)}
-                  className="context-menu-item"
-                >
-                  <Download /> Download
-                </button>
-              )}
-              <button
-                onClick={() => handleMove([contextMenu.item!])}
-                className="context-menu-item"
-              >
-                <Move /> Move
-              </button>
-              <div className="context-menu-separator" />
-              <button
-                onClick={() => handleDelete([contextMenu.item!])}
-                className="context-menu-item text-red-400 hover:text-red-300"
-              >
-                <Trash2 /> Delete
-              </button>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        className="hidden"
-        onChange={(e) => {
-          setUploadFiles(e.target.files);
-          setShowUploadModal(true);
-        }}
-      />
-
-      {/* Modals */}
-      {/* Rename Modal */}
-      {showRenameModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h3>Rename {renameItem?.type}</h3>
-              <button onClick={() => setShowRenameModal(false)} className="modal-close">
-                <X />
-              </button>
-            </div>
-            <div className="modal-body">
-              <input
-                type="text"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                className="modal-input"
-                placeholder="Enter new name"
-                autoFocus
-              />
-            </div>
-            <div className="modal-footer">
-              <button onClick={() => setShowRenameModal(false)} className="btn btn-secondary">
-                Cancel
-              </button>
-              <button onClick={performRename} className="btn btn-primary">
-                Rename
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Modal */}
-      {showDeleteModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h3>Delete {deleteItems.length === 1 ? deleteItems[0].type : `${deleteItems.length} items`}</h3>
-              <button onClick={() => setShowDeleteModal(false)} className="modal-close">
-                <X />
-              </button>
-            </div>
-            <div className="modal-body">
-              <p>
-                Are you sure you want to delete{' '}
-                {deleteItems.length === 1 ? (
-                  <strong>{deleteItems[0].name}</strong>
-                ) : (
-                  <strong>{deleteItems.length} items</strong>
-                )}
-                ? This action cannot be undone.
-              </p>
-            </div>
-            <div className="modal-footer">
-              <button onClick={() => setShowDeleteModal(false)} className="btn btn-secondary">
-                Cancel
-              </button>
-              <button onClick={performDelete} className="btn btn-danger">
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Move Modal */}
-      {showMoveModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h3>Move {moveItems.length === 1 ? moveItems[0].type : `${moveItems.length} items`}</h3>
-              <button onClick={() => setShowMoveModal(false)} className="modal-close">
-                <X />
-              </button>
-            </div>
-            <div className="modal-body">
-              <p className="mb-4">
-                Moving {moveItems.length === 1 ? (
-                  <strong>{moveItems[0].name}</strong>
-                ) : (
-                  <strong>{moveItems.length} items</strong>
-                )}
-              </p>
-              <input
-                type="text"
-                value={moveDestination}
-                onChange={(e) => setMoveDestination(e.target.value)}
-                className="modal-input"
-                placeholder="Enter destination path (leave empty for root)"
-              />
-            </div>
-            <div className="modal-footer">
-              <button onClick={() => setShowMoveModal(false)} className="btn btn-secondary">
-                Cancel
-              </button>
-              <button onClick={performMove} className="btn btn-primary">
-                Move
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Upload Modal */}
-      {showUploadModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h3>Upload Files</h3>
-              <button onClick={() => setShowUploadModal(false)} className="modal-close">
-                <X />
-              </button>
-            </div>
-            <div className="modal-body">
-              {!uploadFiles ? (
-                <div
-                  className="upload-zone"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="upload-icon" />
-                  <p>Click to select files or drag and drop</p>
-                </div>
-              ) : (
-                <div className="upload-files">
-                  {Array.from(uploadFiles).map((file) => (
-                    <div key={file.name} className="upload-file">
-                      <span>{file.name}</span>
-                      <span>{formatFileSize(file.size)}</span>
-                      {uploadProgress[file.name] !== undefined && (
-                        <div className="progress-bar">
-                          <div
-                            className="progress-fill"
-                            style={{ width: `${uploadProgress[file.name]}%` }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="modal-footer">
-              <button onClick={() => setShowUploadModal(false)} className="btn btn-secondary">
-                Cancel
-              </button>
-              {uploadFiles && (
-                <button onClick={handleFileUpload} className="btn btn-primary">
-                  Upload
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Create Folder Modal */}
-      {showCreateFolderModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h3>Create Folder</h3>
-              <button onClick={() => setShowCreateFolderModal(false)} className="modal-close">
-                <X />
-              </button>
-            </div>
-            <div className="modal-body">
-              <input
-                type="text"
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                className="modal-input"
-                placeholder="Enter folder name"
-                autoFocus
-              />
-            </div>
-            <div className="modal-footer">
-              <button onClick={() => setShowCreateFolderModal(false)} className="btn btn-secondary">
-                Cancel
-              </button>
-              <button onClick={createFolder} className="btn btn-primary">
-                Create
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+				<div className={`drive-table-body ${isLoading ? 'drive-loading' : ''}`}>
+					{isLoading && <div className="drive-spinner">Se încarcă...</div>}
+					{!isLoading && filteredEntries.length === 0 && (
+						<div className="drive-empty">Nu există elemente în acest director.</div>
+					)}
+					{!isLoading &&
+						filteredEntries.map((entry) => {
+							const isSelected = selectedKeys.has(entry.key);
+							const isFolder = entry.type === 'folder';
+							const isHighlight = highlightedFolder === entry.key;
+							return (
+								<div
+									key={entry.key}
+									className={`drive-row ${isSelected ? 'drive-row-selected' : ''} ${isFolder ? 'drive-row-folder' : ''} ${isHighlight ? 'drive-row-highlight' : ''}`}
+									draggable
+									onDragStart={(event) => handleDragStart(event, entry)}
+									onDragOver={isFolder ? (event) => {
+										if (event.dataTransfer.types.includes('application/x-filemanager-items') || event.dataTransfer.types.includes('Files')) {
+											event.preventDefault();
+											event.dataTransfer.dropEffect = event.dataTransfer.types.includes('application/x-filemanager-items') ? 'move' : 'copy';
+											setHighlightedFolder(entry.key);
+										}
+									} : undefined}
+									onDragLeave={isFolder ? () => setHighlightedFolder(null) : undefined}
+									onDrop={isFolder ? (event) => handleRowDrop(event, entry) : undefined}
+									onClick={(event) => toggleSelection(entry, event.metaKey || event.ctrlKey)}
+									onDoubleClick={() => openEntry(entry)}
+								>
+									<div className="drive-cell-name">
+										<span className="drive-icon-wrapper">
+											{isFolder ? <Folder size={18} /> : <FileIcon size={18} />}
+										</span>
+										<span className="drive-name">{entry.name}</span>
+									</div>
+									<div className="drive-cell-owner">eu</div>
+									<div className="drive-cell-modified">{formatUploaded(entry.uploaded)}</div>
+									<div className="drive-cell-size">
+										<span className="drive-size-label">{formatSize(entry.size)}</span>
+										<span className="drive-row-actions">
+											{entry.type === 'file' && (
+												<button
+													className="drive-row-action-button"
+													title="Descarcă"
+													onClick={(event) => {
+														event.stopPropagation();
+														handleDownload(entry);
+													}}
+												>
+													<Download size={16} />
+												</button>
+											)}
+											<button
+												className="drive-row-action-button"
+												title="Redenumește"
+												onClick={(event) => {
+													event.stopPropagation();
+													void handleRename(entry);
+												}}
+											>
+												<Pencil size={16} />
+											</button>
+											<button
+												className="drive-row-action-button"
+												title="Șterge"
+												onClick={(event) => {
+													event.stopPropagation();
+													void handleDelete(entry);
+												}}
+											>
+												<Trash2 size={16} />
+											</button>
+										</span>
+									</div>
+								</div>
+							);
+						})}
+				</div>
+			</div>
+			</div>
+			{(actionState || toast) && (
+				<div className="drive-toast-container">
+					{actionState && (
+						<div className="drive-toast drive-toast-loading">
+							<span className="drive-toast-icon">
+								<Loader2 size={16} />
+							</span>
+							<span>{actionState.message}</span>
+						</div>
+					)}
+					{toast && (
+						<div className={`drive-toast drive-toast-${toast.type}`}>
+							<span>{toast.message}</span>
+							<button className="drive-toast-dismiss" onClick={() => setToast(null)}>
+								<X size={16} />
+							</button>
+						</div>
+					)}
+				</div>
+			)}
+		</>
+	);
 };
 
 export default FileManager;
