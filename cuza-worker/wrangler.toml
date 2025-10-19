@@ -2,14 +2,14 @@ name = "cuza-worker"
 
 account_id = "f23d89f989b552da46a4049cb843423d"
 workers_dev = true
-compatibility_date = "2025-09-01"
+compatibility_date = "2025-10-19"
 main = "src/index.ts"
 
 # R2 Bucket Bindings
-[[r2_buckets]]
-binding = "FILES"
-bucket_name = "cuza-bucket"
-preview_bucket_name = "cuza-bucket"
+# [[r2_buckets]]
+# binding = "FILES"
+# bucket_name = "cuza-bucket"
+# preview_bucket_name = "cuza-bucket"
 
 # Environment variables for GitHub integration
 # [vars]

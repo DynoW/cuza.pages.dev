@@ -4,6 +4,18 @@ import sitemap from '@astrojs/sitemap';
 import react from "@astrojs/react";
 import compress from "astro-compress";
 
+const siteConfig = {
+  bucket_mode: "off", // "remote", "local", "off"
+  countdown: "on" // "on", "off"
+};
+
+const publicDefines = Object.entries(siteConfig).reduce((acc, [key, value]) => {
+  if (value !== undefined) {
+    acc[`import.meta.env.PUBLIC_${key.toUpperCase()}`] = JSON.stringify(value);
+  }
+  return acc;
+}, {});
+
 export default defineConfig({
   site: 'https://cuza.pages.dev',
   trailingSlash: 'never',
@@ -16,6 +28,7 @@ export default defineConfig({
     assets: 'file'
   },
   vite: {
+    define: publicDefines,
     build: {
       rollupOptions: {
         output: {
