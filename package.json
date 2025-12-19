@@ -11,19 +11,19 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/react": "^4.4.0",
+    "@astrojs/react": "^4.4.2",
     "@astrojs/sitemap": "^3.6.0",
     "@excalidraw/excalidraw": "^0.18.0",
-    "@tailwindcss/vite": "^4.1.11",
-    "@types/react": "^19.1.10",
-    "@types/react-dom": "^19.1.7",
-    "astro": "^5.14.1",
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "astro": "^5.16.5",
     "astro-compress": "^2.3.8",
     "astro-seo": "^0.8.4",
-    "lucide-react": "^0.545.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "sitemap": "^8.0.0",
-    "tailwindcss": "^4.1.11"
+    "lucide-react": "^0.561.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "sitemap": "^9.0.0",
+    "tailwindcss": "^4.1.18"
   }
 }

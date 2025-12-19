@@ -106,7 +106,7 @@ const host = resolveWorkerBaseUrl(bucketMode);
                 
                 return (
                   <li class="space-y-2" id={isYear ? key : undefined}>
-                    {showDivider && <hr class="border-black m-2" />}
+                    {showDivider && <hr class="border-black m-2" />} {/* dark-reader: border-zinc-400 */}
                     <div class="folder-container">
                       <div 
                         class={`${classNames.text} flex items-center cursor-pointer folder-toggle`}

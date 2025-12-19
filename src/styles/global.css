@@ -37,11 +37,11 @@
 
 @layer utilities {
 	.extra-list { @apply flex flex-col space-y-2 lg:space-y-1; }
-	.extra-link { @apply text-slate-500 hover:text-slate-300; }
-	.extra-text { @apply text-slate-300; }
+	.extra-link { @apply text-slate-500 hover:text-slate-300; } /* dark-reader: text-zinc-500 hover:text-zinc-300 */
+	.extra-text { @apply text-slate-300; }/* dark-reader: text-zinc-300 */
 	.content-list { @apply space-y-4; }
-	.content-link { @apply text-slate-600 hover:text-slate-900 focus:text-slate-900 md:text-lg; }
-	.content-text { @apply text-gray-900 md:text-lg; }
+	.content-text { @apply text-gray-900 md:text-lg; } /* dark-reader: text-zinc-100 */
+	.content-link { @apply text-slate-600 hover:text-slate-900 focus:text-slate-900 md:text-lg; } /* dark-reader: text-zinc-400 hover:text-zinc-200 focus:text-zinc-200 */
 	.QR { @apply max-md:hidden; }
 	.shortcut-link { @apply text-slate-500 hover:text-slate-300 text-lg; }
 	.shortcut-pipe { @apply text-slate-500 text-lg; }
