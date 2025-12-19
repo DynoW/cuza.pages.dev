@@ -3,7 +3,7 @@
     class="flex items-center justify-between flex-row gap-2 md:flex-col lg:flex-row lg:gap-0"
   >
     <span class="text-sm font-medium text-slate-300">Vizualizare dosare:</span>
-    <div class="flex gap-2">
+    <div class="flex gap-2 text-white">
       <button
         id="collapse-all"
         class="expansion-option text-xs px-2 py-1 rounded bg-slate-700 cursor-pointer"
@@ -38,13 +38,11 @@
   /* Hover styles only apply to non-active buttons */
   .expansion-option:not(.active):hover {
     background-color: #475569 !important; /* slate-600 */
-    color: white !important;
   }
 
   /* Active button style */
   .expansion-option.active {
     background-color: #2563eb !important; /* blue-600 */
-    color: white !important;
   }
 </style>
 
