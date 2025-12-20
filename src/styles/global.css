@@ -21,6 +21,24 @@
 	}
 	html { scroll-behavior: smooth; }
 	a { transition: 0.2s; }
+
+	table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1rem 0;
+    }
+    th, td {
+        border: 1px solid #30363d;
+        padding: 6px 13px;
+        text-align: left;
+    }
+    th {
+        background-color: #161b22;
+        font-weight: 600;
+    }
+    tr:nth-child(even) {
+        background-color: #0d1117;
+    }
 }
 
 @layer components {
