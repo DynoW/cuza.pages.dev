@@ -4,7 +4,8 @@ import Navbar from "../../components/Navbar.astro";
 import Footer from "../../components/Footer.astro";
 import MainContainer from "../../layouts/MainContainer.astro";
 import Curs from "../../components/Curs.astro";
-const courses = import.meta.glob("../../content/info/*.md");
+import { getCollection } from 'astro:content';
+const infoCourses = await getCollection('info');
 ---
 
 <Layout title="informatica | cuza.pages.dev">
@@ -48,14 +49,10 @@ const courses = import.meta.glob("../../content/info/*.md");
       </h1>
       <ul>
         {
-          Object.keys(courses).map((path) => {
-            // Extract filename without extension from the path
-            // path will be something like "../../content/info/curs-1.md"
-            const filename = path.split('/').pop()?.replace('.md', '') || '';
-            
+          infoCourses.map(course => {
             return (
               <li class="bg-[#0d1117] rounded-3xl p-5 pr-4 mb-2 max-w-[95vw] select-text">
-                <Curs curs={filename} />
+                <Curs entry={course} />
               </li>
             );
           })

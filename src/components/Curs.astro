@@ -1,25 +1,19 @@
 ---
-import {getEntry} from "astro:content";
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
 
-const {curs} = Astro.props;
-
-let entry;
-let Content;
-let headings;
-
-if (curs) {
-    entry = await getEntry("info", curs);
-    if (entry) {
-        ({Content, headings} = await entry.render());
-    }
+interface Props {
+  entry: CollectionEntry<'info'>;
 }
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
 ---
 
 {entry ? (
     <>
         <p>{entry.data.title} &nbsp; {entry.data.description}</p>
         <article class="flex flex-col gap-2">
-            {/* @ts-ignore */}
             <Content />
         </article>
     </>
