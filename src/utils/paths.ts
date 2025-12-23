@@ -49,9 +49,16 @@ export function getValidPages(subject: string): string[] {
   return fs
     .readdirSync(subjectPath)
     .filter(file => 
-      fs.statSync(path.join(subjectPath, file)).isDirectory() && 
-      file !== "bac"
+      fs.statSync(path.join(subjectPath, file)).isDirectory()
     );
+}
+
+/**
+ * Get the first/primary page for a given subject
+ */
+export function getFirstPage(subject: string): string {
+  const pages = getValidPages(subject);
+  return pages.length > 0 ? pages[0] : "bac";
 }
 
 /**

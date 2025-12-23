@@ -16,11 +16,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            web-scraper
+            files
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
@@ -29,10 +33,10 @@ jobs:
       - name: Run Fetch Script
         run: python web-scraper/main.py
 
-      - name: Commit and Push changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "🤖 Auto-fetch: New BAC exam files for ${{ steps.date.outputs.date }}"
-          file_pattern: 'files/*'
-          skip_dirty_check: false
-          create_branch: false
+      # - name: Commit and Push changes
+      #   uses: stefanzweifel/git-auto-commit-action@v5
+      #   with:
+      #     commit_message: "🤖 Auto-fetch: New BAC exam files for ${{ steps.date.outputs.date }}"
+      #     file_pattern: 'files/*'
+      #     skip_dirty_check: false
+      #     create_branch: false

@@ -1,18 +1,10 @@
 ---
 import Page from "../../components/Page.astro";
-import fs from "fs";
-import path from "path";
+import { getValidSubjects, getFirstPage } from "../../utils/paths";
 
 export function getStaticPaths() {
-  // Get the absolute path to the files directory
-  const filesPath = path.join(process.cwd(), "files");
-
-  // Read directories in the files path to get subjects
-  const validSubjects = fs
-    .readdirSync(filesPath)
-    .filter((file) => fs.statSync(path.join(filesPath, file)).isDirectory());
   const removedSubjects = ["fizica", "admitere"];
-  const filteredSubjects = validSubjects.filter(
+  const filteredSubjects = getValidSubjects().filter(
     (subject) => !removedSubjects.includes(subject)
   );
 
@@ -23,6 +15,7 @@ export function getStaticPaths() {
 
 // Get the dynamic route parameter
 const { subject } = Astro.params;
+const firstPage = getFirstPage(subject!);
 ---
 
-<Page subject={subject} page="bac" />
+<Page subject={subject} page={firstPage} />

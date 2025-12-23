@@ -174,7 +174,8 @@ export class ApiService {
 
     const url = `${this.baseUrl}/files?subject=${encodeURIComponent(subject)}&page=${encodeURIComponent(page)}`;
     const response = await this.fetchJson<ApiResponse>(url);
-    console.log('Fetched content:', response);
+    // console.log('Fetched content:', response);
+    
     return response?.content || null;
   }
 

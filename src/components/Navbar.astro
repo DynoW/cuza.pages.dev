@@ -9,10 +9,14 @@ const currentPath: string[] = pathname.replace(".html", "").split("/");
 // Get the absolute path to the files directory
 const filesPath = path.join(process.cwd(), import.meta.env.FILES_DIR);
 
+function isDirectory(source: string): boolean {
+  return fs.lstatSync(source).isDirectory();
+}
+
 // Read directories in the files path to get subjects
 const validSubjects = fs
   .readdirSync(filesPath)
-  .filter((file) => fs.statSync(path.join(filesPath, file)).isDirectory());
+  .filter((file) => isDirectory(path.join(filesPath, file)));
 
 // Define the navStructure type to avoid TypeScript errors
 interface NavStructure {
@@ -34,7 +38,7 @@ validSubjects.forEach((subject) => {
   // Read subdirectories to get pages
   const subPages = fs.readdirSync(subjectPath).filter((file) => {
     const filePath = path.join(subjectPath, file);
-    return fs.statSync(filePath).isDirectory();
+    return isDirectory(filePath);
   });
 
   navStructure[subject] = subPages;
@@ -143,13 +147,8 @@ function isSubjectActive(subject: string): boolean {
 
 // Determine which subjects should have dropdown menus
 function shouldHaveDropdown(subject: string): boolean {
-  // info should not have a hover menu
-  // if (subject === "info") return false;
-  // romana should not have a hover menu
-  // if (subject === "romana") return false;
-
-  // Only show dropdown if the subject has pages
-  return navStructure[subject] && navStructure[subject].length > 0;
+  // Only show dropdown if the subject has more than one page
+  return navStructure[subject] && navStructure[subject].length > 1;
 }
 ---
 
@@ -273,25 +272,12 @@ function shouldHaveDropdown(subject: string): boolean {
                                 Bac
                               </a>
                             )}
-                            {/* For other subjects with no page (except admitere), it points to /subject */}
-                            {subject !== "fizica" &&
-                              subject !== "admitere" &&
-                              subject !== "notite" && (
-                                <a
-                                  class={
-                                    isActive(subject, null)
-                                      ? "text-lg font-bold hover:text-lime-400 text-lime-400"
-                                      : "text-lg font-bold hover:text-lime-400 text-blue-500"
-                                  }
-                                  rel="prefetch"
-                                  href={`/${subject}`}
-                                >
-                                  Bac
-                                </a>
-                              )}
-                            {/* Render subpages except 'bac' which we handled above for non-admitere subjects */}
+                            {/* Show all pages for the subject */}
                             {pages
-                              .filter((page: string) => page !== "bac")
+                              .filter(
+                                (page: string) =>
+                                  !(subject === "fizica" && page === "bac")
+                              )
                               .map((page: string) => (
                                 <a
                                   class={
@@ -310,12 +296,12 @@ function shouldHaveDropdown(subject: string): boolean {
                       ) : (
                         <a
                           class={
-                            isActive(subject, null)
+                            isActive(subject, pages[0])
                               ? "text-lg font-bold hover:text-lime-400 text-lime-400"
                               : "text-lg font-bold hover:text-lime-400 text-blue-500"
                           }
                           rel="prefetch"
-                          href={`/${subject}`}
+                          href={getNavUrl(subject, pages[0])}
                         >
                           {getDisplayName(subject)}
                         </a>
