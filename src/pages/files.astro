@@ -5,5 +5,5 @@ import "../styles/file-manager.css";
 ---
 
 <Layout title="File Manager - Cuza Pages" backgroundImage={false}>
-    {import.meta.env.BUCKET_MODE !== 'off' && <FileManager client:load />}
+    {import.meta.env.BUCKET_MODE !== 'off' && <FileManager />} <!-- Should I use client:load here? -->
 </Layout>

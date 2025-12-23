@@ -187,7 +187,7 @@ if (month === 11) {
           set:html={JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
-            itemListElement: breadcrumbs.map((crumb, index) => ({
+            itemListElement: breadcrumbs.map((crumb: { name: string; url: string }, index: number) => ({
               "@type": "ListItem",
               position: index + 1,
               name: crumb.name,

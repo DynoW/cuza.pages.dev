@@ -7,6 +7,12 @@ declare module '*.css' {
 }
 
 interface ImportMetaEnv {
+  readonly BASE_URL: string;
+  readonly DEV: boolean;
+  readonly MODE: string;
+  readonly PROD: boolean;
+  readonly SSR: boolean;
+
   readonly WORKER_URL?: string;
   readonly LOCAL_WORKER_URL?: string;
   readonly PUBLIC_WORKER_URL: string;
@@ -17,12 +23,4 @@ interface ImportMetaEnv {
 
 interface ImportMeta {
   readonly env: ImportMetaEnv;
-}
-
-// Extend Astro's HTML attributes to include Astro-specific directives
-declare namespace astroHTML.JSX {
-  interface HTMLAttributes {
-    'set:html'?: string;
-    'is:inline'?: boolean;
-  }
 }
