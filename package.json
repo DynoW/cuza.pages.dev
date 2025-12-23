@@ -20,10 +20,15 @@
     "astro": "^5.16.5",
     "astro-compress": "^2.3.8",
     "astro-seo": "^0.8.4",
+    "autoprefixer": "^10.4.23",
+    "cssnano": "^7.1.2",
     "lucide-react": "^0.561.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "sitemap": "^9.0.0",
     "tailwindcss": "^4.1.18"
+  },
+  "devDependencies": {
+    "vite": "^7.3.0"
   }
 }

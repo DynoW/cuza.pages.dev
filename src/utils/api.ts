@@ -3,57 +3,13 @@
  */
 import { promises as fs, Dirent } from 'node:fs';
 import path from 'node:path';
-
+import type { BucketMode, FileStructure, ApiResponse } from '../types';
 import { extractYearsFromStructure } from './data';
+import { pathExists } from './paths';
 
-export interface FileStructure {
-  [key: string]: FileStructure | string;
-}
+const FILES_ROOT = path.join(process.cwd(), import.meta.env.FILES_DIR);
 
-export interface ApiResponse {
-  content?: FileStructure;
-  years?: number[];
-}
-
-export type BucketMode = 'off' | 'local' | 'remote';
-
-const FALLBACK_URL = 'http://localhost:8787';
-const FILES_ROOT = path.join(process.cwd(), 'files');
-
-function ensureValidBucketMode(mode: string | undefined): BucketMode {
-  if (mode === 'off' || mode === 'local' || mode === 'remote') {
-    return mode;
-  }
-  return 'remote';
-}
-
-const normalizeBaseUrl = (value?: string): string => value ? value.replace(/\/$/, '') : '';
-
-export function getBucketMode(): BucketMode {
-  return ensureValidBucketMode(import.meta.env.PUBLIC_BUCKET_MODE);
-}
-
-export function resolveWorkerBaseUrl(mode: BucketMode = getBucketMode()): string {
-  if (mode === 'off') {
-    return '';
-  }
-
-  if (mode === 'local') {
-    return normalizeBaseUrl(import.meta.env.LOCAL_WORKER_URL) || FALLBACK_URL;
-  }
-
-  return normalizeBaseUrl(import.meta.env.WORKER_URL) || FALLBACK_URL;
-}
-
-async function pathExists(target: string): Promise<boolean> {
-  try {
-    const stats = await fs.stat(target);
-    return stats.isDirectory();
-  } catch {
-    return false;
-  }
-}
-
+// TODO: Move these to data???
 function resolveLocalTarget(subject: string, page: string): { directory: string; prefix: string } {
   const subjectLower = subject.toLowerCase();
   const pageLower = page.toLowerCase();
@@ -194,8 +150,8 @@ export class ApiService {
   private readonly mode: BucketMode;
 
   constructor(baseUrl?: string, mode?: BucketMode) {
-    this.mode = mode ?? getBucketMode();
-    this.baseUrl = baseUrl ?? resolveWorkerBaseUrl(this.mode);
+    this.mode = mode ?? import.meta.env.BUCKET_MODE;
+    this.baseUrl = baseUrl ?? import.meta.env.PUBLIC_WORKER_URL;
   }
 
   private async fetchJson<T>(url: string): Promise<T | null> {

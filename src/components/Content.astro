@@ -1,6 +1,7 @@
 ---
-import { apiService, getBucketMode, resolveWorkerBaseUrl, type FileStructure } from '../utils/api';
+import { apiService } from '../utils/api';
 import { formatKey, isYearFolder } from '../utils/data';
+import type { FileStructure } from '../types/index';
 
 interface Props {
   subject: string;
@@ -49,8 +50,12 @@ const classNames = {
 // Calculate padding based on depth
 const paddingLeft = `${depth * 1}rem`;
 
-const bucketMode = getBucketMode();
-const host = resolveWorkerBaseUrl(bucketMode);
+let host: string;
+if (import.meta.env.BUCKET_MODE === 'off') {
+  host = '';
+} else {
+  host = import.meta.env.PUBLIC_WORKER_URL;
+}
 ---
 
 <div class="w-full" id={`content-${subject}-${page.replace("/", "-")}`}>

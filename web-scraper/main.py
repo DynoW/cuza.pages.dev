@@ -30,14 +30,16 @@ class BacExamScraper:
                     break
             else:
                 # Fallback to original logic
+                print("Base dir not found")
                 self.base_dir = current_file.parent.parent
-        self.web_scraper_dir = Path(__file__).parent
+        
         self.files_dir = self.base_dir / "files"
+
+        self.web_scraper_dir = Path(__file__).parent
         self.seen_urls_file = self.web_scraper_dir / "seen_urls.txt"
         self.temp_dir = self.web_scraper_dir / "temp"
         
-        # Use provided year or default to current year
-        self.current_year = year if year is not None else datetime.now().year
+        self.current_year = str(year) if year else str(datetime.now().year)
         
         # URL patterns for the current year
         self.archive_on = True
@@ -49,21 +51,6 @@ class BacExamScraper:
             f"http://subiecte{self.set_archive}.edu.ro/{self.current_year}/simulare/simulare_bac_XII/",
             f"http://subiecte{self.set_archive}.edu.ro/{self.current_year}/bacalaureat/Subiecte_si_bareme/"
         ]
-        
-        # Subject mapping for file organization
-        self.subject_mapping = {
-            'romana': 'romana',
-            'matematica': 'mate',
-            'istorie': 'istorie',
-            'anatomie': 'anatomie',
-            'chimie': 'chimie',
-            'socio_umane': 'socio',
-            'logica': 'logica',
-            'psihologie': 'psiho',
-            'geografie': 'geogra',
-            'fizica': 'fizica',
-            'informatica': 'info'
-        }
         
         # Load previously seen URLs
         self.seen_urls = self.load_seen_urls()
@@ -97,13 +84,13 @@ class BacExamScraper:
     def extract_links(self, html_content: str, base_url: str) -> list:
         """Extract ZIP file links matching the exam pattern."""
         # Multiple patterns to match different ZIP file formats:
-        # 1. Standard: E_[abcd]_...2025...zip
-        # 2. Model: Bac_2025_E_[abcd]_...zip  
+        # 1. Standard: E_[acd]_...2025...zip
+        # 2. Model: Bac_2025_E_[acd]_...zip  
         # 3. Various other formats with year
         patterns = [
-            rf'href=\"([^\"]*E_[abcd]_[^\"]*{self.current_year}[^\"]*\.zip)\"',  # E_a_2025_...
-            rf'href=\"([^\"]*Bac_{self.current_year}_E_[abcd]_[^\"]*\.zip)\"',   # Bac_2025_E_a_...
-            rf'href=\"([^\"]*{self.current_year}[^\"]*E_[abcd][^\"]*\.zip)\"',   # Other formats with year and E_x
+            rf'href=\"([^\"]*E_[acd]_[^\"]*{self.current_year}[^\"]*\.zip)\"',  # E_a_2025_...
+            rf'href=\"([^\"]*Bac_{self.current_year}_E_[acd]_[^\"]*\.zip)\"',   # Bac_2025_E_a_...
+            rf'href=\"([^\"]*{self.current_year}[^\"]*E_[acd][^\"]*\.zip)\"',   # Other formats with year and E_a
         ]
         
         all_matches = []
@@ -127,186 +114,29 @@ class BacExamScraper:
         filename_lower = zip_filename.lower()
         
         # Check URL first for broad categories
-        if 'simulare' in url_lower:
+        if 'simulare' in url_lower or 'sim' in filename_lower:
             return 'Simulare'
-        elif 'modeledesubiecte' in url_lower or 'model' in filename_lower or 'modele' in filename_lower:
-            return 'Model'
         
-        # Check filename patterns for model files
-        if 'bac_' in filename_lower and ('model' in filename_lower or 'modele' in filename_lower):
+        if 'modeledesubiecte' in url_lower or 'model' in filename_lower:
             return 'Model'
         
         # For regular bac URL, determine based on filename patterns
-        if 'ses_speciala' in filename_lower or 'speciala' in filename_lower:
+        if 'rezerva' in filename_lower:
+            if 'speciala' in filename_lower:
+                return 'Sesiune-olimpici-rezerva'
+            if 'iun' in filename_lower or 'iul' in filename_lower:
+                return 'Sesiunea-I-rezerva'
+            if 'aug' in filename_lower:
+                return 'Sesiunea-II-rezerva'
+        if 'speciala' in filename_lower:
             return 'Sesiune-olimpici'
-        elif 'ses_iunie' in filename_lower or 'iunie' in filename_lower:
+        if  'iun' in filename_lower or 'iul' in filename_lower:
             return 'Sesiunea-I'  # June session
-        elif 'sesiune_august' in filename_lower or 'august' in filename_lower:
+        if 'aug' in filename_lower:
             return 'Sesiunea-II'  # August session
-        elif 'model' in filename_lower or 'modele' in filename_lower:
-            return 'Model'
-        elif 'simulare' in filename_lower:
-            return 'Simulare'
-        elif 'rezerva' in filename_lower:
-            # Reserve sessions are typically part of the main session
-            if 'iunie' in filename_lower:
-                return 'Sesiunea-I'
-            elif 'august' in filename_lower:
-                return 'Sesiunea-II'
-            else:
-                return 'Sesiunea-I'  # Default reserve to Session I
-        
-        # Try to detect session by number patterns in filename
-        # Session numbers: 01 = Sesiunea-I (June), 04 = Sesiunea-II (August), 06 = Sesiune-olimpici, etc.
-        import re
-        session_match = re.search(r'_(\d{2})_', filename_lower)
-        if session_match:
-            session_num = session_match.group(1)
-            if session_num == '01':
-                return 'Sesiunea-I'
-            elif session_num in ['04', '09']:  # 04 and 09 seem to be August sessions
-                return 'Sesiunea-II'
-            elif session_num in ['03', '05', '06']:  # Special sessions
-                return 'Sesiune-olimpici'
-            elif session_num in ['07', '08']:  # Reserve sessions
-                return 'Sesiunea-I'  # Default reserves to Session I
         
         # Default fallback
-        return 'Bac'
-    
-    def parse_filename_info(self, filename: str) -> dict:
-        """Parse exam file information from filename."""
-        # Remove .zip extension for parsing
-        base_name = filename.replace('.zip', '')
-        
-        # Try different patterns to match various filename formats
-        patterns = [
-            # E_a_subject_session_year_type.zip
-            r'E_([acd])_(\w+)_(\w+)_(\d{4})_(\w+)',
-            # E_a_year_session_type.zip
-            r'E_([acd])_(\d{4})_(\w+)_?(\w+)?',
-            # E_a_year_session.zip
-            r'E_([acd])_(\d{4})_(\w+)',
-            # E_a_subject_year_type.zip
-            r'E_([acd])_(\w+)_(\d{4})_(\w+)',
-        ]
-        
-        for pattern in patterns:
-            match = re.search(pattern, base_name, re.IGNORECASE)
-            if match:
-                groups = match.groups()
-                letter = groups[0]
-                
-                # Try to extract subject and other info based on pattern
-                if len(groups) >= 5:  # E_a_subject_session_year_type
-                    subject, session, year, exam_type = groups[1:5]
-                elif len(groups) == 4:  # E_a_year_session_type or E_a_subject_year_type
-                    if groups[1].isdigit():  # year comes first
-                        year, session, exam_type = groups[1:4]
-                        subject = self.extract_subject_from_letter(letter)
-                    else:  # subject comes first
-                        subject, year, exam_type = groups[1:4]
-                        session = 'regular'
-                elif len(groups) == 3:  # E_a_year_session
-                    year, session = groups[1:3]
-                    subject = self.extract_subject_from_letter(letter)
-                    exam_type = session
-                else:
-                    continue
-                
-                # Map subject names to folder names
-                subject_lower = subject.lower()
-                folder_subject = self.get_folder_subject(subject_lower, letter)
-                
-                return {
-                    'letter': letter,
-                    'subject': subject,
-                    'folder_subject': folder_subject,
-                    'year': year,
-                    'exam_type': exam_type,
-                    'variant_type': 'var'
-                }
-        
-        return None
-    
-    def extract_subject_from_letter(self, letter: str) -> str:
-        """Extract subject name from exam letter code."""
-        letter_to_subject = {
-            'a': 'romana',
-            'c': 'matematica', 
-            'd': 'fizica'  # Could also be informatica, we'll determine from context
-        }
-        return letter_to_subject.get(letter.lower(), 'unknown')
-    
-    def get_folder_subject(self, subject: str, letter: str) -> str:
-        """Get the correct folder name for the subject."""
-        # Handle special cases and mappings
-        subject_mappings = {
-            'romana': 'romana',
-            'matematica': 'mate',
-            'fizica': 'fizica', 
-            'informatica': 'info',
-            'unknown': self.extract_subject_from_letter(letter)
-        }
-        
-        # First try direct mapping
-        if subject in subject_mappings:
-            mapped_subject = subject_mappings[subject]
-            if mapped_subject != subject:
-                return mapped_subject
-        
-        # For letter 'd', check for informatica specifically
-        if letter.lower() == 'd':
-            if 'informatica' in subject.lower():
-                return 'info'
-            else:
-                return 'fizica'
-        
-        # Default mapping
-        return subject_mappings.get(subject, subject)
-    
-    def detect_subject_from_zip_content(self, zip_path: Path) -> str:
-        """Detect the primary subject from ZIP file contents."""
-        try:
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                # Count different subject types in filenames
-                subject_counts = {
-                    'informatica': 0,
-                    'fizica': 0,
-                    'matematica': 0,
-                    'romana': 0
-                }
-                
-                for file_info in zip_ref.filelist:
-                    filename = file_info.filename.lower()
-                    if 'informatica' in filename:
-                        subject_counts['informatica'] += 1
-                    elif 'fizica' in filename:
-                        subject_counts['fizica'] += 1
-                    elif 'matematica' in filename:
-                        subject_counts['matematica'] += 1
-                    elif 'romana' in filename:
-                        subject_counts['romana'] += 1
-                
-                # Return the subject with the highest count
-                if subject_counts['informatica'] > 0:
-                    return 'info'
-                elif subject_counts['fizica'] > 0:
-                    return 'fizica'
-                elif subject_counts['matematica'] > 0:
-                    return 'mate'
-                elif subject_counts['romana'] > 0:
-                    return 'romana'
-        except:
-            pass
-        
-        return None
-    
-    def create_target_path(self, file_info: dict, exam_type: str) -> Path:
-        """Create the target file path based on file information."""
-        subject_dir = self.files_dir / file_info['folder_subject'] / 'bac' / file_info['year'] / exam_type
-        subject_dir.mkdir(parents=True, exist_ok=True)
-        return subject_dir
+        return '-'
     
     def download_file(self, url: str, target_path: Path) -> bool:
         """Download file from URL to target path."""
@@ -325,63 +155,82 @@ class BacExamScraper:
         except requests.RequestException as e:
             print(f"Error downloading {url}: {e}")
             return False
-    
+    #! START ORGANIZE
     def extract_subject_from_pdf_name(self, pdf_filename: str) -> str:
         """Extract subject from PDF filename to determine correct folder."""
         filename_lower = pdf_filename.lower()
         
         # Map keywords in filename to subject folders
         subject_keywords = {
-            'romana': 'romana',
-            'matematica': 'mate',
-            'mate': 'mate',
-            'fizica': 'fizica',
-            'informatica': 'info',
-            'chimie': 'chimie',
-            'biologie': 'bio',
-            'bio': 'bio',
-            'geografie': 'geografie',
-            'istorie': 'istorie',
-            'filosofie': 'filosofie',
-            'logica': 'logica',
-            'psihologie': 'psihologie',
-            'sociologie': 'sociologie',
-            'economie': 'economie',
-            'anatomie': 'anatomie',
-            'anat': 'anatomie',
-            'chimie_anorganica': 'chimie',
-            'chimie_organica': 'chimie',
-            'bio_veg_anim': 'bio',
-            'anat_fiz_gen_ec_um': 'anatomie'
+            # e_a_
+            'romana': 'romana', # fara "pentru": real/uman | E_a_romana_real_tehn_2025_var_model.pdf
+            # e_c_
+            'matematica': 'mate', # LRO: mate-info/pedagogic/st-nat/thenologic | E_c_matematica_M_mate-info_2025_var_model_LRO.pdf
+            'istorie': 'istorie', # LRO | E_c_istorie_2025_var_simulare_LRO.pdf
+            # e_d_
+            'anat_fiz_gen_ec_um': 'anat', # LRO | E_d_anat_fiz_gen_ec_um_2025_var_model_LRO.pdf
+            'bio_veg_anim': 'bio', # LRO | E_d_bio_veg_anim_2025_var_model_LRO.pdf
+            'chimie': 'chimie', # LRO: anorganica/organica | E_d_chimie_anorganica_2025_var_model_LRO.pdf
+            'economie': 'economie', # LRO | E_d_economie_2025_var_model_LRO.pdf
+            'filosofie': 'filosofie', # LRO | E_d_filosofie_2025_var_model_LRO.pdf
+            'fizica': 'fizica', # LRO: thenologic/teoretic | E_d_fizica_teoretic_vocational_2025_var_model_LRO.pdf
+            'geografie': 'geo', # LRO | E_d_geografie_2025_var_model_LRO.pdf
+            'informatica': 'info', # LRO: MI/SN doar pt varianta are si C/Pascal | E_d_informatica_2025_sp_MI_C_var_model_LRO.pdf
+            'logica': 'logica', # LRO | E_d_logica_2025_var_model_LRO.pdf
+            'psihologie': 'psihologie', # LRO | E_d_psihologie_2025_var_model_LRO.pdf
+            'sociologie': 'sociologie', # LRO | E_d_sociologie_2025_var_model_LRO.pdf
         }
         
         # Check for exact matches first, then partial matches
         for keyword, folder in subject_keywords.items():
             if keyword in filename_lower:
                 return folder
-                
-        # Special handling for compound names
-        if 'chimie' in filename_lower:
-            return 'chimie'
-        if 'bio' in filename_lower:
-            return 'bio'
-        if 'anat' in filename_lower:
-            return 'anatomie'
         
         return None
+
+    def extract_subcategory_from_pdf_name(self, pdf_filename: str) -> str:
+        """Extract subcategory from PDF filename to determine correct folder."""
+        filename_lower = pdf_filename.lower()
+        
+        # Define subcategory keywords
+        subcategory_keywords = {
+            'real_tehn': 'real',
+            'uman_ped': 'uman',
+            'm_mate-info': 'mate-info',
+            'm_pedagogic': 'pedagogic',
+            'm_st-nat': 'st-nat',
+            'm_thenologic': 'thenologic',
+            'anorganica': 'anorganica',
+            'organica': 'organica',
+            'thenologic': 'thenologic',
+            'teoretic_vocational': 'teoretic',
+            'sp_mi_c': 'mate-info c',
+            'sp_mi_pascal': 'mate-info pascal',
+            'sp_sn_c': 'st-nat c',
+            'sp_sn_pascal': 'st-nat pascal',
+        }
+        
+        for keyword, folder in subcategory_keywords.items():
+            if keyword in filename_lower:
+                return folder
+        
+        return 'bac'  # Default subcategory if none found
     
-    def organize_pdf_by_subject(self, pdf_path: Path, temp_extract_dir: Path, exam_type: str, year: str) -> bool:
+    def organize_pdf_by_subject(self, pdf_path: Path, exam_type: str, year: str) -> bool:
         """Organize a single PDF file into the correct subject folder."""
         filename = pdf_path.name
         
         # Extract subject from filename
-        subject_folder = self.extract_subject_from_pdf_name(filename)
-        if not subject_folder:
-            print(f"Could not determine subject for: {filename}")
+        subject = self.extract_subject_from_pdf_name(filename)
+        if not subject:
+            print(f"Warning: Could not determine subject for: {filename}")
             return False
+
+        # Extract subcategory from filename
+        subcategory = self.extract_subcategory_from_pdf_name(filename)
         
         # Create target directory for this subject
-        target_dir = self.files_dir / subject_folder / 'bac' / year / exam_type
+        target_dir = self.files_dir / subject / 'pages' / subcategory / year / exam_type
         target_dir.mkdir(parents=True, exist_ok=True)
         
         # Clean up the filename by removing language suffixes
@@ -398,26 +247,22 @@ class BacExamScraper:
         try:
             # Copy the file to the correct location (instead of move to avoid cross-device issues)
             shutil.copy2(pdf_path, target_file)
-            print(f"Organized: {clean_filename} -> {subject_folder}")
+            print(f"Organized: {clean_filename} -> {subject}")
             return True
         except OSError as e:
             print(f"Error copying {filename}: {e}")
             return False
-    
-    def extract_zip_file(self, zip_path: Path, target_dir: Path, exam_type: str) -> list:
+    #! STOP
+    def extract_zip_file(self, zip_path: Path, target_temp_dir: Path, exam_type: str) -> list:
         """Extract ZIP file and organize PDFs by subject."""
         extracted_files = []
         
         # Create a temporary extraction directory
-        temp_extract_dir = target_dir / f"temp_{zip_path.stem}"
+        temp_extract_dir = target_temp_dir / f"temp_{zip_path.stem}"
         temp_extract_dir.mkdir(exist_ok=True)
         
         try:
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                # Get year from zip filename or use current year
-                year_match = re.search(r'(\d{4})', zip_path.name)
-                year = year_match.group(1) if year_match else str(self.current_year)
-                
                 # Process each file in the ZIP
                 pdf_files = []
                 for zip_info in zip_ref.filelist:
@@ -448,7 +293,7 @@ class BacExamScraper:
                 # Process each LRO PDF file
                 for pdf_path in lro_files:
                     try:
-                        if self.organize_pdf_by_subject(pdf_path, temp_extract_dir, exam_type, year):
+                        if self.organize_pdf_by_subject(pdf_path, exam_type, self.current_year):
                             extracted_files.append(pdf_path)
                     except Exception as e:
                         print(f"Error processing PDF {pdf_path.name}: {e}")
@@ -547,7 +392,7 @@ def main():
         help=f'Year to scrape exam files for (default: {datetime.now().year})'
     )
     parser.add_argument(
-        '--base-dir',
+        '--base-dir', '-d',
         type=str,
         help='Base directory for the project (auto-detected if not provided)'
     )

@@ -2,6 +2,7 @@
  * Utility functions for generating static paths from file system
  */
 import fs from "fs";
+import fsAsync from "fs/promises";
 import path from "path";
 
 interface StaticPathParams {
@@ -11,6 +12,15 @@ interface StaticPathParams {
 
 interface StaticPath {
   params: StaticPathParams;
+}
+
+export async function pathExists(target: string): Promise<boolean> {
+  try {
+    const stats = await fsAsync.stat(target);
+    return stats.isDirectory();
+  } catch {
+    return false;
+  }
 }
 
 /**

@@ -1,20 +1,17 @@
 import { defineConfig } from 'astro/config';
-import tailwindcss from "@tailwindcss/vite";
+import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
-import react from "@astrojs/react";
-import compress from "astro-compress";
+import react from '@astrojs/react';
+import compress from 'astro-compress';
+import { buildPublicDefines, validateSiteConfig } from './src/utils/site-config';
 
 const siteConfig = {
-  bucket_mode: "off", // "remote", "local", "off"
-  countdown: "on" // "on", "off"
+  bucket_mode: 'off', // "off", "local", "remote"
+  public_countdown: 'on', // "on", "off"
+  files_dir: 'files' // directory in the bucket for files
 };
 
-const publicDefines = Object.entries(siteConfig).reduce((acc, [key, value]) => {
-  if (value !== undefined) {
-    acc[`import.meta.env.PUBLIC_${key.toUpperCase()}`] = JSON.stringify(value);
-  }
-  return acc;
-}, {});
+validateSiteConfig(siteConfig);
 
 export default defineConfig({
   site: 'https://cuza.pages.dev',
@@ -28,7 +25,7 @@ export default defineConfig({
     assets: 'file'
   },
   vite: {
-    define: publicDefines,
+    define: buildPublicDefines(siteConfig),
     build: {
       rollupOptions: {
         output: {
@@ -36,8 +33,9 @@ export default defineConfig({
         },
       },
     },
+
     plugins: [
-      tailwindcss()
+      tailwindcss() // as any
     ]
   },
   markdown: {

@@ -7,7 +7,7 @@ const pathname = new URL(Astro.request.url).pathname;
 const currentPath: string[] = pathname.replace(".html", "").split("/");
 
 // Get the absolute path to the files directory
-const filesPath = path.join(process.cwd(), "files");
+const filesPath = path.join(process.cwd(), import.meta.env.FILES_DIR);
 
 // Read directories in the files path to get subjects
 const validSubjects = fs
@@ -57,16 +57,43 @@ navStructure.notite = ["info", "romana"];
 // Helper function to get display name for navigation items
 function getDisplayName(name: string): string {
   switch (name) {
-    case "fizica":
-      return "Fizică";
-    case "mate":
-      return "Matematică";
-    case "info":
-      return "Informatică";
+    case "admitere":
+      return "Admitere";
+    
     case "romana":
       return "Română";
+    
+    case "mate":
+      return "Matematică";
+    case "istorie":
+      return "Istorie";
+    
+    case "anat":
+      return "Anatomie";
+    case "bio":
+      return "Biologie";
+    case "chimie":
+      return "Chimie";
+    case "economie":
+      return "Economie";
+    case "filosofie":
+      return "Filosofie";
+    case "fizica":
+      return "Fizică";
+    case "geo":
+      return "Geografie";
+    case "info":
+      return "Informatică";
+    case "logica":
+      return "Logică";
+    case "psihologie":
+      return "Psihologie";
+    case "sociologie":
+      return "Sociologie";
+    
     case "simulari-judetene":
       return "Simulări județene/locale";
+    
     default:
       return name.charAt(0).toUpperCase() + name.replace(/-/g, " ").slice(1);
   }
@@ -302,7 +329,7 @@ function shouldHaveDropdown(subject: string): boolean {
         </div>
       </div>
       <div class="row">
-        <div id="container-banner" class="col mb-[6px]">
+        <div id="container-banner" class="col mb-1.5">
           <img
             alt="banner"
             src="/assets/img/banner/fizica.webp"

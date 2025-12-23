@@ -39,8 +39,8 @@ interface ListResponse {
 type BannerState = { type: 'success' | 'error'; message: string } | null;
 type ActionState = { message: string } | null;
 
-const workerBase = (import.meta.env.WORKER_URL as string | undefined)?.replace(/\/$/, '') || 'http://localhost:8787';
-const managerEndpoint = `${workerBase}/file-manager`;
+const workerBaseUrl = import.meta.env.PUBLIC_WORKER_URL;
+const managerEndpoint = `${workerBaseUrl}/file-manager`;
 
 const formatSize = (value: number | null): string => {
 	if (!value || value <= 0) {
@@ -186,7 +186,7 @@ const FileManager: React.FC = () => {
 				fetchEntries(entry.key);
 				return;
 			}
-			const url = `${workerBase}/files/${encodeKeyForUrl(entry.key)}`;
+			const url = `${workerBaseUrl}/files/${encodeKeyForUrl(entry.key)}`;
 			window.open(url, '_blank');
 		},
 		[fetchEntries]
@@ -281,7 +281,7 @@ const handleDelete = useCallback(async (entry?: FileManagerEntry) => {
 const handleDownload = useCallback((entry?: FileManagerEntry) => {
 	const files = entry ? (entry.type === 'file' ? [entry] : []) : selectedEntries.filter((item) => item.type === 'file');
 	files.forEach((file) => {
-			const url = `${workerBase}/files/${encodeKeyForUrl(file.key)}`;
+			const url = `${workerBaseUrl}/files/${encodeKeyForUrl(file.key)}`;
 			const anchor = document.createElement('a');
 			anchor.href = url;
 			anchor.download = file.name;

@@ -32,6 +32,16 @@ const {
   markdown,
   breadcrumbs,
 } = Astro.props;
+
+// Determine background at build time
+const month = new Date().getMonth();
+let backgroundStyle = "";
+
+if (month === 11) {
+  backgroundStyle = 'background: url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d, #cc3333); background-attachment: fixed;';
+} else if (month === 2 || month === 3) {
+  backgroundStyle = 'background: url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2); background-attachment: fixed;';
+}
 ---
 
 <!doctype html>
@@ -64,7 +74,7 @@ const {
         creator: "@DynoW",
       }}
       extend={{
-        link: [
+        link: [ // TODO: fix preloading of fonts warings
           {
             rel: "preload",
             href: "/assets/fonts/poppins-medium.woff2",
@@ -216,6 +226,7 @@ const {
   </head>
   <body
     class={`font-family-sans select-none overflow-x-hidden relative min-h-screen p-0${backgroundImage ? " backgroundImage" : ""}${bodyClass ? ` ${bodyClass}` : ""}`}
+    style={backgroundStyle}
   >
     <slot />
     <div class="fixed bottom-4 right-4">

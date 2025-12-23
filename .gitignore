@@ -28,3 +28,6 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+
+# temporary files
+web-scraper/temp/

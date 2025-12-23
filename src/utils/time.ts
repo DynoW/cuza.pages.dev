@@ -34,5 +34,5 @@ export const calculateProgress = (startTime: number, endTime: number, currentTim
   return Math.round((elapsed / totalDuration) * 100);
 };
 
-export const padNumber = (num: number): string => 
-  num < 10 ? `0${num}` : num.toString();
+export const padNumber = (num: number | string): string => 
+  Number(num) < 10 ? `0${num}` : num.toString();
