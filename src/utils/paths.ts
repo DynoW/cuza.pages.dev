@@ -27,7 +27,7 @@ export async function pathExists(target: string): Promise<boolean> {
  * Get all valid subjects from the files directory
  */
 export function getValidSubjects(): string[] {
-  const filesPath = path.join(process.cwd(), "files");
+  const filesPath = path.join(process.cwd(), import.meta.env.FILES_DIR || "files");
   return fs
     .readdirSync(filesPath)
     .filter((file) => fs.statSync(path.join(filesPath, file)).isDirectory());
@@ -37,7 +37,7 @@ export function getValidSubjects(): string[] {
  * Get valid pages for a given subject
  */
 export function getValidPages(subject: string): string[] {
-  const filesPath = path.join(process.cwd(), "files");
+  const filesPath = path.join(process.cwd(), import.meta.env.FILES_DIR || "files");
   const subjectPath = subject === "admitere" 
     ? path.join(filesPath, subject)
     : path.join(filesPath, `${subject}/pages`);
@@ -67,6 +67,7 @@ export function getFirstPage(subject: string): string {
 export function generateSubjectIndexPaths(excludedSubjects: string[] = []): StaticPath[] {
   return getValidSubjects()
     .filter(subject => !excludedSubjects.includes(subject))
+    .filter(subject => getValidPages(subject).includes("bac"))
     .map(subject => ({ params: { subject } }));
 }
 
@@ -78,7 +79,9 @@ export function generateSubjectPagePaths(): StaticPath[] {
   
   getValidSubjects().forEach(subject => {
     getValidPages(subject).forEach(page => {
-      paths.push({ params: { subject, page } });
+      if (page !== "bac") {
+        paths.push({ params: { subject, page } });
+      }
     });
   });
   

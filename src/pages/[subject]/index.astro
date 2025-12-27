@@ -1,16 +1,10 @@
 ---
 import Page from "../../components/Page.astro";
-import { getValidSubjects, getFirstPage } from "../../utils/paths";
+import { getFirstPage, generateSubjectIndexPaths } from "../../utils/paths";
 
 export function getStaticPaths() {
-  const removedSubjects = ["fizica", "admitere"];
-  const filteredSubjects = getValidSubjects().filter(
-    (subject) => !removedSubjects.includes(subject)
-  );
-
-  return filteredSubjects.map((subject) => ({
-    params: { subject },
-  }));
+  const excludedSubjects = ["fizica","admitere"];
+  return generateSubjectIndexPaths(excludedSubjects);
 }
 
 // Get the dynamic route parameter

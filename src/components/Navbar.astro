@@ -4,7 +4,7 @@ import path from "path";
 
 // Get current path for highlighting active links
 const pathname = new URL(Astro.request.url).pathname;
-const currentPath: string[] = pathname.replace(".html", "").split("/");
+const currentPath: string[] = pathname.replace(".html", "").split("/").slice(1);
 
 // Get the absolute path to the files directory
 const filesPath = path.join(process.cwd(), import.meta.env.FILES_DIR);
@@ -107,6 +107,7 @@ function getDisplayName(name: string): string {
 function getNavUrl(subject: string, page: string | null): string {
   if (subject === "fizica" && !page) return "/";
   if (!page) return `/${subject}`;
+  if (page === "bac" && subject !== "fizica") return `/${subject}`;
   return `/${subject}/${page}`;
 }
 
@@ -116,18 +117,21 @@ function isActive(subject: string, page: string | null): boolean {
   if (
     subject === "fizica" &&
     !page &&
-    (currentPath[1] === "" || currentPath[1] === "index")
+    (currentPath[0] === "" || currentPath[0] === "index")
   ) {
     return true;
   }
 
   // Check if we're on the subject's section with the exact page
-  if (currentPath[1] === subject) {
+  if (currentPath[0] === subject) {
     // For main subject links with no specific page
-    if (!page && !currentPath[2]) return true;
+    // if (!page && !currentPath[1]) return true;
 
     // For specific page links - only highlight the exact match
-    if (page && currentPath[2] === page) return true;
+    if (page && currentPath[1] === page) return true;
+
+    // Handle 'bac' page mapping to subject root
+    if (page === "bac" && !currentPath[1] && subject !== "fizica") return true;
   }
 
   return false;
@@ -137,12 +141,12 @@ function isActive(subject: string, page: string | null): boolean {
 function isSubjectActive(subject: string): boolean {
   // Special case for home page - treat as 'fizica'
   if (
-    (currentPath[1] === "" || currentPath[1] === "index") &&
+    (currentPath[0] === "" || currentPath[0] === "index") &&
     subject === "fizica"
   ) {
     return true;
   }
-  return currentPath[1] === subject;
+  return currentPath[0] === subject;
 }
 
 // Determine which subjects should have dropdown menus

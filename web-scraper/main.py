@@ -204,10 +204,10 @@ class BacExamScraper:
             'organica': 'organica',
             'thenologic': 'thenologic',
             'teoretic_vocational': 'teoretic',
-            'sp_mi_c': 'mate-info c',
-            'sp_mi_pascal': 'mate-info pascal',
-            'sp_sn_c': 'st-nat c',
-            'sp_sn_pascal': 'st-nat pascal',
+            'sp_mi_c': 'mate-info-C',
+            'sp_mi_pascal': 'mate-info-Pascal',
+            'sp_sn_c': 'st-nat-C',
+            'sp_sn_pascal': 'st-nat-Pascal',
         }
         
         for keyword, folder in subcategory_keywords.items():
