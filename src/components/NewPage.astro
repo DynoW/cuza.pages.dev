@@ -1,0 +1,36 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ContentContainer from "../layouts/ContentContainer.astro";
+import NewNavbar from "../components/NewNavbar.astro";
+import NewHeader from "../components/NewHeader.astro";
+import List from "./List.astro";
+import Extra from "../components/Extra.astro";
+import Footer from "../components/Footer.astro";
+import CountdownTimer from "./CountdownTimer.astro";
+
+const subject = "fizica";
+--- 
+
+<Layout title="testing">
+    <ContentContainer>
+        <aside slot="left" class="flex flex-col gap-2 lg:ml-2 lg:mt-2">
+            <NewNavbar />
+        </aside>
+        <div slot="middle" class="flex flex-col gap-2">
+            <!-- <header class="container bg-[rgba(10,13,16,.9)] rounded-3xl py-5 max-w-(--breakpoint-lg)">
+                <Extra subject={subject} page="extra" />
+            </header> -->
+
+            <div class="bg-gray-100/90 rounded-3xl p-5 pr-2.5 min-w-full md:min-w-fit max-w-full contain-content font-bold">
+                <List subject={subject} page="bac" />
+            </div>
+        </div>
+        <aside slot="right" class="flex flex-col gap-2 md:mt-2 md:mr-2 md:sticky md:top-2 md:right-2">
+            <div class="bg-zinc-950/90 rounded-3xl py-3 px-4">
+                <Extra subject={subject} page="bac" />
+            </div>
+            <CountdownTimer />
+        </aside>
+    </ContentContainer>
+    <Footer />
+</Layout>

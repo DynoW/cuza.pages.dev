@@ -1,0 +1,546 @@
+---
+import fs from "fs";
+import path from "path";
+
+// Get current path for highlighting active links
+const pathname = new URL(Astro.request.url).pathname;
+const currentPath: string[] = pathname.replace(".html", "").split("/").slice(1);
+
+// Get the absolute path to the files directory
+const filesPath = path.join(process.cwd(), import.meta.env.FILES_DIR);
+
+function isDirectory(source: string): boolean {
+    return fs.lstatSync(source).isDirectory();
+}
+
+// Read directories in the files path to get subjects
+const validSubjects = fs
+    .readdirSync(filesPath)
+    .filter((file) => isDirectory(path.join(filesPath, file)));
+
+// Define the navStructure type to avoid TypeScript errors
+interface NavStructure {
+    [key: string]: string[];
+}
+
+// Generate navigation structure dynamically
+const navStructure: NavStructure = {};
+
+validSubjects.forEach((subject) => {
+    let subjectPath;
+
+    if (subject === "admitere") {
+        subjectPath = path.join(filesPath, subject);
+    } else {
+        subjectPath = path.join(filesPath, `${subject}/pages`);
+    }
+
+    // Read subdirectories to get pages
+    const subPages = fs.readdirSync(subjectPath).filter((file) => {
+        const filePath = path.join(subjectPath, file);
+        return isDirectory(filePath);
+    });
+
+    navStructure[subject] = subPages;
+});
+
+navStructure.notite = ["info", "romana"];
+
+const navEntries = Object.entries(navStructure);
+
+// Helper function to get display name for navigation items
+function getDisplayName(name: string): string {
+    switch (name) {
+        case "admitere":
+            return "Admitere";
+        case "romana":
+            return "Română";
+        case "mate":
+            return "Matematică";
+        case "istorie":
+            return "Istorie";
+        case "anat":
+            return "Anatomie";
+        case "bio":
+            return "Biologie";
+        case "chimie":
+            return "Chimie";
+        case "economie":
+            return "Economie";
+        case "filosofie":
+            return "Filosofie";
+        case "fizica":
+            return "Fizică";
+        case "geo":
+            return "Geografie";
+        case "info":
+            return "Informatică";
+        case "logica":
+            return "Logică";
+        case "psihologie":
+            return "Psihologie";
+        case "sociologie":
+            return "Sociologie";
+        case "simulari-judetene":
+            return "Simulări județene/locale";
+        default:
+            return (
+                name.charAt(0).toUpperCase() + name.replace(/-/g, " ").slice(1)
+            );
+    }
+}
+
+// Helper function to get the URL for a nav item
+function getNavUrl(subject: string, page: string | null): string {
+    if (subject === "fizica" && !page) return "/";
+    if (!page) return `/${subject}`;
+    return `/${subject}/${page}`;
+}
+
+// Check if current path matches subject/page (covers both active link and dropdown cases)
+function isActive(subject: string, page: string | null = null): boolean {
+    const isHome = currentPath[0] === "" || currentPath[0] === "index";
+    const currentSubject = currentPath[0];
+    const currentPage = currentPath[1];
+
+    // Home page defaults to fizica
+    if (subject === "fizica" && !page && isHome) return true;
+
+    // Match subject + optional page
+    return currentSubject === subject && (!page || currentPage === page);
+}
+---
+
+<>
+    <!-- Mobile hamburger button - Fixed top left, hidden on lg+ -->
+    <button
+        id="mobile-menu-toggle"
+        aria-label="Deschide meniul"
+        class="fixed top-8 right-4 z-100 flex flex-col justify-center items-center gap-1.5 w-12 h-12 p-2 bg-[rgba(10,13,16,0.95)] border border-white/15 rounded-xl cursor-pointer transition-all duration-300 backdrop-blur-lg lg:hidden hover:scale-105 hover:border-[rgba(214,248,122,0.4)] hover:bg-[rgba(10,13,16,0.98)] active:scale-95"
+        type="button"
+    >
+        {
+            [1, 2, 3].map(() => (
+                <span class="block w-6 h-[2.5px] bg-[#e6edff] rounded-sm transition-all duration-300" />
+            ))
+        }
+    </button>
+
+    <!-- Mobile overlay -->
+    <div
+        id="mobile-overlay"
+        class="fixed inset-0 bg-black/70 opacity-0 pointer-events-none transition-opacity duration-300 z-98 backdrop-blur-sm lg:hidden"
+        aria-hidden="true"
+    >
+    </div>
+
+    <!-- Side Navigation -->
+    <div
+        id="side-nav"
+        class="fixed top-0 left-0 bottom-0 w-70 lg:w-auto lg:basis-3/12 lg:static /*bg-zinc-950/90*/ bg-[rgba(10,13,16,0.98)] border-r border-white/10 flex flex-col z-99 overflow-hidden transition-transform duration-300 ease-in-out backdrop-blur-xl -translate-x-full lg:translate-x-0 text-[#e6edff] rounded-r-2xl lg:rounded-3xl"
+        aria-label="Navigare principală"
+    >
+        <!-- Brand Header -->
+        <div
+            class="flex items-center justify-between px-4 py-5 border-b border-white/8 shrink-0"
+        >
+            <div
+                class="flex items-center gap-3 no-underline text-[#e6edff] transition-opacity duration-300 hover:opacity-90"
+            >
+                <a
+                    href="https://analytics.my-lab.ro/share/l2n3pDhX5KJiyuAp/cuza.pages.dev"
+                    class="focus:outline-hidden shrink-0"
+                    target="_blank">
+                    <img
+                        src="/assets/img/logo/atom-w.svg"
+                        width="32"
+                        height="35"
+                        alt="logo"
+                        class="w-6 xl:w-7 2xl:w-8 transition-transform duration-300 hover:rotate-15 hover:scale-110"
+                    />
+                </a>
+                <a href="https://github.com/DynoW/cuza.pages.dev" class="flex flex-col gap-0.5" aria-label="Pagina de GitHub">
+                    <h1 id="page-title"
+                        class="font-bold italic text-xl xl:text-3xl m-0 text-[#e6edff]"
+                    >
+                        Cuza<span class="text-lg">.</span>Pages<span class="text-lg">.dev</span>
+                    </h1>
+                    <h2 class="text-blue-300 text-xs xl:text-sm">
+                        Resurse educaționale gratuite
+                    </h2>
+                </a>
+            </div>
+
+            <!-- Close button for mobile only -->
+            <button
+                id="mobile-close-button"
+                aria-label="Închide meniul"
+                class="lg:hidden w-9 h-9 border border-white/15 rounded-lg bg-white/5 text-[#e6edff] text-xl flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-white/10 hover:border-[rgba(214,248,122,0.4)] hover:text-[#d6f87a]"
+                type="button"
+            >
+                ✕
+            </button>
+        </div>
+
+        <!-- Navigation List -->
+        <nav class="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3">
+            <ul class="list-none m-0 p-0 flex flex-col gap-1">
+                {
+                    navEntries.map(([subject, pages]: [string, string[]]) => {
+                        const dropdownId = `dropdown-${subject}`;
+                        const hasDropdown = pages.length > 1;
+
+                        return (
+                            <li class="relative">
+                                {hasDropdown ? (
+                                    <>
+                                        <button
+                                            type="button"
+                                            class={`nav-link ${isActive(subject) ? "active" : ""}`}
+                                            aria-expanded={
+                                                isActive(subject)
+                                                    ? "true"
+                                                    : "false"
+                                            }
+                                            aria-controls={dropdownId}
+                                            data-nav-trigger
+                                            data-subject={subject}
+                                        >
+                                            <span class="flex-1">
+                                                {getDisplayName(subject)}
+                                            </span>
+                                            <svg
+                                                class="chevron transition-transform duration-300 ease-in-out shrink-0 opacity-70"
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 16 16"
+                                                fill="none"
+                                            >
+                                                <path
+                                                    d="M6 4L10 8L6 12"
+                                                    stroke="currentColor"
+                                                    stroke-width="2"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                />
+                                            </svg>
+                                        </button>
+                                        <div
+                                            class={`submenu ${isActive(subject) ? "open" : ""}`}
+                                            id={dropdownId}
+                                            data-dropdown={subject}
+                                        >
+                                            <div class="min-h-0">
+                                                {subject === "fizica" && (
+                                                    <a
+                                                        class={`submenu-link ${isActive(subject, null) ? "active" : ""}`}
+                                                        href="/"
+                                                        data-nav-link
+                                                    >
+                                                        Bac
+                                                    </a>
+                                                )}
+                                                {pages
+                                                    .filter(
+                                                        (page: string) =>
+                                                            !(
+                                                                subject ===
+                                                                    "fizica" &&
+                                                                page === "bac"
+                                                            ),
+                                                    )
+                                                    .map((page: string) => (
+                                                        <a
+                                                            class={`submenu-link ${isActive(subject, page) ? "active" : ""}`}
+                                                            href={getNavUrl(
+                                                                subject,
+                                                                page,
+                                                            )}
+                                                            data-nav-link
+                                                        >
+                                                            {getDisplayName(
+                                                                page,
+                                                            )}
+                                                        </a>
+                                                    ))}
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <a
+                                        class={`nav-link ${isActive(subject, pages[0]) ? "active" : ""}`}
+                                        href={getNavUrl(subject, pages[0])}
+                                        data-nav-link
+                                    >
+                                        <span class="flex-1">
+                                            {getDisplayName(subject)}
+                                        </span>
+                                    </a>
+                                )}
+                            </li>
+                        );
+                    })
+                }
+            </ul>
+        </nav>
+    </div>
+    <style is:inline>
+        /* Custom scrollbar */
+        nav::-webkit-scrollbar {
+            width: 6px;
+        }
+        nav::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 3px;
+        }
+        nav::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+        }
+        nav::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Navigation Links */
+        .nav-link {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            background: transparent;
+            color: #9fb7ff;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 300ms ease-in-out;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .nav-link > span:first-child {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .nav-link::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #d6f87a;
+            transform: scaleY(0);
+            transform-origin: top;
+            transition: transform 300ms;
+            border-top-right-radius: 2px;
+            border-bottom-right-radius: 2px;
+        }
+
+        .nav-link .chevron {
+            opacity: 0.7;
+            transition:
+                transform 300ms ease-in-out,
+                opacity 300ms;
+            flex-shrink: 0;
+        }
+
+        .nav-link:hover,
+        .nav-link:focus-visible {
+            background: rgba(255, 255, 255, 0.08);
+            color: #d6f87a;
+            outline: none;
+            transform: translateX(0.25rem);
+        }
+
+        .nav-link:hover .chevron,
+        .nav-link:focus-visible .chevron {
+            opacity: 1;
+        }
+
+        .nav-link.active {
+            background: rgba(214, 248, 122, 0.12);
+            color: #d6f87a;
+        }
+        .nav-link.active::before {
+            transform: scaleY(1);
+        }
+        .nav-link[aria-expanded="true"] .chevron {
+            transform: rotate(90deg);
+        }
+
+        /* Submenu */
+        .submenu {
+            display: grid;
+            transition: all 300ms ease-in-out;
+            overflow: hidden;
+            grid-template-rows: 0fr;
+        }
+        .submenu.open {
+            grid-template-rows: 1fr;
+        }
+        .submenu > .min-h-0 {
+            min-height: 0;
+        }
+
+        .submenu-link {
+            display: block;
+            padding: 0.625rem 1rem;
+            padding-left: 2.5rem;
+            margin: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            color: #c8d6f4;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 200ms ease-in-out;
+            position: relative;
+        }
+
+        .submenu-link::before {
+            content: "";
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0.25rem;
+            height: 0.25rem;
+            background: currentColor;
+            border-radius: 9999px;
+            opacity: 0.5;
+            transition: all 200ms ease-in-out;
+        }
+
+        .submenu-link:hover,
+        .submenu-link:focus {
+            background: rgba(255, 255, 255, 0.06);
+            color: #d6f87a;
+            transform: translateX(0.25rem);
+        }
+
+        .submenu-link:hover::before,
+        .submenu-link:focus::before {
+            opacity: 1;
+            transform: translateY(-50%) scale(1.5);
+        }
+        .submenu-link.active {
+            color: #d6f87a;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .submenu-link.active::before {
+            opacity: 1;
+            background: #d6f87a;
+        }
+
+        /* Mobile overlay and side-nav open state */
+        #mobile-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #side-nav.open {
+            transform: translateX(0);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Hamburger hover effect */
+        #mobile-menu-toggle:hover span {
+            background: #d6f87a;
+        }
+    </style>
+
+    <script>
+        // @ts-nocheck
+        document.addEventListener("DOMContentLoaded", () => {
+            const mobileToggle = document.getElementById("mobile-menu-toggle");
+            const mobileClose = document.getElementById("mobile-close-button");
+            const overlay = document.getElementById("mobile-overlay");
+            const sideNav = document.getElementById("side-nav");
+
+            // Open/close mobile menu helpers
+            const toggleMenu = (isOpen) => {
+                if (!sideNav || !overlay || !mobileToggle) return;
+                sideNav.classList.toggle("open", isOpen);
+                sideNav.classList.toggle("translate-x-0", isOpen);
+                sideNav.classList.toggle("-translate-x-full", !isOpen);
+                overlay.classList.toggle("open", isOpen);
+                mobileToggle.style.display = isOpen ? "none" : "";
+                document.body.style.overflow = isOpen ? "hidden" : "";
+            };
+
+            const openMenu = () => toggleMenu(true);
+            const closeMenu = () => toggleMenu(false);
+
+            if (mobileToggle) mobileToggle.addEventListener("click", openMenu);
+            if (mobileClose) mobileClose.addEventListener("click", closeMenu);
+            if (overlay) overlay.addEventListener("click", closeMenu);
+
+            // Handle submenu toggles
+            const navTriggers = document.querySelectorAll("[data-nav-trigger]");
+            navTriggers.forEach((triggerEl) => {
+                triggerEl.addEventListener("click", (e) => {
+                    e.preventDefault();
+
+                    const dropdownId = triggerEl.getAttribute("aria-controls");
+                    if (!dropdownId) return;
+                    const dropdown = document.getElementById(dropdownId);
+                    if (!dropdown) return;
+
+                    const isExpanded =
+                        triggerEl.getAttribute("aria-expanded") === "true";
+                    triggerEl.setAttribute(
+                        "aria-expanded",
+                        (!isExpanded).toString(),
+                    );
+                    if (isExpanded) {
+                        dropdown.classList.remove("open");
+                    } else {
+                        dropdown.classList.add("open");
+                    }
+                });
+            });
+
+            // Close mobile menu when clicking on a link
+            const navLinks = document.querySelectorAll("[data-nav-link]");
+            navLinks.forEach((link) => {
+                link.addEventListener("click", () => {
+                    if (window.innerWidth < 1024) closeMenu();
+                });
+            });
+
+            // Handle escape key
+            document.addEventListener("keydown", (e) => {
+                if (
+                    e.key === "Escape" &&
+                    sideNav &&
+                    sideNav.classList.contains("open")
+                )
+                    closeMenu();
+            });
+
+            const month = new Date().getMonth();
+            if (month === 11) {
+                const logoContainer = document.getElementById("page-title");
+                if (logoContainer && !logoContainer.querySelector("img[data-hat]")) {
+                const img = document.createElement("img");
+                img.src = "/assets/img/logo/sapca.png";
+                img.width = 32;
+                img.height = 35;
+                img.alt = "sapca";
+                img.dataset.hat = "true";
+                img.style.position = "relative";
+                img.style.marginRight = "6px";
+                logoContainer.prepend(img);
+                }
+            }
+        });
+    </script>
+</>

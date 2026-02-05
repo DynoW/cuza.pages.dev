@@ -1,0 +1,43 @@
+---
+import List from "../components/List.astro";
+import Shortcuts from "../components/Shortcuts.astro";
+import ToggleExpansion from "../components/ToggleExpansion.astro";
+
+interface Props {
+  subject: string;
+  page: string;
+  slot?: string;
+}
+
+const { 
+  subject, 
+  page,
+} = Astro.props;
+
+const isAdmitere = subject === "admitere";
+---
+
+<p class="text-lg font-bold text-white">Extra</p>
+{
+    (subject === "admitere" && page === "fizica") ||
+    subject === "fizica" ? (
+        <a
+        class="extra-link"
+        href="https://drive.google.com/drive/folders/1RUHqNmCLyEN-FV3IXjw_aIpZEaE-qJWq?usp=sharing"
+        target="_blank"
+        >
+        Culegeri fizică
+        </a>
+    ) : null
+}
+{
+    isAdmitere ? (
+        <List subject="admitere" page={`${page}/extra`} />
+    ) : (
+        <List subject={subject} page="extra" />
+    )
+}
+
+<Shortcuts subject={subject} page={page} />
+
+<ToggleExpansion />

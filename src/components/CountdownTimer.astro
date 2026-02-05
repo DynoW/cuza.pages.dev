@@ -7,9 +7,9 @@ const config = getCountdownConfig();
 
 <div
   id="countdown-container"
-  class="bg-[rgba(10,13,16,.9)] rounded-3xl py-3 px-4 text-white mb-4"
+  class="bg-zinc-950/90 rounded-3xl py-3 px-4 text-white"
 >
-  <div class="flex justify-between items-center mb-2">
+  <div class="flex justify-between items-center">
     <h3 id="countdown-title" class="text-lg font-bold">{config.title}</h3>
     <button id="toggle-countdown" class="text-white hover:text-gray-300">
       <span id="toggle-icon" class="cursor-pointer">▼</span>
@@ -19,23 +19,23 @@ const config = getCountdownConfig();
   <div id="countdown-content">
     <!-- Countdown timer until exam -->
     <div id="countdown-to-exam">
-      <p class="text-sm mb-1">Timp rămas până la examen:</p>
+      <p class="text-sm mb-1 mt-1">Timp rămas până la examen:</p>
       <div class="grid grid-cols-4 gap-2 text-center text-lg md:text-xl font-bold">
-        <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 flex-1 min-w-0">
+        <div class="bg-neutral-800/90 rounded-lg p-1 flex-1 min-w-0">
           <span id="days">--</span>
           <span class="text-xs block text-center">Zile</span>
         </div>
-        <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 flex-1 min-w-0">
+        <div class="bg-neutral-800/90 rounded-lg p-1 flex-1 min-w-0">
           <span id="hours">--</span>
           <span class="text-xs block text-center">Ore</span>
         </div>
-        <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 flex-1 min-w-0">
+        <div class="bg-neutral-800/90 rounded-lg p-1 flex-1 min-w-0">
           <span id="minutes">--</span>
-          <span class="text-xs block text-center">Minute</span>
+          <span class="text-xs block text-center">Min</span>
         </div>
-        <div class="bg-[rgba(30,33,36,.9)] rounded-lg p-2 flex-1 min-w-0">
+        <div class="bg-neutral-800/90 rounded-lg p-1 flex-1 min-w-0">
           <span id="seconds">--</span>
-          <span class="text-xs block text-center">Secunde</span>
+          <span class="text-xs block text-center">Sec</span>
         </div>
       </div>
     </div>
@@ -71,7 +71,8 @@ const config = getCountdownConfig();
     private startDate: number;
     private endDate: number;
     private elements: Record<string, HTMLElement | null>;
-    private updateInterval: ReturnType<typeof setInterval> | null = null;
+    // Store DOM interval ID as a number to match clearInterval signature
+    private updateInterval: number | null = null;
     private config: any;
 
     constructor(config: any) {
@@ -126,7 +127,8 @@ const config = getCountdownConfig();
 
     private startUpdating(): void {
       this.updateCountdown();
-      this.updateInterval = setInterval(() => this.updateCountdown(), 1000);
+      // Use window.setInterval to ensure DOM typing (number)
+      this.updateInterval = window.setInterval(() => this.updateCountdown(), 1000);
     }
 
     private updateCountdown(): void {
@@ -185,8 +187,10 @@ const config = getCountdownConfig();
     }
 
     public destroy(): void {
-      if (this.updateInterval) {
-        clearInterval(this.updateInterval);
+      if (this.updateInterval !== null) {
+        // Use window.clearInterval to match number ID
+        window.clearInterval(this.updateInterval);
+        this.updateInterval = null;
       }
     }
   }
