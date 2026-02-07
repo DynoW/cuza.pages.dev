@@ -1,5 +1,5 @@
 ---
-import Page from "../../components/Page.astro";
+import NewPage from "../../components/NewPage.astro";
 import { getFirstPage, generateSubjectIndexPaths } from "../../utils/paths";
 
 export function getStaticPaths() {
@@ -12,4 +12,4 @@ const { subject } = Astro.params;
 const firstPage = getFirstPage(subject!);
 ---
 
-<Page subject={subject} page={firstPage} />
+<NewPage subject={subject} page={firstPage} />

@@ -1,5 +1,5 @@
 ---
-import PageComponent from "../../components/Page.astro";
+import NewPage from "../../components/NewPage.astro";
 import { generateSubjectPagePaths } from "../../utils/paths";
 
 export const getStaticPaths = generateSubjectPagePaths;
@@ -12,4 +12,4 @@ if (!subject || !page) {
 }
 ---
 
-<PageComponent subject={subject} page={page} />
+<NewPage subject={subject} page={page} />

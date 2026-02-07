@@ -1,4 +1,4 @@
-// TODO: Remobe this file
+// TODO: Remove this file
 
 import { envField } from 'astro/config';
 import type { BucketMode, SiteConfig } from '../types';
