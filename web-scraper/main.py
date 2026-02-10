@@ -17,7 +17,7 @@ import requests
 from bs4 import BeautifulSoup
 
 class BacExamScraper:
-    def __init__(self, base_dir: str = None, year: int = None, archive_override: bool = None, wayback: str = "Auto"):
+    def __init__(self, base_dir: str = None, year: int = None):
         # Find project root by looking for a marker file (like .git, package.json, etc.)
         if base_dir:
             self.base_dir = Path(base_dir)
@@ -39,25 +39,17 @@ class BacExamScraper:
         self.seen_urls_file = self.web_scraper_dir / "seen_urls.txt"
         self.temp_dir = self.web_scraper_dir / "temp"
         
-        self.current_year = str(datetime.now().year)
-        self.selected_year = str(year) if year else self.current_year
+        self.current_year = str(year) if year else str(datetime.now().year)
         
-        # Determine if we should use archive URL based on year difference
-        use_archive = self.selected_year != self.current_year
-        
-        # Override archive behavior if explicitly specified
-        if archive_override is not None:
-            use_archive = archive_override
-        
-        # Set archive prefix for URL construction
-        self.set_archive = self.selected_year if use_archive else ""
-        
-        self.wayback = wayback
+        # URL patterns for the current year
+        self.archive_on = True
+
+        self.set_archive = self.current_year if self.archive_on else ""
 
         self.urls = [
-            f"http://subiecte{self.set_archive}.edu.ro/{self.selected_year}/bacalaureat/modeledesubiecte/probescrise/",
-            f"http://subiecte{self.set_archive}.edu.ro/{self.selected_year}/simulare/simulare_bac_XII/",
-            f"http://subiecte{self.set_archive}.edu.ro/{self.selected_year}/bacalaureat/Subiecte_si_bareme/"
+            f"http://subiecte{self.set_archive}.edu.ro/{self.current_year}/bacalaureat/modeledesubiecte/probescrise/",
+            f"http://subiecte{self.set_archive}.edu.ro/{self.current_year}/simulare/simulare_bac_XII/",
+            f"http://subiecte{self.set_archive}.edu.ro/{self.current_year}/bacalaureat/Subiecte_si_bareme/"
         ]
         
         # Load previously seen URLs
@@ -78,72 +70,43 @@ class BacExamScraper:
     
     def fetch_page(self, url: str) -> str:
         """Fetch webpage content."""
-        def get_url(target_url: str) -> str:
+        try:
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
-            response = requests.get(target_url, headers=headers, timeout=30)
+            response = requests.get(url, headers=headers, timeout=30)
             response.raise_for_status()
             return response.text
-
-        try:
-            if self.wayback == "True":
-                return get_url(self.build_wayback_url(url))
-
-            return get_url(url)
         except requests.RequestException as e:
             print(f"Error fetching {url}: {e}")
-            if self.wayback == "Auto":
-                try:
-                    wayback_url = self.build_wayback_url(url)
-                    print(f"Retrying via Wayback Machine: {wayback_url}")
-                    return get_url(wayback_url)
-                except requests.RequestException as wayback_error:
-                    print(f"Error fetching Wayback snapshot: {wayback_error}")
             return ""
-
-    def build_wayback_url(self, original_url: str) -> str:
-        """Build a Wayback Machine URL that points to the latest snapshot."""
-        return f"https://web.archive.org/web/20250917055016/{original_url}"
-
-    def is_wayback_url(self, url: str) -> bool:
-        """Check if a URL already points to the Wayback Machine."""
-        parsed_url = urlparse(url)
-        return 'web.archive.org' in parsed_url.netloc and '/web/' in parsed_url.path
     
     def extract_links(self, html_content: str, base_url: str) -> list:
         """Extract ZIP file links matching the exam pattern."""
-        soup = BeautifulSoup(html_content, 'html.parser')
-        year = self.selected_year
-
-        def normalize_href(href_value: str) -> str:
-            if href_value.startswith('http') or href_value.startswith('https'):
-                return href_value
-            return urljoin(base_url, href_value)
-
+        # Multiple patterns to match different ZIP file formats:
+        # 1. Standard: E_[acd]_...2025...zip
+        # 2. Model: Bac_2025_E_[acd]_...zip  
+        # 3. Various other formats with year
+        patterns = [
+            rf'href=\"([^\"]*E_[acd]_[^\"]*{self.current_year}[^\"]*\.zip)\"',  # E_a_2025_...
+            rf'href=\"([^\"]*Bac_{self.current_year}_E_[acd]_[^\"]*\.zip)\"',   # Bac_2025_E_a_...
+            rf'href=\"([^\"]*{self.current_year}[^\"]*E_[acd][^\"]*\.zip)\"',   # Other formats with year and E_a
+        ]
+        
+        all_matches = []
+        for pattern in patterns:
+            matches = re.findall(pattern, html_content, re.IGNORECASE)
+            all_matches.extend(matches)
+        
+        # Convert relative URLs to absolute
         zip_links = []
-        for link in soup.find_all('a', href=True):
-            href = link['href']
-            if '.zip' not in href.lower():
-                continue
-
-            # Prefer links that reference the selected year
-            if year not in href and year not in link.get_text():
-                continue
-
-            zip_links.append(normalize_href(href))
-
-        if zip_links:
-            return list(set(zip_links))
-
-        # Fallback: collect all ZIPs if year-filtered scan yields nothing
-        all_zip_links = []
-        for link in soup.find_all('a', href=True):
-            href = link['href']
-            if '.zip' in href.lower():
-                all_zip_links.append(normalize_href(href))
-
-        return list(set(all_zip_links))
+        for match in all_matches:
+            if match.startswith('http') or match.startswith('https'):
+                zip_links.append(match)
+            else:
+                zip_links.append(urljoin(base_url, match))
+        
+        return list(set(zip_links))  # Remove duplicates
     
     def determine_exam_type(self, url: str, zip_filename: str = "") -> str:
         """Determine the exam type based on URL and filename."""
@@ -177,38 +140,20 @@ class BacExamScraper:
     
     def download_file(self, url: str, target_path: Path) -> bool:
         """Download file from URL to target path."""
-        def get_url(target_url: str) -> bool:
+        try:
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
-            response = requests.get(target_url, headers=headers, timeout=60)
+            response = requests.get(url, headers=headers, timeout=60)
             response.raise_for_status()
-
+            
             with open(target_path, 'wb') as f:
                 f.write(response.content)
-
+            
             print(f"Downloaded: {target_path.name}")
             return True
-
-        def resolve_wayback_url(source_url: str) -> str:
-            if self.is_wayback_url(source_url):
-                return source_url
-            return self.build_wayback_url(source_url)
-
-        try:
-            if self.wayback == "True":
-                return get_url(resolve_wayback_url(url))
-
-            return get_url(url)
         except requests.RequestException as e:
             print(f"Error downloading {url}: {e}")
-            if self.wayback == "Auto" and not self.is_wayback_url(url):
-                try:
-                    wayback_url = resolve_wayback_url(url)
-                    print(f"Retrying download via Wayback Machine: {wayback_url}")
-                    return get_url(wayback_url)
-                except requests.RequestException as wayback_error:
-                    print(f"Error downloading Wayback snapshot: {wayback_error}")
             return False
     #! START ORGANIZE
     def extract_subject_from_pdf_name(self, pdf_filename: str) -> str:
@@ -254,15 +199,19 @@ class BacExamScraper:
             'm_mate-info': 'mate-info',
             'm_pedagogic': 'pedagogic',
             'm_st-nat': 'st-nat',
-            'm_thenologic': 'thenologic',
+            'm_tehnologic': 'thenologic',
             'anorganica': 'anorganica',
             'organica': 'organica',
-            'thenologic': 'thenologic',
+            'tehnologic': 'thenologic',
             'teoretic_vocational': 'teoretic',
             'sp_mi_c': 'mate-info-C',
+            'sp_mi_p': 'mate-info-Pascal',
             'sp_mi_pascal': 'mate-info-Pascal',
             'sp_sn_c': 'st-nat-C',
+            'sp_sn_p': 'st-nat-Pascal',
             'sp_sn_pascal': 'st-nat-Pascal',
+            'sp_mi_bar': 'mate-info-bareme',
+            'sp_sn_bar': 'st-nat-bareme',
         }
         
         for keyword, folder in subcategory_keywords.items():
@@ -275,22 +224,6 @@ class BacExamScraper:
         """Organize a single PDF file into the correct subject folder."""
         filename = pdf_path.name
         
-        # Extract subject from filename
-        subject = self.extract_subject_from_pdf_name(filename)
-        if not subject:
-            filename_lower = filename.lower()
-            if 'materna' in filename_lower:
-                return False
-            print(f"Warning: Could not determine subject for: {filename}")
-            return False
-
-        # Extract subcategory from filename
-        subcategory = self.extract_subcategory_from_pdf_name(filename)
-        
-        # Create target directory for this subject
-        target_dir = self.files_dir / subject / 'pages' / subcategory / year / exam_type
-        target_dir.mkdir(parents=True, exist_ok=True)
-        
         # Clean up the filename by removing language suffixes
         clean_filename = filename
         language_suffixes = ['_LRO', '_LMA', '_LGE', '_LSK', '_LSR', '_LUA']
@@ -298,18 +231,61 @@ class BacExamScraper:
             if suffix + '.pdf' in clean_filename:
                 clean_filename = clean_filename.replace(suffix + '.pdf', '.pdf')
                 break
+
+        # Extract subject from filename
+        subject = self.extract_subject_from_pdf_name(filename)
+        if not subject:
+            print(f"Warning: Could not determine subject for: {filename}")
+            return False
+
+        # Extract subcategory from filename
+        subcategory = self.extract_subcategory_from_pdf_name(filename)
+
+        target_dir = self.files_dir / subject / 'pages' / subcategory / year / exam_type
+
+        if (subcategory == 'mate-info-bareme' or subcategory == 'st-nat-bareme'):
+            self.copy_bar_to_both_c_and_pascal(pdf_path, subcategory, target_dir, clean_filename)
+        else:
+            # Create target directory for this subject
+            target_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Create final file path with cleaned filename
+            target_file = target_dir / clean_filename
+            
+            try:
+                # Copy the file to the correct location (instead of move to avoid cross-device issues)
+                shutil.copy2(pdf_path, target_file)
+                print(f"Organized: {clean_filename} -> {subject}")
+                return True
+            except OSError as e:
+                print(f"Error copying {filename}: {e}")
+                return False
+
+    def copy_bar_to_both_c_and_pascal(self, pdf_path: Path, subcategory: str, target_dir: Path, clean_filename: str):
+        """Copy bar files to both C and Pascal subcategories."""
+        new_subcategory = str(subcategory).replace('bareme', '')
+
+        c_target_dir = str(target_dir).replace(subcategory, new_subcategory + 'C')
+        pascal_target_dir = str(target_dir).replace(subcategory, new_subcategory + 'Pascal')
+
+        c_target_dir = Path(c_target_dir)
+        pascal_target_dir = Path(pascal_target_dir)
         
-        # Create final file path with cleaned filename
-        target_file = target_dir / clean_filename
+        c_target_dir.mkdir(parents=True, exist_ok=True)
+        pascal_target_dir.mkdir(parents=True, exist_ok=True)
+        
+        c_target_file = c_target_dir / clean_filename # .replace('bar', 'bar_C')
+        pascal_target_file = pascal_target_dir / clean_filename # .replace('bar', 'bar_Pascal')
         
         try:
-            # Copy the file to the correct location (instead of move to avoid cross-device issues)
-            shutil.copy2(pdf_path, target_file)
-            print(f"Organized: {clean_filename} -> {subject}")
+            shutil.copy2(pdf_path, c_target_file)
+            shutil.copy2(pdf_path, pascal_target_file)
+            print(f"Organized info barem file: {clean_filename} -> {c_target_file.parent.name} and {pascal_target_file.parent.name}")
             return True
         except OSError as e:
-            print(f"Error copying {filename}: {e}")
+            print(f"Error copying bar file {clean_filename}: {e}")
             return False
+
     #! STOP
     def extract_zip_file(self, zip_path: Path, target_temp_dir: Path, exam_type: str) -> list:
         """Extract ZIP file and organize PDFs by subject."""
@@ -351,7 +327,7 @@ class BacExamScraper:
                 # Process each LRO PDF file
                 for pdf_path in lro_files:
                     try:
-                        if self.organize_pdf_by_subject(pdf_path, exam_type, self.selected_year):
+                        if self.organize_pdf_by_subject(pdf_path, exam_type, self.current_year):
                             extracted_files.append(pdf_path)
                     except Exception as e:
                         print(f"Error processing PDF {pdf_path.name}: {e}")
@@ -405,7 +381,7 @@ class BacExamScraper:
     
     def run(self):
         """Main scraper execution."""
-        print(f"Starting BAC exam scraper for year {self.selected_year}")
+        print(f"Starting BAC exam scraper for year {self.current_year}")
         print(f"Base directory: {self.base_dir}")
         
         new_files_count = 0
@@ -444,47 +420,28 @@ def main():
         description='Web scraper for Romanian Baccalaureate exam files from subiecte.edu.ro'
     )
     parser.add_argument(
-        '--base-dir', '-d',
-        type=str,
-        help='Base directory for the project (auto-detected if not provided)'
-    )
-    parser.add_argument(
         '--year', '-y',
         type=int,
         default=datetime.now().year,
         help=f'Year to scrape exam files for (default: {datetime.now().year})'
     )
     parser.add_argument(
-        '--archive-override', '-a',
+        '--base-dir', '-d',
         type=str,
-        choices=['true', 'false', 'True', 'False'],
-        default=None,
-        help='Override archive usage (true/false). By default, uses archive for past years only.'
-    )
-    parser.add_argument(
-        '--wayback', '-w',
-        type=str,
-        choices=['Auto', 'True', 'False'],
-        default='Auto',
-        help='Wayback Machine usage: Auto, True, False (default: Auto)'
+        help='Base directory for the project (auto-detected if not provided)'
     )
     
     args = parser.parse_args()
     
-    # Convert archive_override string to bool if provided
-    archive_override = None
-    if args.archive_override:
-        archive_override = args.archive_override.lower() == 'true'
-    
     try:
-        scraper = BacExamScraper(base_dir=args.base_dir, year=args.year, archive_override=archive_override, wayback=args.wayback)
-        new_files = scraper.run()
+        scraper = BacExamScraper(base_dir=args.base_dir, year=args.year)
+        new_urls = scraper.run()
         
-        if new_files > 0:
-            print(f"Scraping completed. Downloaded {new_files} new files.")
+        if new_urls > 0:
+            print(f"Scraping completed. Downloaded {new_urls} new urls.")
             sys.exit(0)
         else:
-            print("No new files found.")
+            print("No new urls found.")
             sys.exit(0)
             
     except KeyboardInterrupt:

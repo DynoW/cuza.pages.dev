@@ -1,10 +1,13 @@
 ---
+import { tr } from "framer-motion/client";
 import fs from "fs";
 import path from "path";
 
 // Get current path for highlighting active links
 const pathname = new URL(Astro.request.url).pathname;
 const currentPath: string[] = pathname.replace(".html", "").split("/").slice(1);
+
+const isHome = currentPath.length === 1 && (currentPath[0] === "" || currentPath[0] === "index"); 
 
 // Get the absolute path to the files directory
 const filesPath = path.join(process.cwd(), import.meta.env.FILES_DIR);
@@ -92,22 +95,20 @@ function getDisplayName(name: string): string {
 
 // Helper function to get the URL for a nav item
 function getNavUrl(subject: string, page: string | null): string {
-    if (subject === "fizica" && !page) return "/";
-    if (!page) return `/${subject}`;
+    if (page==="bac") return `/${subject}`;
     return `/${subject}/${page}`;
 }
 
-// Check if current path matches subject/page (covers both active link and dropdown cases)
-function isActive(subject: string, page: string | null = null): boolean {
-    const isHome = currentPath[0] === "" || currentPath[0] === "index";
-    const currentSubject = currentPath[0];
-    const currentPage = currentPath[1];
+// Check if current path matches subject/page
+function isSubjectActive(subject: string): boolean {
+    return currentPath[0] === subject || (subject === "fizica" && isHome);
+}
 
-    // Home page defaults to fizica
-    if (subject === "fizica" && !page && isHome) return true;
-
-    // Match subject + optional page
-    return currentSubject === subject && (!page || currentPage === page);
+function isPageActive(subject: string, page: string | null = null): boolean {
+    if (page == "bac") {
+        return (currentPath[0] === subject && currentPath.length === 1) || (subject === "fizica" && isHome);
+    }
+    return currentPath[0] === subject && currentPath[1] === page;
 }
 ---
 
@@ -196,9 +197,9 @@ function isActive(subject: string, page: string | null = null): boolean {
                                     <>
                                         <button
                                             type="button"
-                                            class={`nav-link ${isActive(subject) ? "active" : ""}`}
+                                            class={`nav-link ${isSubjectActive(subject) ? "active" : ""}`}
                                             aria-expanded={
-                                                isActive(subject)
+                                                isSubjectActive(subject)
                                                     ? "true"
                                                     : "false"
                                             }
@@ -226,32 +227,15 @@ function isActive(subject: string, page: string | null = null): boolean {
                                             </svg>
                                         </button>
                                         <div
-                                            class={`submenu ${isActive(subject) ? "open" : ""}`}
+                                            class={`submenu ${isSubjectActive(subject) ? "open" : ""}`}
                                             id={dropdownId}
                                             data-dropdown={subject}
                                         >
                                             <div class="min-h-0">
-                                                {subject === "fizica" && (
-                                                    <a
-                                                        class={`submenu-link ${isActive(subject, null) ? "active" : ""}`}
-                                                        href="/"
-                                                        data-nav-link
-                                                    >
-                                                        Bac
-                                                    </a>
-                                                )}
                                                 {pages
-                                                    .filter(
-                                                        (page: string) =>
-                                                            !(
-                                                                subject ===
-                                                                    "fizica" &&
-                                                                page === "bac"
-                                                            ),
-                                                    )
                                                     .map((page: string) => (
                                                         <a
-                                                            class={`submenu-link ${isActive(subject, page) ? "active" : ""}`}
+                                                            class={`submenu-link ${isPageActive(subject, page) ? "active" : ""}`}
                                                             href={getNavUrl(
                                                                 subject,
                                                                 page,
@@ -268,7 +252,7 @@ function isActive(subject: string, page: string | null = null): boolean {
                                     </>
                                 ) : (
                                     <a
-                                        class={`nav-link ${isActive(subject, pages[0]) ? "active" : ""}`}
+                                        class={`nav-link ${isSubjectActive(subject) ? "active" : ""}`}
                                         href={getNavUrl(subject, pages[0])}
                                         data-nav-link
                                     >
