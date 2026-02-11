@@ -8,7 +8,7 @@ import { buildPublicDefines, validateSiteConfig } from './src/utils/site-config'
 const siteConfig = {
   bucket_mode: 'off', // "off", "local", "remote"
   public_countdown: 'on', // "on", "off"
-  files_dir: 'ceva/files' // directory in the bucket for files
+  files_dir: 'files' // directory in the bucket for files
 };
 
 validateSiteConfig(siteConfig);
