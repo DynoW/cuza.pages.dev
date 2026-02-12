@@ -162,7 +162,7 @@ function isPageActive(subject: string, page: string | null = null): boolean {
                 </a>
                 <a href="https://github.com/DynoW/cuza.pages.dev" class="flex flex-col gap-0.5" aria-label="Pagina de GitHub">
                     <h1 id="page-title"
-                        class="font-bold italic text-xl xl:text-3xl m-0 text-[#e6edff]"
+                        class="font-bold italic text-xl xl:text-3xl m-0 text-[#e6edff] relative"
                     >
                         Cuza<span class="text-lg">.</span>Pages<span class="text-lg">.dev</span>
                     </h1>
@@ -513,17 +513,29 @@ function isPageActive(subject: string, page: string | null = null): boolean {
             const month = new Date().getMonth();
             if (month === 11) {
                 const logoContainer = document.getElementById("page-title");
+                
+                const updateHatStyles = () => {
+                    const img = logoContainer?.querySelector("img[data-hat]");
+                    if (img) {
+                        img.width = window.innerWidth >= 1280 ? 32 : 22;
+                        img.style.top = window.innerWidth >= 1280 ? "-10px" : "-5px";
+                        img.style.left = window.innerWidth >= 1280 ? "-5px" : "-4px";
+                    }
+                };
+
                 if (logoContainer && !logoContainer.querySelector("img[data-hat]")) {
-                const img = document.createElement("img");
-                img.src = "/assets/img/logo/sapca.png";
-                img.width = 32;
-                img.height = 35;
-                img.alt = "sapca";
-                img.dataset.hat = "true";
-                img.style.position = "relative";
-                img.style.marginRight = "6px";
-                logoContainer.prepend(img);
+                    const img = document.createElement("img");
+                    img.src = "/assets/img/logo/sapca.png";
+                    img.width = window.innerWidth >= 1280 ? 32 : 22;
+                    img.alt = "sapca";
+                    img.dataset.hat = "true";
+                    img.style.position = "absolute";
+                    img.style.top = window.innerWidth >= 1280 ? "-10px" : "-5px";
+                    img.style.left = window.innerWidth >= 1280 ? "-5px" : "-4px";
+                    logoContainer.prepend(img);
                 }
+
+                window.addEventListener("resize", updateHatStyles);
             }
         });
     </script>
