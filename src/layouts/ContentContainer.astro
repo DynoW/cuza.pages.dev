@@ -2,10 +2,10 @@
   <section class="lg:w-75">
     <slot name="left" />
   </section>
-  <section class="grow order-last md:order-0 pb-28 md:pb-20 lg:pb-0 mt-2"> 
+  <section class="basis-1/2 flex-1 order-last md:order-0 pb-28 md:pb-20 lg:pb-0 mt-2"> 
     <slot name="middle" />
   </section>
-  <section class="min-w-64 md:max-w-96 relative"> <!-- On mobile, arrow side panel with open/close animation -->
+  <section class="basis-1/3 min-w-64 md:max-w-96 relative"> <!-- On mobile, arrow side panel with open/close animation -->
     <slot name="right" />
   </section>
 </main>
