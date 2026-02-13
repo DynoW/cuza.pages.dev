@@ -33,10 +33,10 @@ jobs:
       - name: Run Fetch Script
         run: python web-scraper/main.py
 
-      # - name: Commit and Push changes
-      #   uses: stefanzweifel/git-auto-commit-action@v5
-      #   with:
-      #     commit_message: "🤖 Auto-fetch: New BAC exam files for ${{ steps.date.outputs.date }}"
-      #     file_pattern: 'files/*'
-      #     skip_dirty_check: false
-      #     create_branch: false
+      - name: Commit and Push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "🤖 Auto-fetch: New BAC exam files for ${{ steps.date.outputs.date }}"
+          file_pattern: 'files/*'
+          skip_dirty_check: false
+          create_branch: false

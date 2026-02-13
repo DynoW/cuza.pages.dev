@@ -130,9 +130,9 @@ class BacExamScraper:
                 return 'Sesiunea-II-rezerva'
         if 'speciala' in filename_lower:
             return 'Sesiune-olimpici'
-        if  'iun' in filename_lower or 'iul' in filename_lower:
+        if  '_iun' in filename_lower or '_iul' in filename_lower:
             return 'Sesiunea-I'  # June session
-        if 'aug' in filename_lower:
+        if '_aug' in filename_lower:
             return 'Sesiunea-II'  # August session
         
         # Default fallback
