@@ -24,6 +24,8 @@ app.use('*', cors({
   credentials: true,
 }));
 
+app.get('/ping', (c) => c.text('Pong!', 200));
+
 // 4. Main Route
 app.post('/', async (c) => {
   // --- Authentication Check ---
