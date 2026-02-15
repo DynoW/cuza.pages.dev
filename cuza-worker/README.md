@@ -1,3 +1,5 @@
+# Cloudflare worker for cuza.pages.dev
+
 ```txt
 pnpm install
 pnpm run dev
