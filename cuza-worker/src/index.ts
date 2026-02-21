@@ -209,7 +209,7 @@ async function createPullRequest(token: string, storagePath: string, file: File,
 
   // Create PR
   const { data: pullRequest } = await octokit.pulls.create({
-    owner, repo, title: `Upload ${newFileName}`, head: branchName, base: baseBranch,
+    owner, repo, title: `Automated Upload`, head: branchName, base: baseBranch,
     body: `This PR uploads the (*${mtype}*) **${newFileName}** to the path:\n\`${storagePath}\`\nOld name: *${file.name}*`
   });
 
