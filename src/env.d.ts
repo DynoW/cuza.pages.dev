@@ -13,12 +13,7 @@ interface ImportMetaEnv {
   readonly PROD: boolean;
   readonly SSR: boolean;
 
-  readonly WORKER_URL?: string;
-  readonly LOCAL_WORKER_URL?: string;
-  readonly PUBLIC_WORKER_URL: string;
-  readonly BUCKET_MODE: 'off' | 'local' | 'remote' = "off";
-  readonly PUBLIC_COUNTDOWN: 'on' | 'off' = "on";
-  readonly FILES_DIR: string = "files";
+  readonly WORKER_URL: string;
 }
 
 interface ImportMeta {

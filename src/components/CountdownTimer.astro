@@ -1,6 +1,5 @@
 ---
 import { getCountdownConfig } from "../config/countdown";
-import ProgressBar from "./countdown/ProgressBar.astro";
 
 const config = getCountdownConfig();
 ---
@@ -42,7 +41,14 @@ const config = getCountdownConfig();
 
     <!-- Progress bar until results -->
     <div id="progress-to-results" class="hidden">
-      <ProgressBar progress={0} />
+      <div class="w-full bg-[rgba(30,33,36,.9)] rounded-full h-5 mb-2">
+        <div
+          id="progress-bar"
+          class="bg-blue-600 h-5 rounded-full text-xs text-center leading-5 text-white transition-all duration-300"
+          style="width: 0%"
+        >
+        </div>
+      </div>
     </div>
 
     <!-- Completion message -->
@@ -57,15 +63,39 @@ const config = getCountdownConfig();
 </div>
 
 <script>
-  import { calculateTimeDifference, calculateProgress } from "../utils/time";
-  import {
-    getElementById,
-    setElementContent,
-    showElement,
-    hideElement,
-    padNumber,
-  } from "../utils/dom";
-  import { getStorageItem, setStorageItem } from "../utils/storage";
+  // --- time utils ---
+  interface TimeDifference { days: number; hours: number; minutes: number; seconds: number; }
+  const calculateTimeDifference = (targetTime: number, currentTime: number = Date.now()): TimeDifference => {
+    const distance = targetTime - currentTime;
+    if (distance <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    return {
+      days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+      minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+      seconds: Math.floor((distance % (1000 * 60)) / 1000),
+    };
+  };
+  const calculateProgress = (startTime: number, endTime: number, currentTime: number = Date.now()): number => {
+    if (currentTime <= startTime) return 0;
+    if (currentTime >= endTime) return 100;
+    return Math.round(((currentTime - startTime) / (endTime - startTime)) * 100);
+  };
+
+  // --- dom utils ---
+  const getElementById = (id: string): HTMLElement | null => document.getElementById(id);
+  const setElementContent = (element: HTMLElement | null, content: string): void => { if (element) element.textContent = content; };
+  const showElement = (element: HTMLElement | null): void => { if (element) { element.classList.remove('hidden'); element.style.display = ''; } };
+  const hideElement = (element: HTMLElement | null): void => { if (element) { element.classList.add('hidden'); element.style.display = 'none'; } };
+  const padNumber = (num: number): string => num < 10 ? `0${num}` : num.toString();
+
+  // --- storage utils ---
+  const getStorageItem = (key: string, defaultValue: string = ''): string => {
+    if (typeof localStorage === 'undefined') return defaultValue;
+    return localStorage.getItem(key) || defaultValue;
+  };
+  const setStorageItem = (key: string, value: string): void => {
+    if (typeof localStorage !== 'undefined') localStorage.setItem(key, value);
+  };
 
   class CountdownManager {
     private startDate: number;
@@ -73,9 +103,9 @@ const config = getCountdownConfig();
     private elements: Record<string, HTMLElement | null>;
     // Store DOM interval ID as a number to match clearInterval signature
     private updateInterval: number | null = null;
-    private config: any;
+    private config: { title: string; startDate: string; endDate: string };
 
-    constructor(config: any) {
+    constructor(config: { title: string; startDate: string; endDate: string }) {
       this.config = config;
       this.startDate = new Date(config.startDate).getTime();
       this.endDate = new Date(config.endDate).getTime();
@@ -183,7 +213,7 @@ const config = getCountdownConfig();
       hideElement(this.elements.countdownToExam);
       hideElement(this.elements.progressToResults);
       showElement(this.elements.completionMessage);
-      setElementContent(this.elements.title, "BAC 2025 | Finalizat");
+      setElementContent(this.elements.title, `${this.config.title} | Finalizat`);
     }
 
     public destroy(): void {

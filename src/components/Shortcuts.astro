@@ -1,34 +1,27 @@
 ---
-// Add props to customize shortcuts for each page
+import { apiService } from '../api';
+
 interface Props {
   subject: string;
   page: string;
+  /** Pre-fetched years – skips an API call when provided. */
+  years?: number[];
 }
 
-import { apiService } from '../utils/api';
+const { subject, page, years: propYears } = Astro.props;
 
-const { subject, page } = Astro.props;
-
-// Fetch years from the API using the efficient years-only endpoint
 let availableYears: number[] = [];
 let apiError: string | null = null;
 
-try {
-  availableYears = await apiService.getYears(subject, page);
-} catch (error) {
-  apiError = `Failed to fetch years: ${error instanceof Error ? error.message : String(error)}`;
-  console.warn("API fetch failed for shortcuts:", error);
-}
-
-// Function to determine the URL for a year shortcut
-function getShortcutUrl(year: number) {
-  // Special case: if subject is fizica, page is bac, and year is 2007, link to /fizica/variante
-  // if (subject === 'fizica' && (page === 'bac' || !page) && year === 2007) {
-  //   return '/fizica/variante';
-  // }
-  
-  // Default behavior: link to anchor tag for the year
-  return `#${year}`;
+if (propYears !== undefined) {
+  availableYears = propYears;
+} else {
+  try {
+    availableYears = await apiService.getYears(subject, page);
+  } catch (error) {
+    apiError = `Failed to fetch years: ${error instanceof Error ? error.message : String(error)}`;
+    console.warn("API fetch failed for shortcuts:", error);
+  }
 }
 ---
 
@@ -37,7 +30,7 @@ function getShortcutUrl(year: number) {
   
   {
     apiError && (
-      <div class="text-xs text-red-400 mb-2">
+      <div class="text-xs text-red-500 mb-2">
         Nu s-au putut încărca scurtăturile
       </div>
     )
@@ -48,7 +41,7 @@ function getShortcutUrl(year: number) {
       <div class="shortcuts-grid">
         {availableYears.map((year) => (
           <a 
-            href={getShortcutUrl(year)}
+            href={`#${year}`}
             class="shortcut-button"
             title={`Salt la documentele din ${year}`}
           >

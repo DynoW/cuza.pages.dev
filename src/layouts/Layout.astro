@@ -247,10 +247,8 @@ if (month === 11) {
         }
         window.addEventListener("scroll", function () {
           const button = document.getElementById("scrollToTop");
-          if (window.scrollY > 0) {
-            button.style.display = "block";
-          } else {
-            button.style.display = "none";
+          if (button) {
+            button.style.display = window.scrollY > 0 ? "block" : "none";
           }
         });
       </script>

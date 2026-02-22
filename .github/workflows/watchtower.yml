@@ -7,9 +7,9 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  fetch-and-update:
+  fetch-and-upload:
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: write
 
@@ -17,9 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          sparse-checkout: |
-            web-scraper
-            files
+          sparse-checkout: web-scraper
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -27,16 +25,18 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: |
-          pip install requests beautifulsoup4
+        run: pip install requests
 
       - name: Run Fetch Script
+        env:
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+          UPLOAD_PASSWORD: ${{ secrets.UPLOAD_PASSWORD }}
         run: python web-scraper/main.py
 
-      - name: Commit and Push changes
+      - name: Commit seen_urls changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "🤖 Auto-fetch: New BAC exam files for ${{ steps.date.outputs.date }}"
-          file_pattern: 'files/*'
+          commit_message: "🤖 Auto-fetch: Update seen_urls"
+          file_pattern: 'web-scraper/seen_urls.txt'
           skip_dirty_check: false
           create_branch: false

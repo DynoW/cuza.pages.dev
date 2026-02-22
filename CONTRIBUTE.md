@@ -4,7 +4,7 @@
 
 **Largest archive for romanian baccalaureate exam**
 
-<font size="1">For help contact [**Danutz**](https://github.com/DynoW).</font>
+<font size="1">For help contact [**Daniel C.**](https://github.com/DynoW).</font>
 
 ## Why to contribute:
 

@@ -2,11 +2,12 @@
 import Layout from "../layouts/Layout.astro";
 import ContentContainer from "../layouts/ContentContainer.astro";
 import NewNavbar from "../components/NewNavbar.astro";
-import NewHeader from "../components/NewHeader.astro";
 import List from "./List.astro";
 import Extra from "../components/Extra.astro";
 import Footer from "../components/Footer.astro";
 import CountdownTimer from "./CountdownTimer.astro";
+import { apiService } from "../api";
+import type { FileStructure } from "../types";
 
 // Props for the component
 interface Props {
@@ -19,7 +20,13 @@ const {
   page,
 } = Astro.props;
 
-const pageTitle = `${subject}${page ? `-${page}` : ''} | cuza.pages.dev`;
+// Single request for all page data
+const pageData = await apiService.getPageData(subject, page);
+const content: FileStructure = pageData.content;
+const years: number[] = pageData.years;
+const extra: FileStructure = pageData.extra;
+
+const pageTitle = `${subject}-${page} | cuza.pages.dev`;
 --- 
 
 <Layout title={pageTitle}>
@@ -29,12 +36,12 @@ const pageTitle = `${subject}${page ? `-${page}` : ''} | cuza.pages.dev`;
         </aside>
         <div slot="middle" class="flex flex-col gap-2">
             <div class="bg-gray-100/90 rounded-3xl p-5 pr-2.5 font-bold">
-                <List subject={subject} page={page} />
+                <List subject={subject} page={page} data={content} />
             </div>
         </div>
         <aside slot="right" class="flex flex-col gap-2 md:mt-2 md:mr-2 md:sticky md:top-2 md:right-2">
             <div class="bg-zinc-950/90 rounded-3xl py-3 px-4">
-                <Extra subject={subject} page={page} />
+                <Extra subject={subject} page={page} extraData={extra} years={years} />
             </div>
             <CountdownTimer />
         </aside>

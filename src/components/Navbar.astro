@@ -1,59 +1,18 @@
 ---
-import fs from "fs";
-import path from "path";
+import { apiService } from '../api';
 
 // Get current path for highlighting active links
 const pathname = new URL(Astro.request.url).pathname;
 const currentPath: string[] = pathname.replace(".html", "").split("/").slice(1);
-
-// Get the absolute path to the files directory
-const filesPath = path.join(process.cwd(), import.meta.env.FILES_DIR);
-
-function isDirectory(source: string): boolean {
-  return fs.lstatSync(source).isDirectory();
-}
-
-// Read directories in the files path to get subjects
-const validSubjects = fs
-  .readdirSync(filesPath)
-  .filter((file) => isDirectory(path.join(filesPath, file)));
 
 // Define the navStructure type to avoid TypeScript errors
 interface NavStructure {
   [key: string]: string[];
 }
 
-// Generate navigation structure dynamically
-const navStructure: NavStructure = {};
-
-validSubjects.forEach((subject) => {
-  let subjectPath;
-
-  if (subject === "admitere") {
-    subjectPath = path.join(filesPath, subject);
-  } else {
-    subjectPath = path.join(filesPath, `${subject}/pages`);
-  }
-
-  // Read subdirectories to get pages
-  const subPages = fs.readdirSync(subjectPath).filter((file) => {
-    const filePath = path.join(subjectPath, file);
-    return isDirectory(filePath);
-  });
-
-  navStructure[subject] = subPages;
-});
-
-// // Ensure 'info' is in the navStructure even if not present in the filesystem
-// if (!navStructure.info) {
-//   navStructure.info = [];
-// }
-// // Ensure 'romana' is in the navStructure even if not present in the filesystem
-// if (!navStructure.romana) {
-//   navStructure.romana = [];
-// }
-
-navStructure.notite = ["info", "romana"];
+// Build nav structure from fetched subject/page map
+const subjectPages = await apiService.getStructure();
+const navStructure: NavStructure = { ...subjectPages, notite: ["info", "romana"] };
 
 // Define the desired order of subjects
 // const subjectOrder = ["fizica", "mate", "info", "romana", "admitere"];

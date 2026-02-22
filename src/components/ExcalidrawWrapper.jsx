@@ -1,18 +1,26 @@
 import { Excalidraw } from "@excalidraw/excalidraw";
 import "@excalidraw/excalidraw/index.css";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 const LOCAL_STORAGE_KEY = "excalidraw-romana";
 const EXCALIDRAW_FILE = "/assets/excalidraw/romana.excalidraw";
+
+// Pure hash: includes version so edits to existing elements are detected
+const hashElements = (elements) => {
+    if (!elements || !elements.length) return '';
+    return elements.map(el => `${el.id}:${el.version ?? 0}`).sort().join('|');
+};
 
 const ExcalidrawWrapper = () => {
     const [excalidrawData, setExcalidrawData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [excalidrawAPI, setExcalidrawAPI] = useState(null);
     const [hasUserChanges, setHasUserChanges] = useState(false);
-    const [originalSchemaHash, setOriginalSchemaHash] = useState(null);
     const [isSmallScreen, setIsSmallScreen] = useState(false);
     const [updateAvailable, setUpdateAvailable] = useState(false);
+
+    // Use a ref so the onChange callback always sees the latest hash
+    const originalSchemaHashRef = useRef(null);
 
     // Check screen size on mount and when window is resized
     useEffect(() => {
@@ -29,12 +37,6 @@ const ExcalidrawWrapper = () => {
         // Cleanup
         return () => window.removeEventListener('resize', checkScreenSize);
     }, []);
-
-    // Simple hash function to compare schemas
-    const hashElements = (elements) => {
-        if (!elements || !elements.length) return '';
-        return elements.map(el => el.id).sort().join('|');
-    };
 
     // Check if a schema update is available from the server
     const checkForSchemaUpdates = useCallback(async () => {
@@ -77,7 +79,7 @@ const ExcalidrawWrapper = () => {
 
                 // Store the original schema hash for comparison
                 const hash = hashElements(data.elements);
-                setOriginalSchemaHash(hash);
+                originalSchemaHashRef.current = hash;
                 localStorage.setItem(`${LOCAL_STORAGE_KEY}-hash`, hash);
 
                 // Reset flags
@@ -101,7 +103,7 @@ const ExcalidrawWrapper = () => {
                 const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
                 const savedHash = localStorage.getItem(`${LOCAL_STORAGE_KEY}-hash`);
 
-                setOriginalSchemaHash(savedHash);
+                originalSchemaHashRef.current = savedHash;
 
                 if (savedData) {
                     try {
@@ -147,40 +149,34 @@ const ExcalidrawWrapper = () => {
             clearInterval(updateCheckInterval);
         };
     }, [fetchSchema, checkForSchemaUpdates]);
-    // Save changes when user modifies the diagram
+    // Set hand tool and register onChange handler
     useEffect(() => {
-        if (excalidrawAPI) {
-            // Set the hand tool as active and locked
-            excalidrawAPI.setActiveTool({
-                type: "hand",
-                locked: true
-            });            // Add onChange handler to detect and save user changes
-            const onChange = () => {
-                try {
-                    if (excalidrawAPI) {
-                        const elements = excalidrawAPI.getSceneElements();
-                        const files = excalidrawAPI.getFiles();
+        if (!excalidrawAPI) return;
 
-                        // Only save if we have elements to prevent blank page
-                        if (elements && elements.length > 0) {
-                            // Save both elements and files to localStorage
-                            const dataToSave = { elements, files };
-                            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
+        excalidrawAPI.setActiveTool({
+            type: "hand",
+            locked: true
+        });
 
-                            // Compare with original schema to determine if there are changes
-                            const currentHash = hashElements(elements);
-                            const hasChanges = currentHash !== originalSchemaHash;
-                            setHasUserChanges(hasChanges);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error saving Excalidraw data:', error);
+        // Single onChange handler: saves to localStorage and tracks changes
+        const unsubscribe = excalidrawAPI.onChange(() => {
+            try {
+                const elements = excalidrawAPI.getSceneElements();
+                const files = excalidrawAPI.getFiles();
+
+                if (elements && elements.length > 0) {
+                    const dataToSave = { elements, files };
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
+
+                    const currentHash = hashElements(elements);
+                    setHasUserChanges(currentHash !== originalSchemaHashRef.current);
                 }
-            };
+            } catch (error) {
+                console.error('Error saving Excalidraw data:', error);
+            }
+        });
 
-            // Register the onChange handler
-            excalidrawAPI.onChange(onChange);
-        }
+        return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
     }, [excalidrawAPI]);
 
     // Handle updating the Romanian schema (ignoring local changes)
@@ -224,15 +220,7 @@ const ExcalidrawWrapper = () => {
                     }, scrollToContent: true,
                     files: excalidrawData?.files || {}
                 }}
-                onChange={(elements, appState, files) => {
-                    // This is a backup to ensure UI stays responsive
-                    // even if the main onChange handler fails
-                    if (elements && elements.length > 0) {
-                        const currentHash = hashElements(elements);
-                        const hasChanges = currentHash !== originalSchemaHash;
-                        setHasUserChanges(hasChanges);
-                    }
-                }} renderTopRightUI={() => {
+                renderTopRightUI={() => {
                     // Determine button style and text based on state
                     const buttonText = updateAvailable
                         ? "Actualizare schema disponibilă"

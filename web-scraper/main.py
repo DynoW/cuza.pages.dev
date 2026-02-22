@@ -1,39 +1,24 @@
 #!/usr/bin/env python3
 """
 Web scraper for Romanian Baccalaureate exam files from subiecte.edu.ro
-Downloads and organizes exam PDFs by subject and year.
+Downloads and uploads exam PDFs to R2 via the cuza-worker API.
 """
 
 import argparse
 import os
 import re
 import shutil
-import sys
 import zipfile
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 import requests
-from bs4 import BeautifulSoup
+
 
 class BacExamScraper:
-    def __init__(self, base_dir: str = None, year: int = None):
-        # Find project root by looking for a marker file (like .git, package.json, etc.)
-        if base_dir:
-            self.base_dir = Path(base_dir)
-        else:
-            current_file = Path(__file__)
-            # Look for project root markers
-            for parent in [current_file.parent, *current_file.parents]:
-                if (parent / '.git').exists() or (parent / 'package.json').exists():
-                    self.base_dir = parent
-                    break
-            else:
-                # Fallback to original logic
-                print("Base dir not found")
-                self.base_dir = current_file.parent.parent
-        
-        self.files_dir = self.base_dir / "files"
+    def __init__(self, worker_url: str, upload_password: str, year: int = None):
+        self.worker_url = worker_url.rstrip('/')
+        self.upload_password = upload_password
 
         self.web_scraper_dir = Path(__file__).parent
         self.seen_urls_file = self.web_scraper_dir / "seen_urls.txt"
@@ -43,7 +28,6 @@ class BacExamScraper:
         
         # URL patterns for the current year
         self.archive_on = True
-
         self.set_archive = self.current_year if self.archive_on else ""
 
         self.urls = [
@@ -88,9 +72,9 @@ class BacExamScraper:
         # 2. Model: Bac_2025_E_[acd]_...zip  
         # 3. Various other formats with year
         patterns = [
-            rf'href=\"([^\"]*E_[acd]_[^\"]*{self.current_year}[^\"]*\.zip)\"',  # E_a_2025_...
-            rf'href=\"([^\"]*Bac_{self.current_year}_E_[acd]_[^\"]*\.zip)\"',   # Bac_2025_E_a_...
-            rf'href=\"([^\"]*{self.current_year}[^\"]*E_[acd][^\"]*\.zip)\"',   # Other formats with year and E_a
+            rf'href=\"([^\"]*E_[acd]_[^\"]*{self.current_year}[^\"]*\.zip)\"',
+            rf'href=\"([^\"]*Bac_{self.current_year}_E_[acd]_[^\"]*\.zip)\"',
+            rf'href=\"([^\"]*{self.current_year}[^\"]*E_[acd][^\"]*\.zip)\"',
         ]
         
         all_matches = []
@@ -113,7 +97,7 @@ class BacExamScraper:
         url_lower = url.lower()
         filename_lower = zip_filename.lower()
         
-        # Check URL first for broad categories
+        # Check url for exam type indicators first
         if 'simulare' in url_lower or 'sim' in filename_lower:
             return 'Simulare'
         
@@ -130,7 +114,7 @@ class BacExamScraper:
                 return 'Sesiunea-II-rezerva'
         if 'speciala' in filename_lower:
             return 'Sesiune-olimpici'
-        if  '_iun' in filename_lower or '_iul' in filename_lower:
+        if '_iun' in filename_lower or '_iul' in filename_lower:
             return 'Sesiunea-I'  # June session
         if '_aug' in filename_lower:
             return 'Sesiunea-II'  # August session
@@ -155,7 +139,9 @@ class BacExamScraper:
         except requests.RequestException as e:
             print(f"Error downloading {url}: {e}")
             return False
-    #! START ORGANIZE
+
+    # ── Subject & subcategory extraction ────────────────────────────────────────
+
     def extract_subject_from_pdf_name(self, pdf_filename: str) -> str:
         """Extract subject from PDF filename to determine correct folder."""
         filename_lower = pdf_filename.lower()
@@ -165,7 +151,7 @@ class BacExamScraper:
             # e_a_
             'romana': 'romana', # fara "pentru": real/uman | E_a_romana_real_tehn_2025_var_model.pdf
             # e_c_
-            'matematica': 'mate', # LRO: mate-info/pedagogic/st-nat/thenologic | E_c_matematica_M_mate-info_2025_var_model_LRO.pdf
+            'matematica': 'mate', # LRO: mate-info/pedagogic/st-nat/tehnologic | E_c_matematica_M_mate-info_2025_var_model_LRO.pdf
             'istorie': 'istorie', # LRO | E_c_istorie_2025_var_simulare_LRO.pdf
             # e_d_
             'anat_fiz_gen_ec_um': 'anat', # LRO | E_d_anat_fiz_gen_ec_um_2025_var_model_LRO.pdf
@@ -173,7 +159,7 @@ class BacExamScraper:
             'chimie': 'chimie', # LRO: anorganica/organica | E_d_chimie_anorganica_2025_var_model_LRO.pdf
             'economie': 'economie', # LRO | E_d_economie_2025_var_model_LRO.pdf
             'filosofie': 'filosofie', # LRO | E_d_filosofie_2025_var_model_LRO.pdf
-            'fizica': 'fizica', # LRO: thenologic/teoretic | E_d_fizica_teoretic_vocational_2025_var_model_LRO.pdf
+            'fizica': 'fizica', # LRO: tehnologic/teoretic | E_d_fizica_teoretic_vocational_2025_var_model_LRO.pdf
             'geografie': 'geo', # LRO | E_d_geografie_2025_var_model_LRO.pdf
             'informatica': 'info', # LRO: MI/SN doar pt varianta are si C/Pascal | E_d_informatica_2025_sp_MI_C_var_model_LRO.pdf
             'logica': 'logica', # LRO | E_d_logica_2025_var_model_LRO.pdf
@@ -189,7 +175,7 @@ class BacExamScraper:
         return None
 
     def extract_subcategory_from_pdf_name(self, pdf_filename: str) -> str:
-        """Extract subcategory from PDF filename to determine correct folder."""
+        """Extract subcategory from PDF filename."""
         filename_lower = pdf_filename.lower()
         
         # Define subcategory keywords
@@ -199,10 +185,10 @@ class BacExamScraper:
             'm_mate-info': 'mate-info',
             'm_pedagogic': 'pedagogic',
             'm_st-nat': 'st-nat',
-            'm_tehnologic': 'thenologic',
+            'm_tehnologic': 'tehnologic',
             'anorganica': 'anorganica',
             'organica': 'organica',
-            'tehnologic': 'thenologic',
+            'tehnologic': 'tehnologic',
             'teoretic_vocational': 'teoretic',
             'sp_mi_c': 'mate-info-C',
             'sp_mi_p': 'mate-info-Pascal',
@@ -218,13 +204,14 @@ class BacExamScraper:
             if keyword in filename_lower:
                 return folder
         
-        return 'bac'  # Default subcategory if none found
-    
-    def organize_pdf_by_subject(self, pdf_path: Path, exam_type: str, year: str) -> bool:
-        """Organize a single PDF file into the correct subject folder."""
-        filename = pdf_path.name
-        
-        # Clean up the filename by removing language suffixes
+        return 'bac'
+
+    # ── R2 upload ───────────────────────────────────────────────────────────────
+
+    def build_r2_key(self, pdf_filename: str, exam_type: str, year: str) -> str:
+        """Build the R2 object key for a PDF file."""
+        filename = pdf_filename
+        # Clean up filename by removing language suffixes
         clean_filename = filename
         language_suffixes = ['_LRO', '_LMA', '_LGE', '_LSK', '_LSR', '_LUA']
         for suffix in language_suffixes:
@@ -235,63 +222,61 @@ class BacExamScraper:
         # Extract subject from filename
         subject = self.extract_subject_from_pdf_name(filename)
         if not subject:
+            return None, None
+        
+        subcategory = self.extract_subcategory_from_pdf_name(filename)
+        r2_key = f"{subject}/pages/{subcategory}/{year}/{exam_type}/{clean_filename}"
+        return r2_key, clean_filename
+
+    def upload_to_r2(self, pdf_path: Path, r2_key: str) -> bool:
+        """Upload a PDF file to R2 via the worker API."""
+        try:
+            with open(pdf_path, 'rb') as f:
+                response = requests.post(
+                    f"{self.worker_url}/upload-scraper",
+                    files={'file': (pdf_path.name, f, 'application/pdf')},
+                    data={
+                        'password': self.upload_password,
+                        'key': r2_key,
+                    },
+                    timeout=120,
+                )
+            if response.ok:
+                print(f"  Uploaded to R2: {r2_key}")
+                return True
+            else:
+                print(f"  Upload failed ({response.status_code}): {response.text}")
+                return False
+        except requests.RequestException as e:
+            print(f"  Upload error: {e}")
+            return False
+
+    def upload_pdf(self, pdf_path: Path, exam_type: str, year: str) -> bool:
+        """Upload a single PDF to R2 with the correct key."""
+        filename = pdf_path.name
+        r2_key, clean_filename = self.build_r2_key(filename, exam_type, year)
+        if not r2_key:
             print(f"Warning: Could not determine subject for: {filename}")
             return False
 
-        # Extract subcategory from filename
         subcategory = self.extract_subcategory_from_pdf_name(filename)
 
-        target_dir = self.files_dir / subject / 'pages' / subcategory / year / exam_type
+        # Handle bareme files that need to go to both C and Pascal
+        if subcategory in ('mate-info-bareme', 'st-nat-bareme'):
+            new_sub = subcategory.replace('bareme', '')
+            c_key = r2_key.replace(subcategory, new_sub + 'C')
+            pascal_key = r2_key.replace(subcategory, new_sub + 'Pascal')
+            ok_c = self.upload_to_r2(pdf_path, c_key)
+            ok_p = self.upload_to_r2(pdf_path, pascal_key)
+            return ok_c or ok_p
 
-        if (subcategory == 'mate-info-bareme' or subcategory == 'st-nat-bareme'):
-            self.copy_bar_to_both_c_and_pascal(pdf_path, subcategory, target_dir, clean_filename)
-        else:
-            # Create target directory for this subject
-            target_dir.mkdir(parents=True, exist_ok=True)
-            
-            # Create final file path with cleaned filename
-            target_file = target_dir / clean_filename
-            
-            try:
-                # Copy the file to the correct location (instead of move to avoid cross-device issues)
-                shutil.copy2(pdf_path, target_file)
-                print(f"Organized: {clean_filename} -> {subject}")
-                return True
-            except OSError as e:
-                print(f"Error copying {filename}: {e}")
-                return False
+        return self.upload_to_r2(pdf_path, r2_key)
 
-    def copy_bar_to_both_c_and_pascal(self, pdf_path: Path, subcategory: str, target_dir: Path, clean_filename: str):
-        """Copy bar files to both C and Pascal subcategories."""
-        new_subcategory = str(subcategory).replace('bareme', '')
+    # ── ZIP processing ───────────────────────────────────────────────────────────
 
-        c_target_dir = str(target_dir).replace(subcategory, new_subcategory + 'C')
-        pascal_target_dir = str(target_dir).replace(subcategory, new_subcategory + 'Pascal')
-
-        c_target_dir = Path(c_target_dir)
-        pascal_target_dir = Path(pascal_target_dir)
-        
-        c_target_dir.mkdir(parents=True, exist_ok=True)
-        pascal_target_dir.mkdir(parents=True, exist_ok=True)
-        
-        c_target_file = c_target_dir / clean_filename # .replace('bar', 'bar_C')
-        pascal_target_file = pascal_target_dir / clean_filename # .replace('bar', 'bar_Pascal')
-        
-        try:
-            shutil.copy2(pdf_path, c_target_file)
-            shutil.copy2(pdf_path, pascal_target_file)
-            print(f"Organized info barem file: {clean_filename} -> {c_target_file.parent.name} and {pascal_target_file.parent.name}")
-            return True
-        except OSError as e:
-            print(f"Error copying bar file {clean_filename}: {e}")
-            return False
-
-    #! STOP
     def extract_zip_file(self, zip_path: Path, target_temp_dir: Path, exam_type: str) -> list:
-        """Extract ZIP file and organize PDFs by subject."""
-        extracted_files = []
-        
-        # Create a temporary extraction directory
+        """Extract ZIP file and upload PDFs to R2."""
+        uploaded_files = []
         temp_extract_dir = target_temp_dir / f"temp_{zip_path.stem}"
         temp_extract_dir.mkdir(exist_ok=True)
         
@@ -302,64 +287,51 @@ class BacExamScraper:
                 for zip_info in zip_ref.filelist:
                     if zip_info.filename.lower().endswith('.pdf') and zip_info.file_size > 0:
                         try:
-                            # Extract the PDF file directly
                             zip_ref.extract(zip_info, temp_extract_dir)
-                            pdf_path = temp_extract_dir / zip_info.filename
-                            
-                            # Ensure the PDF file actually exists and has content
-                            if pdf_path.exists() and pdf_path.is_file() and pdf_path.stat().st_size > 0:
-                                pdf_files.append(pdf_path)
-                            else:
-                                print(f"Warning: Extracted file is empty or invalid: {zip_info.filename}")
+                            pdf_path_extracted = temp_extract_dir / zip_info.filename
+                            if pdf_path_extracted.exists() and pdf_path_extracted.is_file() and pdf_path_extracted.stat().st_size > 0:
+                                pdf_files.append(pdf_path_extracted)
                         except Exception as e:
                             print(f"Error extracting {zip_info.filename}: {e}")
                             continue
                 
                 print(f"Found {len(pdf_files)} PDF files in {zip_path.name}")
                 
-                # Filter for LRO files only and exclude minority files
+                # Filter for LRO (Romanian) files only
                 lro_files = [f for f in pdf_files if 
                            ('_LRO.pdf' in f.name or (not any(lang in f.name for lang in ['_LMA', '_LGE', '_LSK', '_LSR', '_LUA']) and f.name.endswith('.pdf'))) 
                            and 'pentru_minoritatea' not in f.name.lower() 
                            and 'minoritatea' not in f.name.lower()]
-                print(f"Processing {len(lro_files)} LRO files (Romanian language, excluding minority files)")
+                print(f"Processing {len(lro_files)} LRO files")
                 
-                # Process each LRO PDF file
-                for pdf_path in lro_files:
+                for pdf_file in lro_files:
                     try:
-                        if self.organize_pdf_by_subject(pdf_path, exam_type, self.current_year):
-                            extracted_files.append(pdf_path)
+                        if self.upload_pdf(pdf_file, exam_type, self.current_year):
+                            uploaded_files.append(pdf_file)
                     except Exception as e:
-                        print(f"Error processing PDF {pdf_path.name}: {e}")
+                        print(f"Error processing PDF {pdf_file.name}: {e}")
                         continue
-            
-            # Clean up temporary directory
-            shutil.rmtree(temp_extract_dir, ignore_errors=True)
-            
-            # Remove the ZIP file after extraction
-            zip_path.unlink()
-            print(f"Removed ZIP: {zip_path.name}")
             
         except zipfile.BadZipFile as e:
             print(f"Error extracting {zip_path}: {e}")
-            # Clean up on error
-            shutil.rmtree(temp_extract_dir, ignore_errors=True)
         except Exception as e:
             print(f"Error processing {zip_path}: {e}")
-            # Clean up on error
+        finally:
+            # Always clean up temp dir and ZIP, regardless of success or failure
             shutil.rmtree(temp_extract_dir, ignore_errors=True)
+            if zip_path.exists():
+                zip_path.unlink()
+                print(f"Removed ZIP: {zip_path.name}")
         
-        return extracted_files
+        return uploaded_files
     
     def process_zip_url(self, zip_url: str, exam_type: str) -> bool:
-        """Process a single ZIP URL - download and extract."""
+        """Process a single ZIP URL — download, extract, and upload to R2."""
         if zip_url in self.seen_urls:
-            return False # Already processed
-        
-        # Parse URL to get filename
+            return False
+
         parsed_url = urlparse(zip_url)
         zip_filename = os.path.basename(parsed_url.path)
-        
         print(f"Processing: {zip_filename}")
         
         # Create a temporary download directory
@@ -371,9 +343,9 @@ class BacExamScraper:
             return False
         
         # Extract ZIP file and organize PDFs by subject
-        extracted_files = self.extract_zip_file(zip_path, self.temp_dir, exam_type)
+        uploaded_files = self.extract_zip_file(zip_path, self.temp_dir, exam_type)
         
-        if extracted_files:
+        if uploaded_files:
             self.seen_urls.add(zip_url)
             return True
         
@@ -382,9 +354,9 @@ class BacExamScraper:
     def run(self):
         """Main scraper execution."""
         print(f"Starting BAC exam scraper for year {self.current_year}")
-        print(f"Base directory: {self.base_dir}")
+        print(f"Worker URL: {self.worker_url}")
         
-        new_files_count = 0
+        zips_count = 0
         
         for url in self.urls:
             print(f"\nProcessing URL: {url}")
@@ -406,12 +378,12 @@ class BacExamScraper:
                 exam_type = self.determine_exam_type(url, zip_filename)
                 
                 if self.process_zip_url(zip_url, exam_type):
-                    new_files_count += 1
+                    zips_count += 1
         
         # Save updated seen URLs
         self.save_seen_urls()
         
-        return new_files_count
+        return zips_count
 
 
 def main():
@@ -426,29 +398,45 @@ def main():
         help=f'Year to scrape exam files for (default: {datetime.now().year})'
     )
     parser.add_argument(
-        '--base-dir', '-d',
+        '--worker-url', '-w',
         type=str,
-        help='Base directory for the project (auto-detected if not provided)'
+        default=os.environ.get('WORKER_URL', 'https://cuza-worker.dynow.workers.dev'),
+        help='Worker URL for R2 uploads'
+    )
+    parser.add_argument(
+        '--password', '-p',
+        type=str,
+        default=os.environ.get('UPLOAD_PASSWORD', ''),
+        help='Upload password for the worker API'
     )
     
     args = parser.parse_args()
     
+    if not args.password:
+        print("Error: Upload password is required. Set UPLOAD_PASSWORD env var or use --password.")
+        import sys
+        sys.exit(1)
+    
     try:
-        scraper = BacExamScraper(base_dir=args.base_dir, year=args.year)
-        new_urls = scraper.run()
+        scraper = BacExamScraper(
+            worker_url=args.worker_url,
+            upload_password=args.password,
+            year=args.year,
+        )
+        zips_count = scraper.run()
         
-        if new_urls > 0:
-            print(f"Scraping completed. Downloaded {new_urls} new urls.")
-            sys.exit(0)
+        if zips_count > 0:
+            print(f"Scraping completed. Downloaded {zips_count} new ZIPs.")
         else:
-            print("No new urls found.")
-            sys.exit(0)
+            print("No new ZIPs found.")
             
     except KeyboardInterrupt:
         print("\nScraping interrupted by user.")
+        import sys
         sys.exit(1)
     except Exception as e:
         print(f"Error during scraping: {e}")
+        import sys
         sys.exit(1)
 
 

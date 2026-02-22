@@ -1,31 +1,30 @@
 ---
-import { apiService } from '../utils/api';
-import { formatKey, isYearFolder } from '../utils/data';
-import type { FileStructure } from '../types/index';
+import { apiService } from '../api';
+import type { FileStructure } from '../types';
 
-interface Props {
-  subject: string;
-  page: string;
-  data?: FileStructure;
-  isRoot?: boolean;
-  depth?: number;
-}
+const isYearFolder = (key: string): boolean => /^20\d{2}$/.test(key);
+const formatKey = (key: string): string => key.replace(/_/g, ' ');
 
 const {
   subject,
   page,
   data,
-  isRoot = true,
   depth = 0,
-} = Astro.props;
+  expansionMode = "years",
+  isExtra: isExtraProp,
+} = Astro.props as {
+  subject: string;
+  page: string;
+  data?: FileStructure;
+  depth?: number;
+  expansionMode?: "none" | "years" | "all";
+  isExtra?: boolean;
+};
 
-const expansionMode = "years" as "none" | "years" | "all"; // Default expansion mode: 'none', 'years', 'all'
-
-// Only fetch at the root level
 let content: FileStructure = {};
 let workerError: string | null = null;
 
-if (isRoot && !data) {
+if (!data) {
   try {
     content = await apiService.getContent(subject, page) || {};
   } catch (error) {
@@ -33,44 +32,27 @@ if (isRoot && !data) {
     console.warn("API fetch failed, falling back to empty structure:", error);
   }
 } else {
-  // Use the passed data for nested calls
-  content = data || {};
+  content = data;
 }
 
-// Check if this is an extra page
-const isExtra = page === "extra" || page.endsWith("/extra");
-  
-// CSS classes based on page type (computed once)
-const classNames = {
-  list: isExtra ? "extra-list" : "content-list",
-  link: isExtra ? "extra-link" : "content-link",
-  text: isExtra ? "extra-text" : "content-text",
-} as const;
+// Use explicit prop in recursive calls, derive from page name at root.
+const isExtra = isExtraProp ?? (page === "extra" || page.endsWith("/extra"));
+const cx = isExtra ? "extra" : "content";
 
-// Calculate padding based on depth
-const paddingLeft = `${depth * 1}rem`;
-
-let host: string;
-if (import.meta.env.BUCKET_MODE === 'off') {
-  host = '';
-} else {
-  host = import.meta.env.PUBLIC_WORKER_URL;
-}
+const paddingLeft = `${depth}rem`;
 ---
 
 <div class="w-full" id={`content-${subject}-${page.replace("/", "-")}`}>
   {
     workerError && (
-      <div class="text-sm text-red-500">
-        <p>Failed to load content from worker: {workerError}</p>
-      </div>
+      <div class="text-sm text-red-500">Failed to load content from worker: {workerError}</div>
     )
   }
 
   <div>
     {
        Object.keys(content).length > 0 ? (
-        <ul class={classNames.list} style={`padding-left: ${paddingLeft}`}>
+        <ul class={`${cx}-list`} style={`padding-left: ${paddingLeft}`}>
           {
             Object.entries(content).reverse().map(([key, value]) => {
               if (typeof value === "string") {
@@ -78,8 +60,8 @@ if (import.meta.env.BUCKET_MODE === 'off') {
                 return (
                   <li>
                     <a
-                      class={`${classNames.link} flex items-center break-normal`}
-                      href={host + "/" + value}
+                      class={`${cx}-link flex items-center break-normal`}
+                      href={`${import.meta.env.WORKER_URL}/file/${value}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`Open ${key} in new tab`}
@@ -114,7 +96,7 @@ if (import.meta.env.BUCKET_MODE === 'off') {
                     {showDivider && <hr class="border-black m-2" />} {/* dark-reader: border-zinc-400 */}
                     <div class="folder-container">
                       <div 
-                        class={`${classNames.text} flex items-center cursor-pointer folder-toggle`}
+                        class={`${cx}-text flex items-center cursor-pointer folder-toggle`}
                         data-folder-id={folderId}
                         data-folder-type={isYear ? "year" : "folder"}
                         data-expanded={shouldBeExpanded ? "true" : "false"}
@@ -143,8 +125,9 @@ if (import.meta.env.BUCKET_MODE === 'off') {
                           subject={subject} 
                           page={key}
                           data={value}
-                          isRoot={false}
                           depth={depth + 1}
+                          expansionMode={expansionMode}
+                          isExtra={isExtra}
                         />
                       </div>
                     </div>
@@ -155,102 +138,44 @@ if (import.meta.env.BUCKET_MODE === 'off') {
           }
         </ul>
       ) : (
-        <p class={"text-slate-400! " + classNames.text} style={`padding-left: ${paddingLeft}`}>Fără conținut</p>
+        <p class={`text-slate-400! ${cx}-text`} style={`padding-left: ${paddingLeft}`}>Fără conținut</p>
       )
     }
   </div>
 </div>
 
 <script>
-  // Simple folder toggle functionality
   document.addEventListener("DOMContentLoaded", () => {
     const savedMode = localStorage.getItem('folderExpansionMode') || 'years';
-    
-    // Initialize folders
-    initializeFolders(savedMode);
-    
-    // Add click listeners
-    addClickListeners();
-    
-    // Listen for expansion mode changes
+
+    applyExpansionMode(savedMode);
+
+    document.querySelectorAll<HTMLElement>('.folder-toggle').forEach((toggle) => {
+      toggle.addEventListener('click', () => {
+        const isExpanded = toggle.getAttribute('data-expanded') === 'true';
+        setFolder(toggle, !isExpanded);
+      });
+    });
+
     window.addEventListener('expansionModeChanged', (event) => {
-      const customEvent = event as CustomEvent;
-      const { mode } = customEvent.detail;
+      const { mode } = (event as CustomEvent).detail;
       applyExpansionMode(mode);
     });
-    
-    function addClickListeners(): void {
-      const folderToggles = document.querySelectorAll('.folder-toggle') as NodeListOf<HTMLElement>;
-      
-      folderToggles.forEach((toggle) => {
-        toggle.addEventListener('click', () => {
-          const folderId = toggle.getAttribute('data-folder-id');
-          const folderContent = document.getElementById(folderId!);
-          const arrow = toggle.querySelector('.folder-arrow') as HTMLElement;
-          const isExpanded = toggle.getAttribute('data-expanded') === 'true';
-          
-          if (folderContent && arrow) {
-            if (isExpanded) {
-              folderContent.style.display = 'none';
-              arrow.style.transform = 'rotate(0deg)';
-              toggle.setAttribute('data-expanded', 'false');
-            } else {
-              folderContent.style.display = 'block';
-              arrow.style.transform = 'rotate(90deg)';
-              toggle.setAttribute('data-expanded', 'true');
-            }
-          }
-        });
-      });
+
+    function setFolder(toggle: HTMLElement, open: boolean): void {
+      const folderContent = document.getElementById(toggle.getAttribute('data-folder-id')!);
+      const arrow = toggle.querySelector<HTMLElement>('.folder-arrow');
+      if (!folderContent || !arrow) return;
+      folderContent.style.display = open ? 'block' : 'none';
+      arrow.style.transform = open ? 'rotate(90deg)' : 'rotate(0deg)';
+      toggle.setAttribute('data-expanded', String(open));
     }
-    
-    function initializeFolders(mode: string): void {
-      const folderToggles = document.querySelectorAll('.folder-toggle') as NodeListOf<HTMLElement>;
-      
-      folderToggles.forEach((toggle) => {
-        const folderType = toggle.getAttribute('data-folder-type');
-        const folderId = toggle.getAttribute('data-folder-id');
-        const folderContent = document.getElementById(folderId!);
-        const arrow = toggle.querySelector('.folder-arrow') as HTMLElement;
-        
-        if (folderContent && arrow) {
-          const shouldBeOpen = mode === 'all' || (mode === 'years' && folderType === 'year');
-          
-          if (shouldBeOpen) {
-            folderContent.style.display = 'block';
-            arrow.style.transform = 'rotate(90deg)';
-            toggle.setAttribute('data-expanded', 'true');
-          } else {
-            folderContent.style.display = 'none';
-            arrow.style.transform = 'rotate(0deg)';
-            toggle.setAttribute('data-expanded', 'false');
-          }
-        }
-      });
-    }
-    
+
     function applyExpansionMode(mode: string): void {
-      const folderToggles = document.querySelectorAll('.folder-toggle') as NodeListOf<HTMLElement>;
-      
-      folderToggles.forEach((toggle) => {
-        const folderType = toggle.getAttribute('data-folder-type');
-        const shouldBeOpen = mode === 'all' || (mode === 'years' && folderType === 'year');
-        
-        const folderId = toggle.getAttribute('data-folder-id');
-        const folderContent = document.getElementById(folderId!);
-        const arrow = toggle.querySelector('.folder-arrow') as HTMLElement;
-        
-        if (folderContent && arrow) {
-          if (shouldBeOpen) {
-            folderContent.style.display = 'block';
-            arrow.style.transform = 'rotate(90deg)';
-            toggle.setAttribute('data-expanded', 'true');
-          } else {
-            folderContent.style.display = 'none';
-            arrow.style.transform = 'rotate(0deg)';
-            toggle.setAttribute('data-expanded', 'false');
-          }
-        }
+      document.querySelectorAll<HTMLElement>('.folder-toggle').forEach((toggle) => {
+        const isYear = toggle.getAttribute('data-folder-type') === 'year';
+        const open = mode === 'all' || (mode === 'years' && isYear);
+        setFolder(toggle, open);
       });
     }
   });

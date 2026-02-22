@@ -2,16 +2,22 @@
 import List from "../components/List.astro";
 import Shortcuts from "../components/Shortcuts.astro";
 import ToggleExpansion from "../components/ToggleExpansion.astro";
+import type { FileStructure } from "../types";
 
 interface Props {
   subject: string;
   page: string;
-  slot?: string;
+  /** Pre-fetched extra data – skips a separate API call when provided. */
+  extraData?: FileStructure;
+  /** Pre-fetched years for shortcuts – skips a separate API call when provided. */
+  years?: number[];
 }
 
 const { 
   subject, 
   page,
+  extraData,
+  years,
 } = Astro.props;
 
 const isAdmitere = subject === "admitere";
@@ -32,12 +38,12 @@ const isAdmitere = subject === "admitere";
 }
 {
     isAdmitere ? (
-        <List subject="admitere" page={`${page}/extra`} />
+        <List subject="admitere" page={`${page}/extra`} data={extraData} />
     ) : (
-        <List subject={subject} page="extra" />
+        <List subject={subject} page="extra" data={extraData} />
     )
 }
 
-<Shortcuts subject={subject} page={page} />
+<Shortcuts subject={subject} page={page} years={years} />
 
 <ToggleExpansion />

@@ -1,8 +1,8 @@
 ---
 import NewPage from "../../components/NewPage.astro";
-import { generateSubjectPagePaths } from "../../utils/paths";
+import { subjectPagePaths } from "../../paths";
 
-export const getStaticPaths = generateSubjectPagePaths;
+export const getStaticPaths = subjectPagePaths;
 
 const subject = Astro.params?.subject;
 const page = Astro.params?.page;

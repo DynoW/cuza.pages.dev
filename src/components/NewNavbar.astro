@@ -1,7 +1,5 @@
 ---
-import { tr } from "framer-motion/client";
-import fs from "fs";
-import path from "path";
+import { apiService } from '../api';
 
 // Get current path for highlighting active links
 const pathname = new URL(Astro.request.url).pathname;
@@ -9,45 +7,14 @@ const currentPath: string[] = pathname.replace(".html", "").split("/").slice(1);
 
 const isHome = currentPath.length === 1 && (currentPath[0] === "" || currentPath[0] === "index"); 
 
-// Get the absolute path to the files directory
-const filesPath = path.join(process.cwd(), import.meta.env.FILES_DIR);
-
-function isDirectory(source: string): boolean {
-    return fs.lstatSync(source).isDirectory();
-}
-
-// Read directories in the files path to get subjects
-const validSubjects = fs
-    .readdirSync(filesPath)
-    .filter((file) => isDirectory(path.join(filesPath, file)));
-
 // Define the navStructure type to avoid TypeScript errors
 interface NavStructure {
     [key: string]: string[];
 }
 
-// Generate navigation structure dynamically
-const navStructure: NavStructure = {};
-
-validSubjects.forEach((subject) => {
-    let subjectPath;
-
-    if (subject === "admitere") {
-        subjectPath = path.join(filesPath, subject);
-    } else {
-        subjectPath = path.join(filesPath, `${subject}/pages`);
-    }
-
-    // Read subdirectories to get pages
-    const subPages = fs.readdirSync(subjectPath).filter((file) => {
-        const filePath = path.join(subjectPath, file);
-        return isDirectory(filePath);
-    });
-
-    navStructure[subject] = subPages;
-});
-
-navStructure.notite = ["info", "romana"];
+// Build nav structure from fetched subject/page map
+const subjectPages = await apiService.getStructure();
+const navStructure: NavStructure = { ...subjectPages, notite: ["info", "romana"] };
 
 const navEntries = Object.entries(navStructure);
 
@@ -95,7 +62,7 @@ function getDisplayName(name: string): string {
 
 // Helper function to get the URL for a nav item
 function getNavUrl(subject: string, page: string | null): string {
-    if (page==="bac") return `/${subject}`;
+    if (page==="bac") return subject === "fizica" ? "/" : `/${subject}`;
     return `/${subject}/${page}`;
 }
 
@@ -442,7 +409,6 @@ function isPageActive(subject: string, page: string | null = null): boolean {
     </style>
 
     <script>
-        // @ts-nocheck
         document.addEventListener("DOMContentLoaded", () => {
             const mobileToggle = document.getElementById("mobile-menu-toggle");
             const mobileClose = document.getElementById("mobile-close-button");
@@ -450,7 +416,7 @@ function isPageActive(subject: string, page: string | null = null): boolean {
             const sideNav = document.getElementById("side-nav");
 
             // Open/close mobile menu helpers
-            const toggleMenu = (isOpen) => {
+            const toggleMenu = (isOpen: boolean) => {
                 if (!sideNav || !overlay || !mobileToggle) return;
                 sideNav.classList.toggle("open", isOpen);
                 sideNav.classList.toggle("translate-x-0", isOpen);
@@ -515,7 +481,7 @@ function isPageActive(subject: string, page: string | null = null): boolean {
                 const logoContainer = document.getElementById("page-title");
                 
                 const updateHatStyles = () => {
-                    const img = logoContainer?.querySelector("img[data-hat]");
+                    const img = logoContainer?.querySelector<HTMLImageElement>("img[data-hat]");
                     if (img) {
                         img.width = window.innerWidth >= 1280 ? 32 : 22;
                         img.style.top = window.innerWidth >= 1280 ? "-10px" : "-5px";

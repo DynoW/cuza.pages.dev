@@ -1,15 +1,14 @@
 ---
 import NewPage from "../../components/NewPage.astro";
-import { getFirstPage, generateSubjectIndexPaths } from "../../utils/paths";
+import { subjectIndexPaths } from "../../paths";
 
-export function getStaticPaths() {
+export async function getStaticPaths() {
   const excludedSubjects = ["fizica","admitere"];
-  return generateSubjectIndexPaths(excludedSubjects);
+  return subjectIndexPaths(excludedSubjects);
 }
 
-// Get the dynamic route parameter
-const { subject } = Astro.params;
-const firstPage = getFirstPage(subject!);
+const { subject } = Astro.params as { subject: string };
+const { firstPage } = Astro.props as { firstPage: string };
 ---
 
 <NewPage subject={subject} page={firstPage} />

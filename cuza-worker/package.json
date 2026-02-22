@@ -9,7 +9,6 @@
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
-    "@octokit/rest": "^22.0.1",
     "hono": "^4.10.1"
   },
   "devDependencies": {

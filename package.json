@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview --host 0.0.0.0",
+    "preview": "astro preview --host",
     "astro": "astro"
   },
   "dependencies": {
@@ -20,13 +20,10 @@
     "astro": "^5.16.5",
     "astro-compress": "^2.3.8",
     "astro-seo": "^0.8.4",
-    "autoprefixer": "^10.4.23",
-    "cssnano": "^7.1.2",
     "framer-motion": "^12.33.0",
     "lucide-react": "^0.561.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "sitemap": "^9.0.0",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {

@@ -27,10 +27,11 @@ export function useUmami() {
       return;
     }
 
-    // If not loaded, wait for it
+    // If not loaded, wait for it (max ~10 seconds)
+    let attempts = 0;
     const checkUmami = setInterval(() => {
-      if (typeof window !== 'undefined' && window.umami) {
-        umamiInitialized.current = true;
+      if (++attempts > 20 || (typeof window !== 'undefined' && window.umami)) {
+        if (window.umami) umamiInitialized.current = true;
         clearInterval(checkUmami);
       }
     }, 500);
