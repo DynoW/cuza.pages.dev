@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 Daniel C. (DynoW) — https://github.com/DynoW/cuza.pages.dev
 """
 Web scraper for Romanian Baccalaureate exam files from subiecte.edu.ro
 Downloads and uploads exam PDFs to R2 via the cuza-worker API.
