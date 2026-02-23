@@ -216,7 +216,7 @@ app.get('/files', async (c) => {
  * GET /file/:key+ → Serve a file from R2
  */
 app.get('/file/*', async (c) => {
-  const key = c.req.param('*');
+  const key = c.req.path.replace(/^\/file\//, '');
   if (!key) return c.text('Not Found', 404);
 
   const object = await c.env.FILES.get(key);
