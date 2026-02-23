@@ -40,6 +40,23 @@ const isExtra = isExtraProp ?? (page === "extra" || page.endsWith("/extra"));
 const cx = isExtra ? "extra" : "content";
 
 const paddingLeft = `${depth}rem`;
+
+const sortedEntries = Object.entries(content).sort(([keyA, valA], [keyB, valB]) => {
+  const aIsFile = typeof valA === 'string';
+  const bIsFile = typeof valB === 'string';
+  if (aIsFile && bIsFile) {
+    const matchA = keyA.match(/_(var|bar)_(\d{2})/i);
+    const matchB = keyB.match(/_(var|bar)_(\d{2})/i);
+    if (matchA && matchB) {
+      const numDiff = parseInt(matchA[2]) - parseInt(matchB[2]);
+      if (numDiff !== 0) return numDiff;
+      const typeA = matchA[1].toLowerCase() === 'var' ? 0 : 1;
+      const typeB = matchB[1].toLowerCase() === 'var' ? 0 : 1;
+      return typeA - typeB;
+    }
+  }
+  return keyB.localeCompare(keyA);
+});
 ---
 
 <div class="w-full" id={`content-${subject}-${page.replace("/", "-")}`}>
@@ -54,7 +71,7 @@ const paddingLeft = `${depth}rem`;
        Object.keys(content).length > 0 ? (
         <ul class={`${cx}-list`} style={`padding-left: ${paddingLeft}`}>
           {
-            Object.entries(content).reverse().map(([key, value]) => {
+            sortedEntries.map(([key, value]) => {
               if (typeof value === "string") {
                 // It's a file
                 return (
