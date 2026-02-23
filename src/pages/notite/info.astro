@@ -5,7 +5,9 @@ import Footer from "../../components/Footer.astro";
 import MainContainer from "../../layouts/MainContainer.astro";
 import Curs from "../../components/Curs.astro";
 import { getCollection } from 'astro:content';
-const infoCourses = await getCollection('info');
+const infoCourses = (await getCollection('info')).sort((a, b) =>
+  a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' })
+);
 ---
 
 <Layout title="informatica | cuza.pages.dev">
