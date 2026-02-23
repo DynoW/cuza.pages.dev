@@ -4,7 +4,7 @@ export class ApiService {
   private readonly baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl ?? import.meta.env.WORKER_URL;
+    this.baseUrl = baseUrl ?? import.meta.env.PUBLIC_WORKER_URL;
   }
 
   private async fetchJson<T>(url: string): Promise<T | null> {

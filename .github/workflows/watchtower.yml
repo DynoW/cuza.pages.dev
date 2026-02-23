@@ -29,7 +29,7 @@
 
 #       - name: Run Fetch Script
 #         env:
-#           WORKER_URL: ${{ variables.WORKER_URL }}
+#           PUBLIC_WORKER_URL: ${{ variables.PUBLIC_WORKER_URL }}
 #           UPLOAD_PASSWORD: ${{ secrets.UPLOAD_PASSWORD }}
 #         run: python web-scraper/main.py
 

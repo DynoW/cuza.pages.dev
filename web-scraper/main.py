@@ -402,7 +402,7 @@ def main():
     parser.add_argument(
         '--worker-url', '-w',
         type=str,
-        default=os.environ.get('WORKER_URL', 'https://cuza-worker.dynow.workers.dev'),
+        default=os.environ.get('PUBLIC_WORKER_URL', 'https://cuza-worker.dynow.workers.dev'),
         help='Worker URL for R2 uploads'
     )
     parser.add_argument(

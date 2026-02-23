@@ -13,7 +13,7 @@ interface ImportMetaEnv {
   readonly PROD: boolean;
   readonly SSR: boolean;
 
-  readonly WORKER_URL: string;
+  readonly PUBLIC_WORKER_URL: string;
 }
 
 interface ImportMeta {
