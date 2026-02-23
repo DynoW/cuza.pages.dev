@@ -10,3 +10,7 @@ main = "src/index.ts"
 binding = "FILES"
 bucket_name = "cuza-bucket"
 preview_bucket_name = "cuza-bucket"
+
+[[routes]]
+pattern = "api.my-lab.ro"
+custom_domain = true

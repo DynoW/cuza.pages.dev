@@ -74,15 +74,7 @@ if (month === 11) {
         creator: "@DynoW",
       }}
       extend={{
-        link: [ // TODO: fix preloading of fonts warings
-          {
-            rel: "preload",
-            href: "/assets/fonts/poppins-medium.woff2",
-            as: "font",
-            type: "font/woff2",
-            crossorigin: "anonymous",
-            fetchpriority: "high",
-          },
+        link: [
           {
             rel: "preload",
             href: "/assets/fonts/inter-medium.woff2",
@@ -225,7 +217,7 @@ if (month === 11) {
     }
   </head>
   <body
-    class={`font-family-sans select-none overflow-x-hidden relative min-h-screen p-0${backgroundImage ? " backgroundImage" : ""}${bodyClass ? ` ${bodyClass}` : ""}`}
+    class={`font-sans select-none overflow-x-hidden relative min-h-screen p-0${backgroundImage ? " backgroundImage" : ""}${bodyClass ? ` ${bodyClass}` : ""}`}
     style={backgroundStyle}
   >
     <slot />
