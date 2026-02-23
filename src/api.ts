@@ -38,10 +38,14 @@ export class ApiService {
     return response ?? { content: {}, extra: {}, years: [] };
   }
 
+  private structureCache: Record<string, string[]> | null = null;
+
   async getStructure(): Promise<Record<string, string[]>> {
+    if (this.structureCache) return this.structureCache;
     const url = `${this.baseUrl}/structure`;
     const response = await this.fetchJson<Record<string, string[]>>(url);
-    return response ?? {};
+    this.structureCache = response ?? {};
+    return this.structureCache;
   }
 
 //   async searchFiles(query: string): Promise<string[]> {
