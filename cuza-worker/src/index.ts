@@ -9,6 +9,7 @@ import { cors } from 'hono/cors';
 type Bindings = {
   FILES: R2Bucket;
   UPLOAD_PASSWORD: string;
+  DEPLOY_HOOK_URL: string;
 };
 
 /**
@@ -114,6 +115,11 @@ function extractYears(structure: FileStructure): number[] {
   };
   traverse(structure);
   return [...years].sort((a, b) => b - a);
+}
+
+async function triggerDeploy(hookUrl: string | undefined): Promise<void> {
+  if (!hookUrl) return;
+  await fetch(hookUrl, { method: 'POST' });
 }
 
 function isValidAuth(authHeader: string, password: string): boolean {
@@ -277,6 +283,8 @@ app.post('/upload', async (c) => {
   setInIndex(index, r2Key.split('/'), r2Key);
   await putIndex(c.env.FILES, index);
 
+  await triggerDeploy(c.env.DEPLOY_HOOK_URL);
+
   return c.text(`Fișier încărcat cu succes: ${r2Key.split('/').at(-1)}`, 200);
 });
 
@@ -322,6 +330,8 @@ app.post('/upload-scraper', async (c) => {
   const segments = key.split('/');
   setInIndex(index, segments, key);
   await putIndex(c.env.FILES, index);
+
+  await triggerDeploy(c.env.DEPLOY_HOOK_URL);
 
   return c.json({ success: true, key });
 });
