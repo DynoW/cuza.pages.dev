@@ -149,37 +149,37 @@ function shouldHaveDropdown(subject: string): boolean {
                   >
                     <h1
                       id="page-title"
-                      class="relative container text-3xl italic font-bold m-0!"
+                      class="relative text-3xl italic font-bold m-0!"
                     >
-                      <script>
-                        document.addEventListener("DOMContentLoaded", () => {
-                          if (new Date().getMonth() === 11) {
-                            const logoContainer =
-                              document.getElementById("page-title");
-                            if (logoContainer) {
-                              const img = document.createElement("img");
-                              img.src = "/assets/img/logo/sapca.png";
-                              img.width = 32;
-                              img.height = 35.03;
-                              img.alt = "sapca";
-                              img.classList.add(
-                                "absolute",
-                                "-top-[10px]",
-                                "left-[6px]"
-                              );
-                              logoContainer.insertBefore(
-                                img,
-                                logoContainer.firstChild
-                              );
-                            }
-                          }
-                        });
-                      </script>
                       Cuza
                       <span class="text-lg">.</span>
                       Pages
                       <span class="text-lg">.dev</span>
                     </h1>
+                    <script>
+                      document.addEventListener("DOMContentLoaded", () => {
+                        if (new Date().getMonth() === 11) {
+                          const logoContainer =
+                            document.getElementById("page-title");
+                          if (logoContainer) {
+                            const img = document.createElement("img");
+                            img.src = "/assets/img/logo/sapca.png";
+                            img.width = 32;
+                            img.height = 35.03;
+                            img.alt = "sapca";
+                            img.classList.add(
+                              "absolute",
+                              "-top-[10px]",
+                              "left-[6px]"
+                            );
+                            logoContainer.insertBefore(
+                              img,
+                              logoContainer.firstChild
+                            );
+                          }
+                        }
+                      });
+                    </script>
                   </a>
                 </div>
               </div>

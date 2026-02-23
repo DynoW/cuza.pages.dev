@@ -20,7 +20,7 @@ interface Props {
 
 const {
   title,
-  description = "Subiecte de bacalaureat si admitere upb din anii anteriori la fizică, matematică și informatică pentru pregătirea elevilor. Materiale create de elevi pentru elevi din Liceul Teoretic Alexandru Ioan Cuza, București. Exerciții și variante rezolvate.",
+  description = "Subiecte de bac și admitere UPB la fizică, matematică și informatică. Liceul Teoretic Alexandru Ioan Cuza, București",
   keywords = "bac, bacalaureat, subiecte, fizica, matematica, informatica, examen, admitere, upb, poli, programare, algoritmi, variante, teste, simulari, mate-fizica, mate-info, info, Liceul Teoretic Alexandru Ioan Cuza, București, LTAIC, cuza",
   noindex,
   nofollow,
@@ -58,20 +58,28 @@ if (month === 11) {
         basic: {
           title: title,
           type: "website",
-          image: "https://cuza.pages.dev/assets/img/site-img.webp",
+          image: "https://cuza.pages.dev/assets/img/site-img.png",
           url: Astro.url.href,
         },
         optional: {
           description: description,
           locale: "ro_RO",
-          siteName: "Subiecte bac si admitere upb",
+          siteName: "Mate-fizica",
         },
         image: {
-          alt: "Subiecte bac si admitere upb",
+          alt: "Preview cuza.pages.dev",
+          width: 1200,
+          height: 630,
         },
       }}
       twitter={{
+        card: "summary_large_image",
+        site: "https://cuza.pages.dev",
         creator: "@DynoW",
+        title: title,
+        description: description,
+        image: "https://cuza.pages.dev/assets/img/site-img.png",
+        imageAlt: "Preview cuza.pages.dev"
       }}
       extend={{
         link: [
@@ -153,24 +161,32 @@ if (month === 11) {
             content: keywords,
           },
           {
-            name: "twitter:image",
-            content: "https://cuza.pages.dev/assets/img/site-img.webp",
-          },
-          {
-            name: "twitter:title",
-            content: title,
-          },
-          {
-            name: "twitter:description",
-            content: description,
-          },
-          {
             name: "theme-color",
             content: "#0e1720",
+          },
+          {
+            name: "author",
+            content: "Liceul Teoretic Alexandru Ioan Cuza, București",
           },
           ...(Array.isArray(extendMeta) ? extendMeta : []),
         ],
       }}
+    />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "Mate-fizica",
+        url: "https://cuza.pages.dev",
+        description: "Subiecte de bac și admitere UPB la fizică, matematică și informatică. Liceul Teoretic Alexandru Ioan Cuza, București",
+        inLanguage: "ro",
+        publisher: {
+          "@type": "EducationalOrganization",
+          name: "Liceul Teoretic Alexandru Ioan Cuza, București",
+          url: "https://laicuza.ro",
+        },
+      })}
     />
     {
       breadcrumbs && (
@@ -245,6 +261,13 @@ if (month === 11) {
         });
       </script>
     </div>
+    <script>
+      // Tab visibility title change
+      const _originalTitle = document.title;
+      document.addEventListener("visibilitychange", () => {
+        document.title = document.hidden ? "Cuza Hub 😉" : _originalTitle;
+      });
+    </script>
     <script>
       // Background update
       const backgroundImageElement = document.querySelector(

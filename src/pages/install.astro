@@ -36,19 +36,11 @@ import Layout from "../layouts/Layout.astro";
     <script is:inline>
         var beforeInstallPrompt = null;
 
-        window.addEventListener(
-            "beforeinstallprompt",
-            eventHandler,
-            errorHandler,
-        );
+        window.addEventListener("beforeinstallprompt", eventHandler);
 
         function eventHandler(event) {
             beforeInstallPrompt = event;
             document.getElementById("installBtn").removeAttribute("disabled");
-        }
-
-        function errorHandler(event) {
-            console.log("error: " + event);
         }
 
         function install() {
