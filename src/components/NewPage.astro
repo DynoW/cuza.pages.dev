@@ -35,6 +35,15 @@ const pageTitle = (subject === "fizica" && page === "bac")
     <ContentContainer>
         <aside slot="left" class="flex flex-col gap-2 lg:ml-2 lg:mt-2">
             <NewNavbar />
+            <div class="bg-zinc-950/90 rounded-3xl py-3 px-4 w-28 hidden lg:block">
+                <a href="https://old.cuza.pages.dev" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between text-white font-medium hover:text-gray-300 transition-colors">
+                    Old site
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 17L17 7"/>
+                        <path d="M7 7h10v10"/>
+                    </svg>
+                </a>
+            </div>
         </aside>
         <div slot="middle" class="flex flex-col gap-2">
             <div class="bg-gray-100/90 rounded-3xl p-5 pr-2.5 font-bold">
@@ -46,15 +55,6 @@ const pageTitle = (subject === "fizica" && page === "bac")
                 <Extra subject={subject} page={page} extraData={extra} years={years} />
             </div>
             <CountdownTimer />
-            <div class="bg-zinc-950/90 rounded-3xl py-3 px-4 w-28 self-end">
-                <a href="https://old.cuza.pages.dev" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between text-white font-medium hover:text-gray-300 transition-colors">
-                    Old site
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M7 17L17 7"/>
-                        <path d="M7 7h10v10"/>
-                    </svg>
-                </a>
-            </div>
         </aside>
     </ContentContainer>
     <Footer />
