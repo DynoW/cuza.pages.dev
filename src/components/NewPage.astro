@@ -26,7 +26,9 @@ const content: FileStructure = pageData.content;
 const years: number[] = pageData.years;
 const extra: FileStructure = pageData.extra;
 
-const pageTitle = `${subject}-${page} | cuza.pages.dev`;
+const pageTitle = (subject === "fizica" && page === "bac")
+    ? "mate-fizica | cuza.pages.dev"
+    : `${subject}-${page} | cuza.pages.dev`;
 --- 
 
 <Layout title={pageTitle}>
@@ -44,6 +46,15 @@ const pageTitle = `${subject}-${page} | cuza.pages.dev`;
                 <Extra subject={subject} page={page} extraData={extra} years={years} />
             </div>
             <CountdownTimer />
+            <div class="bg-zinc-950/90 rounded-3xl py-3 px-4 w-28 self-end">
+                <a href="https://old.cuza.pages.dev" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between text-white font-medium hover:text-gray-300 transition-colors">
+                    Old site
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 17L17 7"/>
+                        <path d="M7 7h10v10"/>
+                    </svg>
+                </a>
+            </div>
         </aside>
     </ContentContainer>
     <Footer />
