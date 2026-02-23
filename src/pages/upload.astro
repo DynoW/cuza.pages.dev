@@ -371,7 +371,7 @@ import Layout from "../layouts/Layout.astro";
                     });
                     return btoa(binary);
                 };
-                const authHeader = "Basic " + toBase64(`${username}:${password}`);
+                const authHeader = "Bearer " + toBase64(`${username}:${password}`);
 
                 try {
                     const response = await fetch(

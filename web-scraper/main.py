@@ -230,17 +230,36 @@ class BacExamScraper:
         r2_key = f"{subject}/pages/{subcategory}/{year}/{exam_type}/{clean_filename}"
         return r2_key, clean_filename
 
+    def _auth_header(self) -> dict:
+        """Build a Bearer Authorization header using the upload password."""
+        import base64
+        token = base64.b64encode(f"scraper:{self.upload_password}".encode()).decode()
+        return {'Authorization': f'Bearer {token}'}
+
+    def trigger_deploy(self) -> None:
+        """Trigger a Cloudflare Pages deploy via the worker API."""
+        try:
+            response = requests.post(
+                f"{self.worker_url}/trigger-deploy",
+                headers=self._auth_header(),
+                timeout=30,
+            )
+            if response.ok:
+                print("Deploy triggered successfully.")
+            else:
+                print(f"Deploy trigger failed ({response.status_code}): {response.text}")
+        except requests.RequestException as e:
+            print(f"Deploy trigger error: {e}")
+
     def upload_to_r2(self, pdf_path: Path, r2_key: str) -> bool:
         """Upload a PDF file to R2 via the worker API."""
         try:
             with open(pdf_path, 'rb') as f:
                 response = requests.post(
                     f"{self.worker_url}/upload-scraper",
+                    headers=self._auth_header(),
                     files={'file': (pdf_path.name, f, 'application/pdf')},
-                    data={
-                        'password': self.upload_password,
-                        'key': r2_key,
-                    },
+                    data={'key': r2_key},
                     timeout=120,
                 )
             if response.ok:
@@ -384,6 +403,10 @@ class BacExamScraper:
         
         # Save updated seen URLs
         self.save_seen_urls()
+
+        # Trigger a deploy only once, after all uploads are done
+        if zips_count > 0:
+            self.trigger_deploy()
         
         return zips_count
 

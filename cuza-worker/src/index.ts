@@ -305,8 +305,8 @@ app.post('/upload-scraper', async (c) => {
     return c.text('Failed to parse form data', 400);
   }
 
-  const password = formData.get('password') as string;
-  if (password !== c.env.UPLOAD_PASSWORD) {
+  const authHeader = c.req.header('Authorization');
+  if (!authHeader || !isValidAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
     return c.text('Unauthorized', 401);
   }
 
@@ -331,9 +331,21 @@ app.post('/upload-scraper', async (c) => {
   setInIndex(index, segments, key);
   await putIndex(c.env.FILES, index);
 
-  await triggerDeploy(c.env.DEPLOY_HOOK_URL);
-
   return c.json({ success: true, key });
+});
+
+/**
+ * POST /trigger-deploy — Trigger a Cloudflare Pages deploy hook.
+ * Called by the scraper after all files have been uploaded.
+ */
+app.post('/trigger-deploy', async (c) => {
+  const authHeader = c.req.header('Authorization');
+  if (!authHeader || !isValidAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
+    return c.text('Unauthorized', 401);
+  }
+
+  await triggerDeploy(c.env.DEPLOY_HOOK_URL);
+  return c.json({ success: true });
 });
 
 /**
