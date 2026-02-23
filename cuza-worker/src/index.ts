@@ -26,7 +26,7 @@ const app = new Hono<{ Bindings: Bindings }>();
 app.use('*', cors({
   origin: (origin) => {
     const allowed = ['https://cuza.pages.dev', 'http://localhost:4321'];
-    return allowed.includes(origin) ? origin : allowed[0];
+    return allowed.includes(origin) ? origin : null;
   },
   allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
@@ -113,19 +113,71 @@ function extractYears(structure: FileStructure): number[] {
     }
   };
   traverse(structure);
-  return Array.from(years).sort((a, b) => b - a);
+  return [...years].sort((a, b) => b - a);
 }
 
 function isValidAuth(authHeader: string, password: string): boolean {
-  const parts = authHeader.split(' ');
-  if (parts.length !== 2) return false;
+  const [, token] = authHeader.split(' ');
+  if (!token) return false;
   try {
-    const decoded = atob(parts[1]);
-    const [, pwd] = decoded.split(':');
+    const [, pwd] = atob(token).split(':');
     return pwd === password;
   } catch {
     return false;
   }
+}
+
+const VALID_PAGES = new Set(['bac', 'teste', 'sim']);
+const VALID_SIMULATIONS = new Set(['judetene', 'locale']);
+const YEAR_RE = /^20[1-3]\d$/;
+const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 MB
+
+/**
+ * Validate the multipart form data sent to /upload.
+ * Returns a Romanian error message, or null on success.
+ */
+function validateFormData(formData: FormData): string | null {
+  const page  = formData.get('page')  as string | null;
+  const year  = formData.get('year')  as string | null;
+  const type  = formData.get('type')  as string | null;
+  const type2 = formData.get('type2') as string | null;
+  const file  = formData.get('file')  as unknown as File | null;
+
+  // ── Required fields ────────────────────────────────────────────────────────
+  if (!page || !year || !type || !type2 || !file) {
+    return 'Câmpuri obligatorii lipsă';
+  }
+
+  // ── Field-level validation ─────────────────────────────────────────────────
+  if (!VALID_PAGES.has(page)) {
+    return 'Pagină invalidă';
+  }
+  if (!YEAR_RE.test(year)) {
+    return 'An invalid (format așteptat: 20XX)';
+  }
+  if (file.type !== 'application/pdf') {
+    return 'Fișierul trebuie să fie PDF';
+  }
+  if (file.size > MAX_FILE_BYTES) {
+    return 'Fișierul depășește limita de 20 MB';
+  }
+
+  // ── Page-specific validation ───────────────────────────────────────────────
+  if (page === 'bac' && !formData.get('title')) {
+    return 'Lipsă titlu';
+  }
+  if (page === 'teste' && !formData.get('testNumber')) {
+    return 'Lipsă număr test';
+  }
+  if (page === 'sim') {
+    const simulation = formData.get('simulation') as string | null;
+    if (!simulation)                              return 'Lipsă tip simulare';
+    if (!VALID_SIMULATIONS.has(simulation))       return 'Tip de simulare invalid';
+    if (simulation === 'judetene' && !formData.get('county')) return 'Lipsă județ pentru simulare județeană';
+    if (simulation === 'locale'   && !formData.get('local'))  return 'Lipsă localitate pentru simulare locală';
+  }
+
+  return null;
 }
 
 // ── Routes ─────────────────────────────────────────────────────────────────────
@@ -164,7 +216,7 @@ app.get('/files', async (c) => {
  * GET /file/:key+ → Serve a file from R2
  */
 app.get('/file/*', async (c) => {
-  const key = c.req.path.replace(/^\/file\//, '');
+  const key = c.req.param('*');
   if (!key) return c.text('Not Found', 404);
 
   const object = await c.env.FILES.get(key);
@@ -199,22 +251,21 @@ app.post('/upload', async (c) => {
     return c.text('Eroare la citirea datelor', 400);
   }
 
-  const page = formData.get('page') as string;
-  const year = formData.get('year') as string;
-  const title = formData.get('title') as string;
-  const type = formData.get('type') as string;
-  const type2 = formData.get('type2') as string;
-  const testNumber = formData.get('testNumber') as string;
-  const simulation = formData.get('simulation') as string;
-  const county = formData.get('county') as string;
-  const local = formData.get('local') as string;
-  const file = formData.get('file') as unknown as File;
+  const validationError = validateFormData(formData);
+  if (validationError) return c.text(validationError, 400);
 
-  if (!page || !year || !type || !type2 || !file) {
-    return c.text('Date lipsă: Câmpuri obligatorii lipsă', 400);
-  }
+  const page       = formData.get('page')       as string;
+  const year       = formData.get('year')       as string;
+  const title      = formData.get('title')      as string | null;
+  const type       = formData.get('type')       as string;
+  const type2      = formData.get('type2')      as string;
+  const testNumber = formData.get('testNumber') as string | null;
+  const simulation = formData.get('simulation') as string | null;
+  const county     = formData.get('county')     as string | null;
+  const local      = formData.get('local')      as string | null;
+  const file       = formData.get('file')       as unknown as File;
 
-  const { r2Key, fileName } = generateUploadPath({
+  const { r2Key } = generateUploadPath({
     page, year, title, type, type2, testNumber, simulation, county, local,
   });
 
@@ -223,11 +274,10 @@ app.post('/upload', async (c) => {
   });
 
   const index = await getIndex(c.env.FILES);
-  const segments = r2Key.split('/');
-  setInIndex(index, segments, r2Key);
+  setInIndex(index, r2Key.split('/'), r2Key);
   await putIndex(c.env.FILES, index);
 
-  return c.text(`Fișier încărcat cu succes: ${fileName}`, 200);
+  return c.text(`Fișier încărcat cu succes: ${r2Key.split('/').at(-1)}`, 200);
 });
 
 /**
@@ -299,9 +349,10 @@ app.get('/page-data', async (c) => {
   const years = extractYears(content);
 
   // Extra content
-  const isAdmitere = subject.toLowerCase() === 'admitere';
-  const extraPage = isAdmitere ? `${page}/extra` : 'extra';
-  const extraSegments = resolvePathSegments(isAdmitere ? 'admitere' : subject, extraPage);
+  const extraSegments = resolvePathSegments(
+    subject,
+    subject.toLowerCase() === 'admitere' ? `${page}/extra` : 'extra',
+  );
   const extraSubtree = getSubtree(index, extraSegments);
   const extra: FileStructure = (extraSubtree !== null && typeof extraSubtree !== 'string')
     ? (extraSubtree as FileStructure)
@@ -346,42 +397,39 @@ app.get('/index', async (c) => {
 // ── Upload path generation ─────────────────────────────────────────────────────
 
 /** Strip characters that could cause path traversal or unexpected R2 keys. */
-const sanitizePathSegment = (s: string): string =>
-  s.replace(/[^a-zA-Z0-9_\-ăîșțâĂÎȘȚÂ ]/g, '').trim();
+const sanitizePathSegment = (s: string | null | undefined): string =>
+  (s ?? '').replace(/[^a-zA-Z0-9_\-ăîșțâĂÎȘȚÂ ]/g, '').trim();
 
 interface UploadPathData {
   page: string;
   year: string;
-  title: string;
+  title: string | null;
   type: string;
   type2: string;
-  testNumber: string;
-  simulation: string;
-  county: string;
-  local: string;
+  testNumber: string | null;
+  simulation: string | null;
+  county: string | null;
+  local: string | null;
 }
 
-function generateUploadPath(data: UploadPathData): { r2Key: string; fileName: string } {
+function generateUploadPath(data: UploadPathData): { r2Key: string } {
   const { page, year, type, type2, testNumber, simulation } = data;
   const title = sanitizePathSegment(data.title);
   const county = sanitizePathSegment(data.county);
   const local = sanitizePathSegment(data.local);
-  let r2Key = '';
-  let fileName = '';
 
   if (page === 'bac') {
-    fileName = `E_d_fizica_teoretic_vocational_${year}_${type2}_${type}.pdf`;
-    r2Key = `fizica/pages/bac/${year}/${title}/${fileName}`;
-  } else if (page === 'teste') {
-    fileName = `E_d_fizica_${year}_${type2}_${testNumber}.pdf`;
-    r2Key = `fizica/pages/teste-de-antrenament/${year}/${fileName}`;
-  } else if (page === 'sim') {
-    const location = simulation === 'judetene' ? county : local;
-    fileName = `E_d_fizica_${location}_${year}_${type2}.pdf`;
-    r2Key = `fizica/pages/simulari-judetene/${year}/${fileName}`;
+    const fileName = `E_d_fizica_teoretic_vocational_${year}_${type2}_${type}.pdf`;
+    return { r2Key: `fizica/pages/bac/${year}/${title}/${fileName}` };
   }
-
-  return { r2Key, fileName };
+  if (page === 'teste') {
+    const fileName = `E_d_fizica_${year}_${type2}_${testNumber}.pdf`;
+    return { r2Key: `fizica/pages/teste-de-antrenament/${year}/${fileName}` };
+  }
+  // page === 'sim'
+  const location = simulation === 'judetene' ? county : local;
+  const fileName = `E_d_fizica_${location}_${year}_${type2}.pdf`;
+  return { r2Key: `fizica/pages/simulari-judetene/${year}/${fileName}` };
 }
 
 export default app;
