@@ -3,8 +3,8 @@ export const countdownConfig = {
   // Simulare admitere dates
   simulare_admitere: {
     title: "Simulare Admitere UPB 2026",
-    startDate: "March 15, 2026 10:00:00",
-    endDate: "March 15, 2026 13:00:00",
+    startDate: "March 7, 2026 10:00:00",
+    endDate: "March 7, 2026 13:00:00",
   },
 
   // Simulare BAC dates
@@ -17,8 +17,8 @@ export const countdownConfig = {
   // Admitere dates
   preadmitere: {
     title: "Preadmitere UPB 2026",
-    startDate: "April 6, 2026 10:00:00",
-    endDate: "April 6, 2026 13:00:00",
+    startDate: "March 28, 2026 10:00:00",
+    endDate: "March 28, 2026 13:00:00",
   },
 
   // BAC dates
