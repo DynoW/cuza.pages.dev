@@ -62,7 +62,13 @@ const sortedEntries = Object.entries(content).sort(([keyA, valA], [keyB, valB]) 
 <div class="w-full" id={`content-${subject}-${page.replace("/", "-")}`}>
   {
     workerError && (
-      <div class="text-sm text-red-500">Failed to load content from worker: {workerError}</div>
+      <div
+        class="text-sm text-red-500"
+        data-track-event="worker_error"
+        data-track-subject={subject}
+        data-track-page={page}
+        data-track-error={workerError}
+      >Failed to load content from worker: {workerError}</div>
     )
   }
 
@@ -82,6 +88,10 @@ const sortedEntries = Object.entries(content).sort(([keyA, valA], [keyB, valB]) 
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`Open ${key} in new tab`}
+                      data-umami-event="download_file"
+                      data-umami-file-path={value}
+                      data-umami-subject={subject}
+                      data-umami-page={page}
                     >
                       {!isExtra && (
                         <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -155,28 +165,75 @@ const sortedEntries = Object.entries(content).sort(([keyA, valA], [keyB, valB]) 
           }
         </ul>
       ) : (
-        <p class={`text-slate-400! ${cx}-text`} style={`padding-left: ${paddingLeft}`}>Fără conținut</p>
+        <p
+          class={`text-slate-400! ${cx}-text`}
+          style={`padding-left: ${paddingLeft}`}
+          data-track-event={depth === 0 ? "no_content_shown" : undefined}
+          data-track-subject={depth === 0 ? subject : undefined}
+          data-track-page={depth === 0 ? page : undefined}
+        >Fără conținut</p>
       )
     }
   </div>
 </div>
 
 <script>
+  function trackUmami(eventName: string, eventData?: Record<string, unknown>): void {
+    if (!import.meta.env.PROD) return;
+    try {
+      const umami = (window as any).umami;
+      if (umami) {
+        if (typeof umami.track === 'function') {
+          umami.track(eventName, eventData);
+        } else if (typeof umami.trackEvent === 'function') {
+          umami.trackEvent(eventName, eventData);
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     const savedMode = localStorage.getItem('folderExpansionMode') || 'years';
 
     applyExpansionMode(savedMode);
 
+    document.querySelectorAll<HTMLElement>('[data-track-event]').forEach((el) => {
+      const event = el.getAttribute('data-track-event')!;
+      const subject = el.getAttribute('data-track-subject') ?? '';
+      const page = el.getAttribute('data-track-page') ?? '';
+      const error = el.getAttribute('data-track-error');
+      const data: Record<string, unknown> = { subject, page };
+      if (error) data.error = error;
+      trackUmami(event, data);
+    });
+
+    document.querySelectorAll<HTMLAnchorElement>('a[data-umami-event="download_file"]').forEach((link) => {
+      link.addEventListener('click', () => {
+        trackUmami('download_file', {
+          filePath: link.getAttribute('data-umami-file-path') ?? '',
+          subject: link.getAttribute('data-umami-subject') ?? '',
+          page: link.getAttribute('data-umami-page') ?? '',
+        });
+      });
+    });
+
     document.querySelectorAll<HTMLElement>('.folder-toggle').forEach((toggle) => {
       toggle.addEventListener('click', () => {
         const isExpanded = toggle.getAttribute('data-expanded') === 'true';
         setFolder(toggle, !isExpanded);
+        trackUmami(isExpanded ? 'folder_close' : 'folder_open', {
+          folder: toggle.getAttribute('data-folder-id'),
+          type: toggle.getAttribute('data-folder-type'),
+        });
       });
     });
 
     window.addEventListener('expansionModeChanged', (event) => {
       const { mode } = (event as CustomEvent).detail;
       applyExpansionMode(mode);
+      trackUmami('expansion_mode_changed', { mode });
     });
 
     function setFolder(toggle: HTMLElement, open: boolean): void {
