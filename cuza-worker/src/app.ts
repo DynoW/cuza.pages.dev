@@ -222,11 +222,10 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
   });
 
 /**
- * GET /file/:key+ → Serve a file from R2
+ * GET /file/:key → Serve a file from R2
  */
-  // Uses c.req.param('*') so it works regardless of basePath prefix
-  app.get('/file/*', async (c) => {
-    const key = c.req.param('*');
+  app.get('/file/:key{.*}', async (c) => {
+    const key = c.req.param('key');
     if (!key) return c.text('Not Found', 404);
 
     const object = await c.env.FILES.get(key);
