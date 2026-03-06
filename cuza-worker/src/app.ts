@@ -11,6 +11,10 @@ export type Bindings = {
   DEPLOY_HOOK_URL: string;
 };
 
+/**
+ * Recursive file structure stored in R2 as index.json.
+ * Leaves are string URLs (R2 keys), branches are nested objects.
+ */
 interface FileStructure {
   [key: string]: FileStructure | string;
 }
@@ -31,6 +35,9 @@ async function putIndex(bucket: R2Bucket, index: FileStructure): Promise<void> {
   });
 }
 
+/**
+ * Navigate into the index to a specific path like "fizica/pages/bac".
+ */
 function getSubtree(index: FileStructure, segments: string[]): FileStructure | string | null {
   let current: FileStructure | string = index;
   for (const seg of segments) {
@@ -41,6 +48,9 @@ function getSubtree(index: FileStructure, segments: string[]): FileStructure | s
   return current;
 }
 
+/**
+ * Set a value at a nested path, creating intermediate objects as needed.
+ */
 function setInIndex(index: FileStructure, segments: string[], value: string): void {
   let current = index;
   for (let i = 0; i < segments.length - 1; i++) {
@@ -53,6 +63,9 @@ function setInIndex(index: FileStructure, segments: string[], value: string): vo
   current[segments[segments.length - 1]] = value;
 }
 
+/**
+ * Resolve (subject, page) to the correct index path segments.
+ */
 function resolvePathSegments(subject: string, page: string): string[] {
   const subjectLower = subject.toLowerCase();
   const pageLower = page.toLowerCase();
@@ -72,6 +85,9 @@ function resolvePathSegments(subject: string, page: string): string[] {
   return [subjectLower, 'pages', pageLower];
 }
 
+/**
+ * Extract year keys from a FileStructure.
+ */
 function extractYears(structure: FileStructure): number[] {
   const years = new Set<number>();
   const traverse = (obj: FileStructure) => {
@@ -103,8 +119,12 @@ function isValidAuth(authHeader: string, password: string): boolean {
 const VALID_PAGES = new Set(['bac', 'teste', 'sim']);
 const VALID_SIMULATIONS = new Set(['judetene', 'locale']);
 const YEAR_RE = /^20[1-3]\d$/;
-const MAX_FILE_BYTES = 20 * 1024 * 1024;
+const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 MB
 
+/**
+ * Validate the multipart form data sent to /upload.
+ * Returns a Romanian error message, or null on success.
+ */
 function validateFormData(formData: FormData): string | null {
   const page  = formData.get('page')  as string | null;
   const year  = formData.get('year')  as string | null;
@@ -112,18 +132,36 @@ function validateFormData(formData: FormData): string | null {
   const type2 = formData.get('type2') as string | null;
   const file  = formData.get('file')  as unknown as File | null;
 
-  if (!page || !year || !type || !type2 || !file) return 'Câmpuri obligatorii lipsă';
-  if (!VALID_PAGES.has(page))             return 'Pagină invalidă';
-  if (!YEAR_RE.test(year))                return 'An invalid (format așteptat: 20XX)';
-  if (file.type !== 'application/pdf')    return 'Fișierul trebuie să fie PDF';
-  if (file.size > MAX_FILE_BYTES)         return 'Fișierul depășește limita de 20 MB';
+  // ── Required fields ────────────────────────────────────────────────────────
+  if (!page || !year || !type || !type2 || !file) {
+    return 'Câmpuri obligatorii lipsă';
+  }
 
-  if (page === 'bac' && !formData.get('title'))       return 'Lipsă titlu';
-  if (page === 'teste' && !formData.get('testNumber')) return 'Lipsă număr test';
+  // ── Field-level validation ─────────────────────────────────────────────────
+  if (!VALID_PAGES.has(page)) {
+    return 'Pagină invalidă';
+  }
+  if (!YEAR_RE.test(year)) {
+    return 'An invalid (format așteptat: 20XX)';
+  }
+  if (file.type !== 'application/pdf') {
+    return 'Fișierul trebuie să fie PDF';
+  }
+  if (file.size > MAX_FILE_BYTES) {
+    return 'Fișierul depășește limita de 20 MB';
+  }
+
+  // ── Page-specific validation ───────────────────────────────────────────────
+  if (page === 'bac' && !formData.get('title')) {
+    return 'Lipsă titlu';
+  }
+  if (page === 'teste' && !formData.get('testNumber')) {
+    return 'Lipsă număr test';
+  }
   if (page === 'sim') {
     const simulation = formData.get('simulation') as string | null;
-    if (!simulation)                        return 'Lipsă tip simulare';
-    if (!VALID_SIMULATIONS.has(simulation)) return 'Tip de simulare invalid';
+    if (!simulation)                              return 'Lipsă tip simulare';
+    if (!VALID_SIMULATIONS.has(simulation))       return 'Tip de simulare invalid';
     if (simulation === 'judetene' && !formData.get('county')) return 'Lipsă județ pentru simulare județeană';
     if (simulation === 'locale'   && !formData.get('local'))  return 'Lipsă localitate pentru simulare locală';
   }
@@ -141,9 +179,9 @@ interface UploadPathData {
 
 function generateUploadPath(data: UploadPathData): { r2Key: string } {
   const { page, year, type, type2, testNumber, simulation } = data;
-  const title  = sanitizePathSegment(data.title);
+  const title = sanitizePathSegment(data.title);
   const county = sanitizePathSegment(data.county);
-  const local  = sanitizePathSegment(data.local);
+  const local = sanitizePathSegment(data.local);
 
   if (page === 'bac') {
     return { r2Key: `fizica/pages/bac/${year}/${title}/E_d_fizica_teoretic_vocational_${year}_${type2}_${type}.pdf` };
@@ -160,6 +198,10 @@ function generateUploadPath(data: UploadPathData): { r2Key: string } {
 export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
   app.get('/ping', (c) => c.text('Pong!', 200));
 
+/**
+ * GET /files?subject=X&page=Y        → { content: FileStructure }
+ * GET /files?subject=X&page=Y&years=true → { years: number[] }
+ */
   app.get('/files', async (c) => {
     const subject = c.req.query('subject');
     const page = c.req.query('page');
@@ -179,9 +221,12 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     return c.json({ content: subtree });
   });
 
+/**
+ * GET /file/:key+ → Serve a file from R2
+ */
   // Uses c.req.param('*') so it works regardless of basePath prefix
   app.get('/file/*', async (c) => {
-    const key = c.req.param('*');
+    const key = c.req.path.replace("\/file\/", '');
     if (!key) return c.text('Not Found', 404);
 
     const object = await c.env.FILES.get(key);
@@ -195,6 +240,9 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     return new Response(object.body, { headers });
   });
 
+/**
+ * POST /upload — Upload a single PDF to R2 (from the web form).
+ */
   app.post('/upload', async (c) => {
     const authHeader = c.req.header('Authorization');
     if (!authHeader || !isValidAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
@@ -202,7 +250,8 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     }
 
     const contentType = c.req.header('Content-Type') || '';
-    if (!contentType.includes('multipart/form-data')) return c.text('Tip de conținut neacceptat', 415);
+    if (!contentType.includes('multipart/form-data'))
+      return c.text('Tip de conținut neacceptat', 415);
 
     let formData: FormData;
     try {
@@ -214,16 +263,16 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     const validationError = validateFormData(formData);
     if (validationError) return c.text(validationError, 400);
 
-    const page       = formData.get('page')       as string;
-    const year       = formData.get('year')       as string;
-    const title      = formData.get('title')      as string | null;
-    const type       = formData.get('type')       as string;
-    const type2      = formData.get('type2')      as string;
+    const page = formData.get('page') as string;
+    const year = formData.get('year') as string;
+    const title = formData.get('title') as string | null;
+    const type = formData.get('type') as string;
+    const type2 = formData.get('type2') as string;
     const testNumber = formData.get('testNumber') as string | null;
     const simulation = formData.get('simulation') as string | null;
-    const county     = formData.get('county')     as string | null;
-    const local      = formData.get('local')      as string | null;
-    const file       = formData.get('file')       as unknown as File;
+    const county = formData.get('county') as string | null;
+    const local = formData.get('local') as string | null;
+    const file = formData.get('file') as unknown as File;
 
     const { r2Key } = generateUploadPath({ page, year, title, type, type2, testNumber, simulation, county, local });
 
@@ -239,9 +288,14 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     return c.text(`Fișier încărcat cu succes: ${r2Key.split('/').at(-1)}`, 200);
   });
 
+/**
+ * POST /upload-scraper — Bulk upload from the watchtower/scraper.
+ * Accepts multipart with: password, key (R2 path), file (PDF blob).
+ */
   app.post('/upload-scraper', async (c) => {
     const contentType = c.req.header('Content-Type') || '';
-    if (!contentType.includes('multipart/form-data')) return c.text('Unsupported content type', 415);
+    if (!contentType.includes('multipart/form-data'))
+      return c.text('Unsupported content type', 415);
 
     let formData: FormData;
     try {
@@ -255,11 +309,15 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
       return c.text('Unauthorized', 401);
     }
 
-    const key  = formData.get('key')  as string;
+    const key = formData.get('key') as string;
     const file = formData.get('file') as unknown as File;
 
-    if (!key || !file) return c.text('Missing key or file', 400);
-    if (key.includes('..') || key.startsWith('/')) return c.text('Invalid key', 400);
+    if (!key || !file)
+      return c.text('Missing key or file', 400);
+
+    // Reject path traversal attempts
+    if (key.includes('..') || key.startsWith('/'))
+      return c.text('Invalid key', 400);
 
     await c.env.FILES.put(key, file, {
       httpMetadata: { contentType: 'application/pdf' },
@@ -272,6 +330,10 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     return c.json({ success: true, key });
   });
 
+/**
+ * POST /trigger-deploy — Trigger a Cloudflare Pages deploy hook.
+ * Called by the scraper after all files have been uploaded.
+ */
   app.post('/trigger-deploy', async (c) => {
     const authHeader = c.req.header('Authorization');
     if (!authHeader || !isValidAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
@@ -281,20 +343,27 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     return c.json({ success: true });
   });
 
+/**
+ * GET /page-data?subject=X&page=Y
+ * Returns { content, extra, years } in one request.
+ */
   app.get('/page-data', async (c) => {
     const subject = c.req.query('subject');
     const page = c.req.query('page');
 
-    if (!subject || !page) return c.json({ error: 'Missing subject or page' }, 400);
+    if (!subject || !page)
+      return c.json({ error: 'Missing subject or page' }, 400);
 
     const index = await getIndex(c.env.FILES);
 
+  // Main content + years
     const segments = resolvePathSegments(subject, page);
     const subtree = getSubtree(index, segments);
     const content: FileStructure = (subtree !== null && typeof subtree !== 'string')
       ? (subtree as FileStructure) : {};
     const years = extractYears(content);
 
+  // Extra content
     const extraSegments = resolvePathSegments(
       subject,
       subject.toLowerCase() === 'admitere' ? `${page}/extra` : 'extra',
@@ -306,6 +375,10 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     return c.json({ content, extra, years });
   });
 
+/**
+ * GET /structure — Return subjects → pages map derived from the index.
+ * Used by the SSG build to generate static paths dynamically.
+ */
   app.get('/structure', async (c) => {
     const index = await getIndex(c.env.FILES);
     const structure: Record<string, string[]> = {};
@@ -315,6 +388,7 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
       const branch = value as FileStructure;
 
       if (subject === 'admitere') {
+        // admitere's "pages" are its direct children (e.g. fizica, info, mate)
         structure[subject] = Object.keys(branch).filter(
           (k) => typeof branch[k] === 'object' && branch[k] !== null,
         );
@@ -326,6 +400,9 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     return c.json(structure);
   });
 
+/**
+ * GET /index — Return the full index (for debugging / migration).
+ */
   app.get('/index', async (c) => {
     const index = await getIndex(c.env.FILES);
     return c.json(index);
