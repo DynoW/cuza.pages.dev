@@ -477,15 +477,15 @@ function isPageActive(subject: string, page: string | null = null): boolean {
             });
 
             const month = new Date().getMonth();
-            if (month === 11) {
+            if (month === 2) {
                 const logoContainer = document.getElementById("page-title");
                 
                 const updateHatStyles = () => {
                     const img = logoContainer?.querySelector<HTMLImageElement>("img[data-hat]");
                     if (img) {
                         img.width = window.innerWidth >= 1280 ? 32 : 22;
-                        img.style.top = window.innerWidth >= 1280 ? "-10px" : "-5px";
-                        img.style.left = window.innerWidth >= 1280 ? "-5px" : "-4px";
+                        img.style.top = window.innerWidth >= 1280 ? "-6px" : "-3px";
+                        img.style.left = window.innerWidth >= 1280 ? "-9px" : "-7px";
                     }
                 };
 
@@ -496,8 +496,9 @@ function isPageActive(subject: string, page: string | null = null): boolean {
                     img.alt = "sapca";
                     img.dataset.hat = "true";
                     img.style.position = "absolute";
-                    img.style.top = window.innerWidth >= 1280 ? "-10px" : "-5px";
-                    img.style.left = window.innerWidth >= 1280 ? "-5px" : "-4px";
+                    img.style.top = window.innerWidth >= 1280 ? "-6px" : "-3px";
+                    img.style.left = window.innerWidth >= 1280 ? "-9px" : "-7px";
+                    // @ts-ignore
                     logoContainer.prepend(img);
                 }
 

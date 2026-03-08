@@ -19,6 +19,14 @@ export const onRequest: PagesFunction<{ FILES: R2Bucket }> = async (ctx) => {
     headers.set('etag', object.httpEtag);
     headers.set('Cache-Control', 'public, max-age=31536000, immutable');
 
+    // Ensure PDFs are served inline so Googlebot can index them
+    const contentType = headers.get('Content-Type') || '';
+    if (contentType.includes('application/pdf') || key.toLowerCase().endsWith('.pdf')) {
+      headers.set('Content-Type', 'application/pdf');
+      headers.set('Content-Disposition', 'inline');
+      headers.set('X-Robots-Tag', 'index, follow');
+    }
+
     return new Response(object.body, { headers });
   }
 

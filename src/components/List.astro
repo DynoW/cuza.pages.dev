@@ -84,9 +84,9 @@ const sortedEntries = Object.entries(content).sort(([keyA, valA], [keyB, valB]) 
                   <li>
                     <a
                       class={`${cx}-link flex items-center break-normal`}
-                      href={`${import.meta.env.PUBLIC_WORKER_URL}/file/${value}`}
+                      href={`https://cuza.pages.dev/api/file/${value}`}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="noopener"
                       aria-label={`Open ${key} in new tab`}
                       data-umami-event="download_file"
                       data-umami-file-path={value}

@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Allow: /api/file/
 Disallow: /install
 Disallow: /upload
 

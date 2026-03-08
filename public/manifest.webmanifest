@@ -1,5 +1,8 @@
 {
-    "name": "CuzaPages",
+    "name": "CuzaPages - Subiecte BAC",
+    "short_name": "CuzaPages",
+    "description": "Subiecte de bac și admitere UPB la fizică, matematică și informatică.",
+    "categories": ["education"],
     "icons": [
         {
             "src": "/assets/img/logo/atoms_192px.png",
@@ -11,11 +14,12 @@
             "src": "/assets/img/logo/atoms_512px.png",
             "type": "image/png",
             "sizes": "512x512",
-            "purpose": "any"
+            "purpose": "any maskable"
         }
     ],
     "start_url": "/",
     "background_color": "#f9f9f9",
-    "theme_color": "#f9f9f9",
-    "display": "standalone"
+    "theme_color": "#0e1720",
+    "display": "standalone",
+    "lang": "ro"
 }

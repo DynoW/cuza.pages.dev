@@ -11,14 +11,11 @@ import type { FileStructure } from "../types";
 
 // Props for the component
 interface Props {
-  subject: string;
-  page: string;
+    subject: string;
+    page: string;
 }
 
-const { 
-  subject, 
-  page,
-} = Astro.props;
+const { subject, page } = Astro.props;
 
 // Single request for all page data
 const pageData = await apiService.getPageData(subject, page);
@@ -26,21 +23,100 @@ const content: FileStructure = pageData.content;
 const years: number[] = pageData.years;
 const extra: FileStructure = pageData.extra;
 
-const pageTitle = (subject === "fizica" && page === "bac")
-    ? "mate-fizica | cuza.pages.dev"
-    : `${subject}-${page} | cuza.pages.dev`;
---- 
+// ── SEO helpers ──────────────────────────────────────────────────────────────
+const SUBJECT_NAMES: Record<string, string> = {
+    fizica: "Fizică",
+    mate: "Matematică",
+    info: "Informatică",
+    admitere: "Admitere UPB",
+    romana: "Română",
+    bio: "Biologie",
+    chimie: "Chimie",
+    geo: "Geografie",
+    anat: "Anatomie",
+    economie: "Economie",
+    filosofie: "Filosofie",
+    istorie: "Istorie",
+    logica: "Logică",
+    psihologie: "Psihologie",
+    sociologie: "Sociologie",
+};
+const PAGE_NAMES: Record<string, string> = {
+    bac: "BAC",
+    fizica: "Fizică",
+    mate: "Matematică",
+    info: "Informatică",
+    "simulari-judetene": "Simulări Județene",
+    "mate-info-C": "Mate-Info (C)",
+    "mate-info-Pascal": "Mate-Info (Pascal)",
+    "st-nat-C": "Științe Ale Naturii (C)",
+    "st-nat-Pascal": "Științe Ale Naturii (Pascal)",
+};
 
-<Layout title={pageTitle}>
+const subjectLabel =
+    SUBJECT_NAMES[subject] ??
+    subject.charAt(0).toUpperCase() + subject.slice(1);
+const pageLabel =
+    PAGE_NAMES[page] ??
+    page.charAt(0).toUpperCase() + page.replace(/-/g, " ").slice(1);
+const isHome = subject === "fizica" && page === "bac";
+
+const pageTitle = isHome
+    ? "Mate-Fizică BAC | cuza.pages.dev"
+    : `${subjectLabel} - ${pageLabel} | cuza.pages.dev`;
+const pageDescription = `Subiecte oficiale, variante și simulări ${pageLabel} la ${subjectLabel}. Descarcă gratuit PDF-uri pentru pregătire BAC și admitere. Liceul Teoretic Alexandru Ioan Cuza, București.`;
+const pageKeywords = `${subjectLabel.toLowerCase()}, ${pageLabel.toLowerCase()}, bacalaureat, subiecte, variante, bareme, simulare, cuza, LTAIC, UPB`;
+
+const subjectBaseUrl =
+    subject === "fizica"
+        ? "https://cuza.pages.dev"
+        : `https://cuza.pages.dev/${subject}`;
+const canonicalUrl =
+    page === "bac"
+        ? subjectBaseUrl
+        : `https://cuza.pages.dev/${subject}/${page}`;
+
+const breadcrumbs = [
+    { name: subjectLabel, url: subjectBaseUrl },
+    ...(page !== "bac" ? [{ name: pageLabel, url: canonicalUrl }] : []),
+];
+
+console.log(breadcrumbs)
+---
+
+<Layout
+    title={pageTitle}
+    description={pageDescription}
+    keywords={pageKeywords}
+    canonicalUrl={canonicalUrl}
+    breadcrumbs={breadcrumbs}
+>
     <ContentContainer>
         <aside slot="left" class="flex flex-col gap-2 lg:ml-2 lg:mt-2">
             <NewNavbar />
-            <div class="bg-zinc-950/90 rounded-3xl py-3 px-4 w-31 hidden lg:block">
-                <a href="https://old.cuza.pages.dev?utm_source=new" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between text-white font-medium hover:text-gray-300 transition-colors">
+            <div
+                class="bg-zinc-950/90 rounded-3xl py-3 px-4 w-31 hidden lg:block"
+            >
+                <a
+                    href="https://old.cuza.pages.dev"
+                    target="_blank"
+                    rel="noopener"
+                    class="flex items-center justify-between text-white font-medium hover:text-gray-300 transition-colors"
+                    data-umami-event="click_old_site"
+                >
                     Site vechi
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M7 17L17 7"/>
-                        <path d="M7 7h10v10"/>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M7 17L17 7"></path>
+                        <path d="M7 7h10v10"></path>
                     </svg>
                 </a>
             </div>
@@ -50,9 +126,17 @@ const pageTitle = (subject === "fizica" && page === "bac")
                 <List subject={subject} page={page} data={content} />
             </div>
         </div>
-        <aside slot="right" class="flex flex-col gap-2 md:mt-2 md:mr-2 md:sticky md:top-2 md:right-2">
+        <aside
+            slot="right"
+            class="flex flex-col gap-2 md:mt-2 md:mr-2 md:sticky md:top-2 md:right-2"
+        >
             <div class="bg-zinc-950/90 rounded-3xl py-3 px-4">
-                <Extra subject={subject} page={page} extraData={extra} years={years} />
+                <Extra
+                    subject={subject}
+                    page={page}
+                    extraData={extra}
+                    years={years}
+                />
             </div>
             <CountdownTimer />
         </aside>

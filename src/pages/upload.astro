@@ -169,18 +169,18 @@ import Layout from "../layouts/Layout.astro";
     </div>
 
     <script>
-        const pageSelect = document.getElementById("page");
-        let page = pageSelect ? (pageSelect as HTMLSelectElement).value : '';
-        const simulationSelect = document.getElementById("simulation");
-        let simulation = simulationSelect ? (simulationSelect as HTMLSelectElement).value : '';
-        const titluSelect = document.getElementById("title"); // titleSelect is already declared
-        let title = titluSelect ? (titluSelect as HTMLSelectElement).value : '';
+        const pageSelect = document.getElementById("page") as HTMLSelectElement | null;
+        let page = pageSelect ? pageSelect.value : '';
+        const simulationSelect = document.getElementById("simulation") as HTMLSelectElement | null;
+        let simulation = simulationSelect ? simulationSelect.value : '';
+        const titluSelect = document.getElementById("title") as HTMLSelectElement | null; // titleSelect is already declared
+        let title = titluSelect ? titluSelect.value : '';
         const simulationField = document.getElementById("simulationField");
         const countyField = document.getElementById("countyField");
         const localField = document.getElementById("localField");
         const testNumberField = document.getElementById("testNumberField");
         const titleField = document.getElementById("titleField");
-        const typeField = document.getElementById("type") as HTMLSelectElement;
+        const typeField = document.getElementById("type") as HTMLSelectElement | null;
 
         function toggleFields(page: string, simulation: string) {
             if (typeField) {
