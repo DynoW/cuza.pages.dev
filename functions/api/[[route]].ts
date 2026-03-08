@@ -1,26 +1,26 @@
-import { Hono } from 'hono';
-import { handle } from 'hono/cloudflare-pages';
-import { type Bindings } from '../../cuza-worker/src/app';
+/// <reference types="@cloudflare/workers-types" />
 
-const app = new Hono<{ Bindings: Bindings }>();
+export const onRequest: PagesFunction<{ FILES: R2Bucket }> = async (ctx) => {
+  const url = new URL(ctx.request.url);
+  const path = url.pathname.replace(/^\/api/, '');
 
-app.basePath('/api');
+  if (path === '/ping') {
+    return new Response('Pong!', { status: 200 });
+  }
 
-app.get('/ping', (c) => c.text('Pong!', 200));
+  const fileMatch = path.match(/^\/file\/(.+)$/);
+  if (fileMatch) {
+    const key = fileMatch[1];
+    const object = await ctx.env.FILES.get(key);
+    if (!object) return new Response('Not Found', { status: 404 });
 
-app.get('/file/:key{.*}', async (c) => {
-  const key = c.req.param('key');
-  if (!key) return c.text('Not Found', 404);
+    const headers = new Headers();
+    object.writeHttpMetadata(headers);
+    headers.set('etag', object.httpEtag);
+    headers.set('Cache-Control', 'public, max-age=31536000, immutable');
 
-  const object = await c.env.FILES.get(key);
-  if (!object) return c.text('Not Found', 404);
+    return new Response(object.body, { headers });
+  }
 
-  const headers = new Headers();
-  object.writeHttpMetadata(headers);
-  headers.set('etag', object.httpEtag);
-  headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-
-  return new Response(object.body, { headers });
-});
-
-export const onRequest = handle(app);
+  return new Response('Not Found', { status: 404 });
+};

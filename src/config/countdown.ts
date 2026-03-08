@@ -43,7 +43,7 @@ export const countdownConfig = {
   },
 } as const;
 
-const currentExam = 'simulare_admitere';
+const currentExam = 'simulare_bac';
 
 // Default config type
 export type ExamType = keyof typeof countdownConfig;

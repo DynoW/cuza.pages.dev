@@ -38,9 +38,6 @@ importers:
       framer-motion:
         specifier: ^12.33.0
         version: 12.33.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      hono:
-        specifier: ^4.12.5
-        version: 4.12.5
       lucide-react:
         specifier: ^0.561.0
         version: 0.561.0(react@19.2.3)
@@ -54,6 +51,9 @@ importers:
         specifier: ^4.1.18
         version: 4.1.18
     devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20260307.1
+        version: 4.20260307.1
       vite:
         specifier: ^7.3.0
         version: 7.3.0(@types/node@25.0.2)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.39.0)(yaml@2.8.2)
@@ -203,6 +203,9 @@ packages:
   '@capsizecss/unpack@3.0.1':
     resolution: {integrity: sha512-8XqW8xGn++Eqqbz3e9wKuK7mxryeRjs4LOHLxbh2lwKeSbuNR4NFifDZT4KzvjU6HMOPbiNTsWpniK5EJfTWkg==}
     engines: {node: '>=18'}
+
+  '@cloudflare/workers-types@4.20260307.1':
+    resolution: {integrity: sha512-0PvWLVVD6Q64V/XhollYtc8H35Vxm2rZi8bkZbEr3lK+mNgd2FBBVhlZ6A3saAUq3giRF4US/UfU/3a8i1PEcg==}
 
   '@emmetio/abbreviation@2.3.3':
     resolution: {integrity: sha512-mgv58UrU3rh4YgbE/TzgLQwJ3pFsHHhCLqY20aJq+9comytTXUDNGG/SMtSeMJdkpxgXSXunBGLD8Boka3JyVA==}
@@ -2242,10 +2245,6 @@ packages:
   hastscript@9.0.1:
     resolution: {integrity: sha512-g7df9rMFX/SPi34tyGCyUBREQoKkapwdY/T04Qn9TDWfHhAYt4/I0gMVirzK5wEzeUqIjEB+LXC/ypb7Aqno5w==}
 
-  hono@4.12.5:
-    resolution: {integrity: sha512-3qq+FUBtlTHhtYxbxheZgY8NIFnkkC/MR8u5TTsr7YZ3wixryQ3cCwn3iZbg8p8B88iDBBAYSfZDS75t8MN7Vg==}
-    engines: {node: '>=16.9.0'}
-
   html-escaper@3.0.3:
     resolution: {integrity: sha512-RuMffC89BOWQoY0WKGpIhn5gX3iI54O6nRA0yC124NYVtzjmFWBIiFd8M0x+ZdX0P9R4lADg1mgP8C7PxGOWuQ==}
 
@@ -3998,6 +3997,8 @@ snapshots:
   '@capsizecss/unpack@3.0.1':
     dependencies:
       fontkit: 2.0.4
+
+  '@cloudflare/workers-types@4.20260307.1': {}
 
   '@emmetio/abbreviation@2.3.3':
     dependencies:
@@ -6114,8 +6115,6 @@ snapshots:
       hast-util-parse-selector: 4.0.0
       property-information: 7.1.0
       space-separated-tokens: 2.0.2
-
-  hono@4.12.5: {}
 
   html-escaper@3.0.3: {}
 

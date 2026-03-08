@@ -21,13 +21,13 @@
     "astro-compress": "^2.3.8",
     "astro-seo": "^0.8.4",
     "framer-motion": "^12.33.0",
-    "hono": "^4.12.5",
     "lucide-react": "^0.561.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260307.1",
     "vite": "^7.3.0"
   },
   "packageManager": "pnpm@10.28.2+sha512.41872f037ad22f7348e3b1debbaf7e867cfd448f2726d9cf74c08f19507c31d2c8e7a11525b983febc2df640b5438dee6023ebb1f84ed43cc2d654d2bc326264"
