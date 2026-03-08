@@ -9,6 +9,7 @@ export type Bindings = {
   FILES: R2Bucket;
   UPLOAD_PASSWORD: string;
   DEPLOY_HOOK_URL: string;
+  RATE_LIMITER: { limit(opts: { key: string }): Promise<{ success: boolean }> };
 };
 
 /**

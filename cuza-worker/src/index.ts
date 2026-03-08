@@ -7,6 +7,15 @@ import { type Bindings, registerRoutes } from './app';
 
 const app = new Hono<{ Bindings: Bindings }>();
 
+app.use('*', async (c, next) => {
+  if (c.req.method === 'POST') {
+    const ip = c.req.header('CF-Connecting-IP') ?? 'unknown';
+    const { success } = await c.env.RATE_LIMITER.limit({ key: ip });
+    if (!success) return c.text('Too Many Requests', 429);
+  }
+  return next();
+});
+
 app.use('*', cors({
   origin: (origin) => {
     const allowed = ['https://cuza.pages.dev', 'http://localhost:4321'];
