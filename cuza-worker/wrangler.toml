@@ -10,7 +10,7 @@ name = "RATE_LIMITER"
 namespace_id = "1001"
 
 [ratelimits.simple]
-limit = 100
+limit = 10
 period = 60
 
 # R2 Bucket Bindings
