@@ -16,7 +16,7 @@ interface Props {
   page: string;
 }
 
-const { subject, page } = Astro.props;
+const { subject, page } = Astro.props as Props;
 
 // Single request for all page data
 const pageData = await apiService.getPageData(subject, page);

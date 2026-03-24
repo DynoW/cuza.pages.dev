@@ -1,6 +1,15 @@
 ---
 import type { FileStructure } from "../types";
 
+interface Props {
+  subject: string;
+  page: string;
+  content: FileStructure;
+  depth?: number;
+  expansionMode?: "none" | "years" | "all";
+  isExtra?: boolean;
+}
+
 const isYearFolder = (key: string): boolean => /^20\d{2}$/.test(key);
 const formatKey = (key: string): string => key.replace(/_/g, " ");
 
@@ -10,21 +19,15 @@ const {
   content,
   depth = 0,
   expansionMode = "years",
-  isExtra: isExtraProp,
-} = Astro.props as {
-  subject: string;
-  page: string;
-  content: FileStructure;
-  depth?: number;
-  expansionMode?: "none" | "years" | "all";
-  isExtra?: boolean;
-};
+  isExtra: isExtraProp
+} = Astro.props as Props;
 
 // Use explicit prop in recursive calls, derive from page name at root.
 const isExtra = isExtraProp ?? (page === "extra" || page.endsWith("/extra"));
 const cx = isExtra ? "extra" : "content";
 
 const paddingLeft = `${depth}rem`;
+const contentKeys = Object.keys(content);
 
 const sortedEntries = Object.entries(content).sort(
   ([keyA, valA], [keyB, valB]) => {
@@ -49,7 +52,7 @@ const sortedEntries = Object.entries(content).sort(
 <div class="w-full" id={`content-${subject}-${page.replace("/", "-")}`}>
   <div>
     {
-      Object.keys(content).length > 0 ? (
+      contentKeys.length > 0 ? (
         <ul class={`${cx}-list`} style={`padding-left: ${paddingLeft}`}>
           {sortedEntries.map(([key, value]) => {
             if (typeof value === "string") {
@@ -94,7 +97,7 @@ const sortedEntries = Object.entries(content).sort(
               const isYear = isYearFolder(key);
               const showDivider =
                 depth === 1 &&
-                key === Object.keys(content)[Object.keys(content).length - 1];
+                key === contentKeys[contentKeys.length - 1];
               const folderId = `folder-${subject}-${page}-${key}-${depth}`;
 
               // Determine if folder should be expanded by default
@@ -146,7 +149,7 @@ const sortedEntries = Object.entries(content).sort(
                       <Astro.self
                         subject={subject}
                         page={key}
-                        data={value}
+                        content={value}
                         depth={depth + 1}
                         expansionMode={expansionMode}
                         isExtra={isExtra}

@@ -26,7 +26,21 @@ export class ApiService {
   async getPageData(subject: string, page: string): Promise<PageData> {
     const url = `${this.baseUrl}/files?subject=${encodeURIComponent(subject)}&page=${encodeURIComponent(page)}`;
     const response = await this.fetchJson<PageData>(url);
-    return response ?? { content: {}, extra: {}, years: [] };
+    if (!response) {
+      return { content: {}, extra: {}, years: [] };
+    }
+
+    const content =
+      response.content && typeof response.content === "object"
+        ? response.content
+        : {};
+    const extra =
+      response.extra && typeof response.extra === "object"
+        ? response.extra
+        : {};
+    const years = Array.isArray(response.years) ? response.years : [];
+
+    return { content, extra, years };
   }
 
   private structureCache: Record<string, string[]> | null = null;
