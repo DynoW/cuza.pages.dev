@@ -3,7 +3,6 @@
 """Manual uploader for local files -> cuza worker /upload-scraper endpoint."""
 
 import argparse
-import base64
 import os
 from pathlib import Path
 import sys
@@ -12,6 +11,8 @@ try:
     import requests
 except ModuleNotFoundError:
     requests = None
+
+from utils import build_bearer_auth_header, create_retry_session, load_local_env
 
 
 def ensure_requests_installed() -> None:
@@ -25,31 +26,14 @@ def ensure_requests_installed() -> None:
     raise SystemExit(1)
 
 
-def load_local_env(env_path: Path) -> None:
-    if not env_path.exists():
-        return
-
-    for line in env_path.read_text(encoding='utf-8').splitlines():
-        entry = line.strip()
-        if not entry or entry.startswith('#') or '=' not in entry:
-            continue
-
-        key, value = entry.split('=', 1)
-        key = key.strip()
-        value = value.strip().strip('"').strip("'")
-        if key and key not in os.environ:
-            os.environ[key] = value
-
-
 def auth_header(password: str) -> dict:
-    token = base64.b64encode(f"scraper:{password}".encode()).decode()
-    return {'Authorization': f'Bearer {token}'}
+    return build_bearer_auth_header('scraper', password)
 
 
-def upload_file(worker_url: str, password: str, file_path: Path, key: str) -> bool:
+def upload_file(session, worker_url: str, password: str, file_path: Path, key: str) -> bool:
     try:
         with file_path.open('rb') as file_handle:
-            response = requests.post(
+            response = session.post(
                 f"{worker_url.rstrip('/')}/upload-scraper",
                 headers=auth_header(password),
                 files={'file': (file_path.name, file_handle, 'application/pdf')},
@@ -68,9 +52,9 @@ def upload_file(worker_url: str, password: str, file_path: Path, key: str) -> bo
     return False
 
 
-def trigger_deploy(worker_url: str, password: str) -> bool:
+def trigger_deploy(session, worker_url: str, password: str) -> bool:
     try:
-        response = requests.post(
+        response = session.post(
             f"{worker_url.rstrip('/')}/trigger-deploy",
             headers=auth_header(password),
             timeout=30,
@@ -131,6 +115,7 @@ def main() -> int:
     script_dir = Path(__file__).parent
     load_local_env(script_dir / '.env')
     ensure_requests_installed()
+    session = create_retry_session()
 
     default_password = (
         os.environ.get('UPLOAD_PASSWORD')
@@ -189,13 +174,13 @@ def main() -> int:
             print(f'Error: {error}')
             return 1
 
-        if upload_file(args.worker_url, args.password, path, key):
+        if upload_file(session, args.worker_url, args.password, path, key):
             success_count += 1
 
     print(f'Completed uploads: {success_count}/{len(file_paths)}')
 
     if success_count > 0 and args.deploy:
-        trigger_deploy(args.worker_url, args.password)
+        trigger_deploy(session, args.worker_url, args.password)
 
     return 0 if success_count == len(file_paths) else 1
 

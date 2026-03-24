@@ -4,6 +4,9 @@ Use `run.sh` as the single entrypoint for both Python tools:
 - `main.py` (scrape)
 - `upload_local_files.py` (manual upload)
 
+Auth for protected worker routes is standardized to:
+`Authorization: Bearer <base64(username:UPLOAD_PASSWORD)>`
+
 ## Quick start
 
 From `web-scraper/`:
@@ -15,6 +18,8 @@ From `web-scraper/`:
 This opens an interactive menu where you can choose:
 1. Scrape subiecte.edu.ro
 2. Upload local PDFs
+3. Cleanup worker index
+4. Trigger deploy
 
 ## Non-interactive usage
 
@@ -69,21 +74,40 @@ Use explicit key for one file:
 Run a safe dry-run first (no writes):
 
 ```bash
-python cleanup_index.py --dry-run
+./run.sh cleanup-index --dry-run
 ```
 
 Apply cleanup (writes cleaned `index.json` to R2 via worker):
 
 ```bash
-python cleanup_index.py
+./run.sh cleanup-index
+```
+
+Cleanup does not trigger deploy automatically.
+
+With explicit worker settings:
+
+```bash
+./run.sh cleanup-index \
+  --worker-url "https://api.my-lab.ro" \
+  --password "$UPLOAD_PASSWORD"
+```
+
+### Deploy mode
+
+Trigger deploy explicitly when needed:
+
+```bash
+./run.sh deploy
 ```
 
 With explicit worker settings:
 
 ```bash
-python cleanup_index.py \
+./run.sh deploy \
   --worker-url "https://api.my-lab.ro" \
-  --password "$UPLOAD_PASSWORD"
+  --password "$UPLOAD_PASSWORD" \
+  --timeout 120
 ```
 
 ## CI / automation notes
@@ -98,16 +122,6 @@ Skip package installation when the environment is already prepared:
 - still loads `.env` if present
 - still activates existing `venv` if available
 - only skips dependency installation
-
-## Legacy compatibility
-
-Old-style scrape call still works:
-
-```bash
-./run.sh -y 2026 -u
-```
-
-This is interpreted as scrape mode with upload enabled.
 
 ## Dependencies
 

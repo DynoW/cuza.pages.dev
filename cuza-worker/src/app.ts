@@ -156,9 +156,9 @@ async function triggerDeploy(hookUrl: string | undefined): Promise<void> {
   await fetch(hookUrl, { method: 'POST' });
 }
 
-function isValidAuth(authHeader: string, password: string): boolean {
-  const [, token] = authHeader.split(' ');
-  if (!token) return false;
+function isValidBearerAuth(authHeader: string, password: string): boolean {
+  const [scheme, token] = authHeader.split(' ');
+  if (!scheme || scheme.toLowerCase() !== 'bearer' || !token) return false;
   try {
     const [, pwd] = atob(token).split(':');
     return pwd === password;
@@ -346,7 +346,7 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
  */
   app.post('/upload', async (c) => {
     const authHeader = c.req.header('Authorization');
-    if (!authHeader || !isValidAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
+    if (!authHeader || !isValidBearerAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
       return c.text('Neautorizat', 401);
     }
 
@@ -415,7 +415,7 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     }
 
     const authHeader = c.req.header('Authorization');
-    if (!authHeader || !isValidAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
+    if (!authHeader || !isValidBearerAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
       return c.text('Unauthorized', 401);
     }
 
@@ -453,7 +453,7 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
  */
   app.post('/trigger-deploy', async (c) => {
     const authHeader = c.req.header('Authorization');
-    if (!authHeader || !isValidAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
+    if (!authHeader || !isValidBearerAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
       return c.text('Unauthorized', 401);
     }
     await triggerDeploy(c.env.DEPLOY_HOOK_URL);
@@ -466,7 +466,7 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
  */
   app.post('/cleanup-index', async (c) => {
     const authHeader = c.req.header('Authorization');
-    if (!authHeader || !isValidAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
+    if (!authHeader || !isValidBearerAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
       return c.text('Unauthorized', 401);
     }
 

@@ -16,22 +16,7 @@ from pathlib import Path
 from urllib.parse import urljoin, urlparse
 import requests
 
-
-def load_local_env(env_path: Path) -> None:
-    """Load KEY=VALUE pairs from a local .env file if variables are missing."""
-    if not env_path.exists():
-        return
-
-    for line in env_path.read_text(encoding='utf-8').splitlines():
-        entry = line.strip()
-        if not entry or entry.startswith('#') or '=' not in entry:
-            continue
-
-        key, value = entry.split('=', 1)
-        key = key.strip()
-        value = value.strip().strip('"').strip("'")
-        if key and key not in os.environ:
-            os.environ[key] = value
+from utils import build_bearer_auth_header, create_retry_session, load_local_env
 
 
 class BacExamScraper:
@@ -44,6 +29,7 @@ class BacExamScraper:
         self.seen_urls_file = self.web_scraper_dir / "seen_urls.txt"
         self.temp_dir = self.web_scraper_dir / "temp"
         self.files_dir = self.web_scraper_dir / "files"
+        self.session = create_retry_session()
         
         self.current_year = str(year) if year else str(datetime.now().year)
         
@@ -79,7 +65,7 @@ class BacExamScraper:
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
-            response = requests.get(url, headers=headers, timeout=30)
+            response = self.session.get(url, headers=headers, timeout=30)
             response.raise_for_status()
             return response.text
         except requests.RequestException as e:
@@ -149,12 +135,14 @@ class BacExamScraper:
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
-            response = requests.get(url, headers=headers, timeout=60)
+            response = self.session.get(url, headers=headers, timeout=60, stream=True)
             response.raise_for_status()
-            
+
             with open(target_path, 'wb') as f:
-                f.write(response.content)
-            
+                for chunk in response.iter_content(chunk_size=1024 * 1024):
+                    if chunk:
+                        f.write(chunk)
+
             print(f"Downloaded: {target_path.name}")
             return True
         except requests.RequestException as e:
@@ -251,30 +239,13 @@ class BacExamScraper:
 
     def _auth_header(self) -> dict:
         """Build a Bearer Authorization header using the upload password."""
-        import base64
-        token = base64.b64encode(f"scraper:{self.upload_password}".encode()).decode()
-        return {'Authorization': f'Bearer {token}'}
-
-    def trigger_deploy(self) -> None:
-        """Trigger a Cloudflare Pages deploy via the worker API."""
-        try:
-            response = requests.post(
-                f"{self.worker_url}/trigger-deploy",
-                headers=self._auth_header(),
-                timeout=30,
-            )
-            if response.ok:
-                print("Deploy triggered successfully.")
-            else:
-                print(f"Deploy trigger failed ({response.status_code}): {response.text}")
-        except requests.RequestException as e:
-            print(f"Deploy trigger error: {e}")
+        return build_bearer_auth_header('scraper', self.upload_password)
 
     def upload_to_r2(self, pdf_path: Path, r2_key: str) -> bool:
         """Upload a PDF file to R2 via the worker API."""
         try:
             with open(pdf_path, 'rb') as f:
-                response = requests.post(
+                response = self.session.post(
                     f"{self.worker_url}/upload-scraper",
                     headers=self._auth_header(),
                     files={'file': (pdf_path.name, f, 'application/pdf')},
@@ -443,10 +414,6 @@ class BacExamScraper:
         # Save updated seen URLs
         self.save_seen_urls()
 
-        # Trigger a deploy only once, after all uploads are done
-        if self.upload_enabled and zips_count > 0:
-            self.trigger_deploy()
-        
         return zips_count
 
 

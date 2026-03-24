@@ -6,37 +6,47 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
 show_usage() {
-    cat <<'EOF'
+        cat <<'EOF'
 Unified runner for BAC scraper tools.
 
 Interactive mode:
-  ./run.sh
+    ./run.sh
 
 Subcommands:
-  ./run.sh scrape [options]
-  ./run.sh upload [options]
-
-Legacy compatibility (defaults to scrape):
-  ./run.sh -y 2026 -u
+    ./run.sh scrape [options]
+    ./run.sh upload [options]
+    ./run.sh cleanup-index [options]
+    ./run.sh deploy [options]
 
 Global options:
-  --skip-install         Skip venv/dependency setup
-  -h, --help             Show this help
+    --skip-install         Skip venv/dependency setup
+    -h, --help             Show this help
 
 Scrape options:
-  -y, --year YEAR        Year to scrape (default: current year)
-  -u, --upload           Upload to R2 (default: save locally in ./files)
-  -w, --worker-url URL   Override worker URL
-  -p, --password PASS    Override upload password
+    -y, --year YEAR        Year to scrape (default: current year)
+    -u, --upload           Upload to R2 (default: save locally in ./files)
+    -w, --worker-url URL   Override worker URL
+    -p, --password PASS    Override upload password
 
 Upload options:
-  --files PATH [PATH..]  Files or folders to upload (default: ./files in interactive mode)
-  -b, --base-dir DIR     Base dir used to derive R2 keys (default: ./files)
-  -k, --key KEY          Explicit R2 key (single-file only)
-  --deploy               Trigger deploy after successful uploads
-  --dry-run              Print planned uploads only (no API calls)
-  -w, --worker-url URL   Override worker URL
-  -p, --password PASS    Override upload password
+    --files PATH [PATH..]  Files or folders to upload (default: ./files in interactive mode)
+    -b, --base-dir DIR     Base dir used to derive R2 keys (default: ./files)
+    -k, --key KEY          Explicit R2 key (single-file only)
+    --deploy               Trigger deploy after successful uploads
+    --dry-run              Print planned uploads only (no API calls)
+    -w, --worker-url URL   Override worker URL
+    -p, --password PASS    Override upload password
+
+Cleanup Index options:
+    --dry-run              Only compute cleanup stats (do not write index.json)
+    --timeout SECONDS      HTTP timeout in seconds (default: 300)
+    -w, --worker-url URL   Override worker URL
+    -p, --password PASS    Override upload password
+
+Deploy options:
+    --timeout SECONDS      HTTP timeout in seconds (default: 120)
+    -w, --worker-url URL   Override worker URL
+    -p, --password PASS    Override upload password
 EOF
 }
 
@@ -121,15 +131,56 @@ run_upload() {
     "${cmd[@]}"
 }
 
+run_cleanup_index() {
+    local cmd=(python cleanup_index.py)
+
+    if [[ -n "$CLEANUP_WORKER_URL" ]]; then
+        cmd+=(--worker-url "$CLEANUP_WORKER_URL")
+    fi
+    if [[ -n "$CLEANUP_PASSWORD" ]]; then
+        cmd+=(--password "$CLEANUP_PASSWORD")
+    fi
+    if [[ "$CLEANUP_DRY_RUN" -eq 1 ]]; then
+        cmd+=(--dry-run)
+    fi
+    if [[ "$CLEANUP_TIMEOUT" -gt 0 ]]; then
+        cmd+=(--timeout "$CLEANUP_TIMEOUT")
+    fi
+
+    echo "🚀 Running cleanup-index..."
+    "${cmd[@]}"
+}
+
+run_deploy() {
+    local cmd=(python trigger_deploy.py)
+
+    if [[ -n "$DEPLOY_WORKER_URL" ]]; then
+        cmd+=(--worker-url "$DEPLOY_WORKER_URL")
+    fi
+    if [[ -n "$DEPLOY_PASSWORD" ]]; then
+        cmd+=(--password "$DEPLOY_PASSWORD")
+    fi
+    if [[ "$DEPLOY_TIMEOUT" -gt 0 ]]; then
+        cmd+=(--timeout "$DEPLOY_TIMEOUT")
+    fi
+
+    echo "🚀 Running deploy..."
+    "${cmd[@]}"
+}
+
 interactive_select_mode() {
     echo "Select action:"
     echo "  1) Scrape subiecte.edu.ro"
     echo "  2) Upload local PDFs"
-    read -r -p "Choice [1/2]: " choice
+    echo "  3) Cleanup worker index"
+    echo "  4) Trigger deploy"
+    read -r -p "Choice [1/2/3/4]: " choice
 
     case "${choice:-1}" in
         1) MODE="scrape" ;;
         2) MODE="upload" ;;
+        3) MODE="cleanup-index" ;;
+        4) MODE="deploy" ;;
         *)
             echo "Invalid choice: $choice"
             exit 1
@@ -184,6 +235,33 @@ interactive_upload_options() {
     UPLOAD_PASSWORD="${input_password:-}"
 }
 
+interactive_cleanup_index_options() {
+    read -r -p "Dry run only? [Y/n]: " input_dry
+    if [[ -z "$input_dry" || "${input_dry,,}" =~ ^(y|yes)$ ]]; then
+        CLEANUP_DRY_RUN=1
+    fi
+
+    read -r -p "HTTP timeout in seconds [300]: " input_timeout
+    CLEANUP_TIMEOUT="${input_timeout:-300}"
+
+    read -r -p "Custom worker URL (optional): " input_worker
+    CLEANUP_WORKER_URL="${input_worker:-}"
+
+    read -r -p "Custom password (optional): " input_password
+    CLEANUP_PASSWORD="${input_password:-}"
+}
+
+interactive_deploy_options() {
+    read -r -p "HTTP timeout in seconds [120]: " input_timeout
+    DEPLOY_TIMEOUT="${input_timeout:-120}"
+
+    read -r -p "Custom worker URL (optional): " input_worker
+    DEPLOY_WORKER_URL="${input_worker:-}"
+
+    read -r -p "Custom password (optional): " input_password
+    DEPLOY_PASSWORD="${input_password:-}"
+}
+
 # Defaults
 MODE=""
 SKIP_INSTALL=0
@@ -201,18 +279,29 @@ UPLOAD_DRY_RUN=0
 UPLOAD_WORKER_URL=""
 UPLOAD_PASSWORD=""
 
+CLEANUP_WORKER_URL=""
+CLEANUP_PASSWORD=""
+CLEANUP_DRY_RUN=0
+CLEANUP_TIMEOUT=300
+
+DEPLOY_WORKER_URL=""
+DEPLOY_PASSWORD=""
+DEPLOY_TIMEOUT=120
+
 # Mode detection
 if [[ $# -eq 0 ]]; then
     MODE="interactive"
-elif [[ "$1" == "scrape" || "$1" == "upload" ]]; then
+elif [[ "$1" == "scrape" || "$1" == "upload" || "$1" == "cleanup-index" || "$1" == "deploy" ]]; then
     MODE="$1"
     shift
 elif [[ "$1" == "-h" || "$1" == "--help" ]]; then
     show_usage
     exit 0
 else
-    # Legacy mode: assume scrape options without explicit subcommand
-    MODE="scrape"
+    echo "Unknown command: $1"
+    echo
+    show_usage
+    exit 1
 fi
 
 # Parse args
@@ -241,6 +330,10 @@ while [[ $# -gt 0 ]]; do
         -w|--worker-url)
             if [[ "$MODE" == "upload" ]]; then
                 UPLOAD_WORKER_URL="${2:-}"
+            elif [[ "$MODE" == "cleanup-index" ]]; then
+                CLEANUP_WORKER_URL="${2:-}"
+            elif [[ "$MODE" == "deploy" ]]; then
+                DEPLOY_WORKER_URL="${2:-}"
             else
                 SCRAPE_WORKER_URL="${2:-}"
             fi
@@ -249,6 +342,10 @@ while [[ $# -gt 0 ]]; do
         -p|--password)
             if [[ "$MODE" == "upload" ]]; then
                 UPLOAD_PASSWORD="${2:-}"
+            elif [[ "$MODE" == "cleanup-index" ]]; then
+                CLEANUP_PASSWORD="${2:-}"
+            elif [[ "$MODE" == "deploy" ]]; then
+                DEPLOY_PASSWORD="${2:-}"
             else
                 SCRAPE_PASSWORD="${2:-}"
             fi
@@ -276,8 +373,28 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --dry-run)
-            UPLOAD_DRY_RUN=1
+            if [[ "$MODE" == "cleanup-index" ]]; then
+                CLEANUP_DRY_RUN=1
+            elif [[ "$MODE" == "upload" ]]; then
+                UPLOAD_DRY_RUN=1
+            else
+                echo "--dry-run is only supported for upload and cleanup-index"
+                exit 1
+            fi
             shift
+            ;;
+
+        # Cleanup index args
+        --timeout)
+            if [[ "$MODE" == "cleanup-index" ]]; then
+                CLEANUP_TIMEOUT="${2:-300}"
+            elif [[ "$MODE" == "deploy" ]]; then
+                DEPLOY_TIMEOUT="${2:-120}"
+            else
+                echo "--timeout is only supported for cleanup-index and deploy"
+                exit 1
+            fi
+            shift 2
             ;;
 
         # Positional inputs for upload mode are treated as files
@@ -301,8 +418,12 @@ if [[ "$MODE" == "interactive" ]]; then
     interactive_select_mode
     if [[ "$MODE" == "scrape" ]]; then
         interactive_scrape_options
-    else
+    elif [[ "$MODE" == "upload" ]]; then
         interactive_upload_options
+    elif [[ "$MODE" == "cleanup-index" ]]; then
+        interactive_cleanup_index_options
+    else
+        interactive_deploy_options
     fi
 fi
 
@@ -313,6 +434,10 @@ if [[ "$MODE" == "scrape" ]]; then
     run_scrape
 elif [[ "$MODE" == "upload" ]]; then
     run_upload
+elif [[ "$MODE" == "cleanup-index" ]]; then
+    run_cleanup_index
+elif [[ "$MODE" == "deploy" ]]; then
+    run_deploy
 else
     echo "Unknown mode: $MODE"
     exit 1

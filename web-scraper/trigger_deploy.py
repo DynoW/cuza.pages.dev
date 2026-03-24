@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Clean stale entries from worker index.json by validating keys against R2."""
+"""Trigger Cloudflare Pages deploy via worker endpoint."""
 
 import argparse
 import json
@@ -19,8 +19,14 @@ def main() -> int:
     script_dir = Path(__file__).resolve().parent
     load_local_env(script_dir / '.env')
 
+    default_password = (
+        os.environ.get('UPLOAD_PASSWORD')
+        or os.environ.get('WORKER_UPLOAD_PASSWORD')
+        or ''
+    )
+
     parser = argparse.ArgumentParser(
-        description='Prune stale keys from worker index.json (keys that no longer exist in R2).',
+        description='Trigger deploy through worker /trigger-deploy endpoint.',
     )
     parser.add_argument(
         '--worker-url',
@@ -31,19 +37,14 @@ def main() -> int:
     parser.add_argument(
         '--password',
         '-p',
-        default=os.environ.get('UPLOAD_PASSWORD', ''),
+        default=default_password,
         help='Upload password for authenticated worker routes',
-    )
-    parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Only compute cleanup stats; do not write cleaned index.json',
     )
     parser.add_argument(
         '--timeout',
         type=int,
-        default=300,
-        help='HTTP timeout in seconds (default: 300)',
+        default=120,
+        help='HTTP timeout in seconds (default: 120)',
     )
 
     args = parser.parse_args()
@@ -53,9 +54,7 @@ def main() -> int:
         return 1
 
     worker_url = args.worker_url.rstrip('/')
-    endpoint = f"{worker_url}/cleanup-index"
-    if args.dry_run:
-        endpoint = f"{endpoint}?dryRun=true"
+    endpoint = f"{worker_url}/trigger-deploy"
 
     headers = {
         **build_auth_header(args.password),
@@ -68,17 +67,17 @@ def main() -> int:
         session = create_retry_session()
         response = session.post(endpoint, headers=headers, timeout=args.timeout)
     except requests.RequestException as exc:
-        print(f'Cleanup request failed: {exc}')
+        print(f'Deploy request failed: {exc}')
         return 1
 
     if response.status_code != 200:
-        print(f'Cleanup failed with status {response.status_code}: {response.text}')
+        print(f'Deploy failed with status {response.status_code}: {response.text}')
         return 1
 
     try:
         payload = response.json()
     except ValueError:
-        print('Cleanup response is not valid JSON:')
+        print('Deploy response is not valid JSON:')
         print(response.text)
         return 1
 
