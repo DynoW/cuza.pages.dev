@@ -11,13 +11,13 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/react": "^4.4.2",
+    "@astrojs/react": "^5.0.1",
     "@astrojs/sitemap": "^3.7.1",
     "@excalidraw/excalidraw": "^0.18.0",
     "@tailwindcss/vite": "^4.1.18",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "astro": "^5.18.1",
+    "astro": "^6.0.8",
     "astro-compress": "^2.3.8",
     "astro-seo": "^0.8.4",
     "framer-motion": "^12.33.0",
