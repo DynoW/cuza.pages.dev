@@ -13,35 +13,29 @@ interface Props {
   years?: number[];
 }
 
-const { 
-  subject, 
-  page,
-  extraData,
-  years,
-} = Astro.props;
+const { subject, page, extraData, years } = Astro.props;
 
 const isAdmitere = subject === "admitere";
 ---
 
 <p class="text-lg font-bold text-white">Extra</p>
 {
-    (subject === "admitere" && page === "fizica") ||
-    subject === "fizica" ? (
-        <a
-        class="extra-link"
-        href="https://drive.google.com/drive/folders/1RUHqNmCLyEN-FV3IXjw_aIpZEaE-qJWq?usp=sharing"
-        target="_blank"
-        >
-        Culegeri fizică
-        </a>
-    ) : null
+  (subject === "admitere" && page === "fizica") || subject === "fizica" ? (
+    <a
+      class="extra-link"
+      href="https://drive.google.com/drive/folders/1RUHqNmCLyEN-FV3IXjw_aIpZEaE-qJWq?usp=sharing"
+      target="_blank"
+    >
+      Culegeri fizică
+    </a>
+  ) : null
 }
 {
-    isAdmitere ? (
-        <List subject="admitere" page={`${page}/extra`} data={extraData} />
-    ) : (
-        <List subject={subject} page="extra" data={extraData} />
-    )
+  isAdmitere ? (
+    <List subject="admitere" page={`${page}/extra`} content={extraData} />
+  ) : (
+    <List subject={subject} page="extra" content={extraData} />
+  )
 }
 
 <Shortcuts subject={subject} page={page} years={years} />

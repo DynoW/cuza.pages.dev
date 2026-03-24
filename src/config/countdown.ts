@@ -27,7 +27,7 @@ export const countdownConfig = {
     startDate: "June 29, 2026 09:00:00",
     endDate: "July 2, 2026 12:00:00",
   },
-  
+
   // Admitere dates
   admitere: {
     title: "Admitere UPB 2026",
@@ -43,7 +43,7 @@ export const countdownConfig = {
   },
 } as const;
 
-const currentExam = 'simulare_bac';
+const currentExam = "simulare_bac";
 
 // Default config type
 export type ExamType = keyof typeof countdownConfig;

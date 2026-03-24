@@ -1,32 +1,35 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Daniel C. (DynoW) — https://github.com/DynoW/cuza.pages.dev
 
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { type Bindings, registerRoutes } from './app';
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { type Bindings, registerRoutes } from "./app";
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-app.use('*', async (c, next) => {
-  if (c.req.method === 'POST') {
-    const ip = c.req.header('CF-Connecting-IP') ?? 'unknown';
+app.use("*", async (c, next) => {
+  if (c.req.method === "POST") {
+    const ip = c.req.header("CF-Connecting-IP") ?? "unknown";
     const { success } = await c.env.RATE_LIMITER.limit({ key: ip });
-    if (!success) return c.text('Too Many Requests', 429);
+    if (!success) return c.text("Too Many Requests", 429);
   }
   return next();
 });
 
-app.use('*', cors({
-  origin: (origin) => {
-    const allowed = ['https://cuza.pages.dev', 'http://localhost:4321'];
-    return allowed.includes(origin) ? origin : null;
-  },
-  allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
-  exposeHeaders: ['Content-Length'],
-  maxAge: 600,
-  credentials: true,
-}));
+app.use(
+  "*",
+  cors({
+    origin: (origin) => {
+      const allowed = ["https://cuza.pages.dev", "http://localhost:4321"];
+      return allowed.includes(origin) ? origin : null;
+    },
+    allowMethods: ["GET", "POST", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    exposeHeaders: ["Content-Length"],
+    maxAge: 600,
+    credentials: true,
+  }),
+);
 
 registerRoutes(app);
 

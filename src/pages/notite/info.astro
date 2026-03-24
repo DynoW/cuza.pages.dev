@@ -4,9 +4,9 @@ import NewNavbar from "../../components/NewNavbar.astro";
 import Footer from "../../components/Footer.astro";
 import ContentContainer from "../../layouts/ContentContainer.astro";
 import Curs from "../../components/Curs.astro";
-import { getCollection } from 'astro:content';
-const infoCourses = (await getCollection('info')).sort((a, b) =>
-  a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' })
+import { getCollection } from "astro:content";
+const infoCourses = (await getCollection("info")).sort((a, b) =>
+  a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: "base" }),
 );
 ---
 
@@ -27,11 +27,12 @@ const infoCourses = (await getCollection('info')).sort((a, b) =>
             href="https://github.com/search?q=repo%3ADynoW%2FCS-files-storage+%28.md+OR+.excalidraw+NOT+README.md+NOT+C%23%29&type=code"
             target="_blank"
             class="text-slate-300 hover:text-slate-100">aici</a
-          >)</span>
+          >)</span
+        >
       </h1>
       <ul>
         {
-          infoCourses.map(course => {
+          infoCourses.map((course) => {
             return (
               <li class="bg-[#0d1117] rounded-3xl p-5 pr-4 mb-2 max-w-[95vw] select-text">
                 <Curs entry={course} />

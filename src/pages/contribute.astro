@@ -7,36 +7,36 @@ import Content from "../../CONTRIBUTE.md";
 ---
 
 <Layout title="contribuie | cuza.pages.dev" markdown>
-    <ContentContainer>
-        <aside slot="left" class="flex flex-col gap-2 lg:ml-2 lg:mt-2">
-            <NewNavbar />
-        </aside>
-        <div slot="middle" class="flex flex-col gap-2">
-            <div class="bg-[#0d1117] rounded-3xl p-5 pr-2.5 mb-12">
-                <article class="markdown-body">
-                    <Content />
-                </article>
-            </div>
+  <ContentContainer>
+    <aside slot="left" class="flex flex-col gap-2 lg:ml-2 lg:mt-2">
+      <NewNavbar />
+    </aside>
+    <div slot="middle" class="flex flex-col gap-2">
+      <div class="bg-[#0d1117] rounded-3xl p-5 pr-2.5 mb-12">
+        <article class="markdown-body">
+          <Content />
+        </article>
+      </div>
+    </div>
+    <aside
+      slot="right"
+      class="flex flex-col gap-2 md:mt-2 md:mr-2 md:sticky md:top-2 md:right-2"
+    >
+      <div class="bg-[rgba(10,13,16,.9)] rounded-3xl py-5 QR">
+        <div class="mx-5">
+          <span class="text-md text-white"
+            >Scanează codul QR de mai jos pentru a instala aplicația!</span
+          >
+          <img
+            height="150"
+            width="150"
+            class="mx-auto my-4"
+            src="/assets/img/QR-code.png"
+            alt="QR-code"
+          />
         </div>
-        <aside
-            slot="right"
-            class="flex flex-col gap-2 md:mt-2 md:mr-2 md:sticky md:top-2 md:right-2"
-        >
-            <div class="bg-[rgba(10,13,16,.9)] rounded-3xl py-5 QR">
-            <div class="mx-5">
-                <span class="text-md text-white"
-                    >Scanează codul QR de mai jos pentru a instala aplicația!</span
-                >
-                <img
-                    height="150"
-                    width="150"
-                    class="mx-auto my-4"
-                    src="/assets/img/QR-code.png"
-                    alt="QR-code"
-                />
-            </div>
-            </div>
-        </aside>
-    </ContentContainer>
-    <Footer />
+      </div>
+    </aside>
+  </ContentContainer>
+  <Footer />
 </Layout>

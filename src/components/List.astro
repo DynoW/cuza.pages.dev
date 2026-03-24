@@ -1,26 +1,24 @@
 ---
-import type { FileStructure } from '../types';
+import type { FileStructure } from "../types";
 
 const isYearFolder = (key: string): boolean => /^20\d{2}$/.test(key);
-const formatKey = (key: string): string => key.replace(/_/g, ' ');
+const formatKey = (key: string): string => key.replace(/_/g, " ");
 
 const {
   subject,
   page,
-  data,
+  content,
   depth = 0,
   expansionMode = "years",
   isExtra: isExtraProp,
 } = Astro.props as {
   subject: string;
   page: string;
-  data: FileStructure;
+  content: FileStructure;
   depth?: number;
   expansionMode?: "none" | "years" | "all";
   isExtra?: boolean;
 };
-
-const content: FileStructure = data ?? {};
 
 // Use explicit prop in recursive calls, derive from page name at root.
 const isExtra = isExtraProp ?? (page === "extra" || page.endsWith("/extra"));
@@ -28,116 +26,137 @@ const cx = isExtra ? "extra" : "content";
 
 const paddingLeft = `${depth}rem`;
 
-const sortedEntries = Object.entries(content).sort(([keyA, valA], [keyB, valB]) => {
-  const aIsFile = typeof valA === 'string';
-  const bIsFile = typeof valB === 'string';
-  if (aIsFile && bIsFile) {
-    const matchA = keyA.match(/_(var|bar)_(\d{2})/i);
-    const matchB = keyB.match(/_(var|bar)_(\d{2})/i);
-    if (matchA && matchB) {
-      const numDiff = parseInt(matchA[2]) - parseInt(matchB[2]);
-      if (numDiff !== 0) return numDiff;
-      const typeA = matchA[1].toLowerCase() === 'var' ? 0 : 1;
-      const typeB = matchB[1].toLowerCase() === 'var' ? 0 : 1;
-      return typeA - typeB;
+const sortedEntries = Object.entries(content).sort(
+  ([keyA, valA], [keyB, valB]) => {
+    const aIsFile = typeof valA === "string";
+    const bIsFile = typeof valB === "string";
+    if (aIsFile && bIsFile) {
+      const matchA = keyA.match(/_(var|bar)_(\d{2})/i);
+      const matchB = keyB.match(/_(var|bar)_(\d{2})/i);
+      if (matchA && matchB) {
+        const numDiff = parseInt(matchA[2]) - parseInt(matchB[2]);
+        if (numDiff !== 0) return numDiff;
+        const typeA = matchA[1].toLowerCase() === "var" ? 0 : 1;
+        const typeB = matchB[1].toLowerCase() === "var" ? 0 : 1;
+        return typeA - typeB;
+      }
     }
-  }
-  return keyB.localeCompare(keyA);
-});
+    return keyB.localeCompare(keyA);
+  },
+);
 ---
 
 <div class="w-full" id={`content-${subject}-${page.replace("/", "-")}`}>
   <div>
     {
-       Object.keys(content).length > 0 ? (
+      Object.keys(content).length > 0 ? (
         <ul class={`${cx}-list`} style={`padding-left: ${paddingLeft}`}>
-          {
-            sortedEntries.map(([key, value]) => {
-              if (typeof value === "string") {
-                // It's a file
-                return (
-                  <li>
-                    <a
-                      class={`${cx}-link flex items-center break-normal`}
-                      href={`https://cuza.pages.dev/api/file/${value}`}
-                      target="_blank"
-                      rel="noopener"
-                      aria-label={`Open ${key} in new tab`}
-                      data-umami-event="download_file"
-                      data-umami-file-path={value}
-                      data-umami-subject={subject}
-                      data-umami-page={page}
-                    >
-                      {!isExtra && (
-                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
-                          <path fill="currentColor" d="M8 10a1 1 0 100-2 1 1 0 000 2zm0 2a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1z" />
-                        </svg>
-                      )}
-                      {key.split('_').map((part, i, arr) => (
-                        <Fragment>
-                          {part}{i < arr.length - 1 && <>&#8203;_</>}
-                        </Fragment>
-                      ))}
-                    </a>
-                  </li>
-                );
-              } else if (typeof value === "object" && value !== null) {
-                // It's a directory
-                const isYear = isYearFolder(key);
-                const showDivider = depth === 1 && key === Object.keys(content)[Object.keys(content).length - 1];
-                const folderId = `folder-${subject}-${page}-${key}-${depth}`;
-                
-                // Determine if folder should be expanded by default
-                const shouldBeExpanded = expansionMode === "all" || (expansionMode === "years" && isYear);
-                const arrowRotation = shouldBeExpanded ? "rotate(90deg)" : "rotate(0deg)";
-                const displayStyle = shouldBeExpanded ? "display: block;" : "display: none;";
-                
-                return (
-                  <li class="space-y-2" id={isYear ? key : undefined}>
-                    {showDivider && <hr class="border-black m-2" />} {/* dark-reader: border-zinc-400 */}
-                    <div class="folder-container">
-                      <div 
-                        class={`${cx}-text flex items-center cursor-pointer folder-toggle`}
-                        data-folder-id={folderId}
-                        data-folder-type={isYear ? "year" : "folder"}
-                        data-expanded={shouldBeExpanded ? "true" : "false"}
+          {sortedEntries.map(([key, value]) => {
+            if (typeof value === "string") {
+              // It's a file
+              return (
+                <li>
+                  <a
+                    class={`${cx}-link flex items-center break-normal`}
+                    href={`https://cuza.pages.dev/api/file/${value}`}
+                    target="_blank"
+                    rel="noopener"
+                    aria-label={`Open ${key} in new tab`}
+                    data-umami-event="download_file"
+                    data-umami-file-path={value}
+                    data-umami-subject={subject}
+                    data-umami-page={page}
+                  >
+                    {!isExtra && (
+                      <svg
+                        class="w-5 h-5 mr-2"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
                       >
+                        <path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+                        <path
+                          fill="currentColor"
+                          d="M8 10a1 1 0 100-2 1 1 0 000 2zm0 2a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1z"
+                        />
+                      </svg>
+                    )}
+                    {key.split("_").map((part, i, arr) => (
+                      <Fragment>
+                        {part}
+                        {i < arr.length - 1 && <>&#8203;_</>}
+                      </Fragment>
+                    ))}
+                  </a>
+                </li>
+              );
+            } else if (typeof value === "object" && value !== null) {
+              // It's a directory
+              const isYear = isYearFolder(key);
+              const showDivider =
+                depth === 1 &&
+                key === Object.keys(content)[Object.keys(content).length - 1];
+              const folderId = `folder-${subject}-${page}-${key}-${depth}`;
+
+              // Determine if folder should be expanded by default
+              const shouldBeExpanded =
+                expansionMode === "all" ||
+                (expansionMode === "years" && isYear);
+              const arrowRotation = shouldBeExpanded
+                ? "rotate(90deg)"
+                : "rotate(0deg)";
+              const displayStyle = shouldBeExpanded
+                ? "display: block;"
+                : "display: none;";
+
+              return (
+                <li class="space-y-2" id={isYear ? key : undefined}>
+                  {showDivider && <hr class="border-black m-2" />}{" "}
+                  {/* dark-reader: border-zinc-400 */}
+                  <div class="folder-container">
+                    <div
+                      class={`${cx}-text flex items-center cursor-pointer folder-toggle`}
+                      data-folder-id={folderId}
+                      data-folder-type={isYear ? "year" : "folder"}
+                      data-expanded={shouldBeExpanded ? "true" : "false"}
+                    >
+                      <svg
+                        class="w-5 h-5 mr-2 transition-transform duration-200 folder-arrow"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        style={`transform: ${arrowRotation}`}
+                      >
+                        <path d="M6 6L14 10L6 14V6Z" />
+                      </svg>
+                      <div class="flex items-center">
                         <svg
-                          class="w-5 h-5 mr-2 transition-transform duration-200 folder-arrow"
+                          class="w-5 h-5 mr-1"
                           fill="currentColor"
                           viewBox="0 0 20 20"
-                          style={`transform: ${arrowRotation}`}
                         >
-                          <path d="M6 6L14 10L6 14V6Z" />
+                          <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
                         </svg>
-                        <div class="flex items-center">
-                          <svg class="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-                          </svg>
-                          <span>{formatKey(key)}</span>
-                        </div>
-                      </div>
-                      <div 
-                        id={folderId}
-                        class="folder-content mt-2"
-                        style={displayStyle}
-                      >
-                        <Astro.self 
-                          subject={subject} 
-                          page={key}
-                          data={value}
-                          depth={depth + 1}
-                          expansionMode={expansionMode}
-                          isExtra={isExtra}
-                        />
+                        <span>{formatKey(key)}</span>
                       </div>
                     </div>
-                  </li>
-                );
-              }
-            })
-          }
+                    <div
+                      id={folderId}
+                      class="folder-content mt-2"
+                      style={displayStyle}
+                    >
+                      <Astro.self
+                        subject={subject}
+                        page={key}
+                        data={value}
+                        depth={depth + 1}
+                        expansionMode={expansionMode}
+                        isExtra={isExtra}
+                      />
+                    </div>
+                  </div>
+                </li>
+              );
+            }
+          })}
         </ul>
       ) : (
         <p
@@ -146,21 +165,26 @@ const sortedEntries = Object.entries(content).sort(([keyA, valA], [keyB, valB]) 
           data-track-event={depth === 0 ? "no_content_shown" : undefined}
           data-track-subject={depth === 0 ? subject : undefined}
           data-track-page={depth === 0 ? page : undefined}
-        >Fără conținut</p>
+        >
+          Fără conținut
+        </p>
       )
     }
   </div>
 </div>
 
 <script>
-  function trackUmami(eventName: string, eventData?: Record<string, unknown>): void {
+  function trackUmami(
+    eventName: string,
+    eventData?: Record<string, unknown>,
+  ): void {
     if (!import.meta.env.PROD) return;
     try {
       const umami = (window as any).umami;
       if (umami) {
-        if (typeof umami.track === 'function') {
+        if (typeof umami.track === "function") {
           umami.track(eventName, eventData);
-        } else if (typeof umami.trackEvent === 'function') {
+        } else if (typeof umami.trackEvent === "function") {
           umami.trackEvent(eventName, eventData);
         }
       }
@@ -170,62 +194,74 @@ const sortedEntries = Object.entries(content).sort(([keyA, valA], [keyB, valB]) 
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const savedMode = localStorage.getItem('folderExpansionMode') || 'years';
+    const savedMode = localStorage.getItem("folderExpansionMode") || "years";
 
     applyExpansionMode(savedMode);
 
-    document.querySelectorAll<HTMLElement>('[data-track-event]').forEach((el) => {
-      const event = el.getAttribute('data-track-event')!;
-      const subject = el.getAttribute('data-track-subject') ?? '';
-      const page = el.getAttribute('data-track-page') ?? '';
-      const error = el.getAttribute('data-track-error');
-      const data: Record<string, unknown> = { subject, page };
-      if (error) data.error = error;
-      trackUmami(event, data);
-    });
+    document
+      .querySelectorAll<HTMLElement>("[data-track-event]")
+      .forEach((el) => {
+        const event = el.getAttribute("data-track-event")!;
+        const subject = el.getAttribute("data-track-subject") ?? "";
+        const page = el.getAttribute("data-track-page") ?? "";
+        const error = el.getAttribute("data-track-error");
+        const data: Record<string, unknown> = { subject, page };
+        if (error) data.error = error;
+        trackUmami(event, data);
+      });
 
-    document.querySelectorAll<HTMLAnchorElement>('a[data-umami-event="download_file"]').forEach((link) => {
-      link.addEventListener('click', () => {
-        trackUmami('download_file', {
-          filePath: link.getAttribute('data-umami-file-path') ?? '',
-          subject: link.getAttribute('data-umami-subject') ?? '',
-          page: link.getAttribute('data-umami-page') ?? '',
+    document
+      .querySelectorAll<HTMLAnchorElement>(
+        'a[data-umami-event="download_file"]',
+      )
+      .forEach((link) => {
+        link.addEventListener("click", () => {
+          trackUmami("download_file", {
+            filePath: link.getAttribute("data-umami-file-path") ?? "",
+            subject: link.getAttribute("data-umami-subject") ?? "",
+            page: link.getAttribute("data-umami-page") ?? "",
+          });
         });
       });
-    });
 
-    document.querySelectorAll<HTMLElement>('.folder-toggle').forEach((toggle) => {
-      toggle.addEventListener('click', () => {
-        const isExpanded = toggle.getAttribute('data-expanded') === 'true';
-        setFolder(toggle, !isExpanded);
-        trackUmami(isExpanded ? 'folder_close' : 'folder_open', {
-          folder: toggle.getAttribute('data-folder-id'),
-          type: toggle.getAttribute('data-folder-type'),
+    document
+      .querySelectorAll<HTMLElement>(".folder-toggle")
+      .forEach((toggle) => {
+        toggle.addEventListener("click", () => {
+          const isExpanded = toggle.getAttribute("data-expanded") === "true";
+          setFolder(toggle, !isExpanded);
+          trackUmami(isExpanded ? "folder_close" : "folder_open", {
+            folder: toggle.getAttribute("data-folder-id"),
+            type: toggle.getAttribute("data-folder-type"),
+          });
         });
       });
-    });
 
-    window.addEventListener('expansionModeChanged', (event) => {
+    window.addEventListener("expansionModeChanged", (event) => {
       const { mode } = (event as CustomEvent).detail;
       applyExpansionMode(mode);
-      trackUmami('expansion_mode_changed', { mode });
+      trackUmami("expansion_mode_changed", { mode });
     });
 
     function setFolder(toggle: HTMLElement, open: boolean): void {
-      const folderContent = document.getElementById(toggle.getAttribute('data-folder-id')!);
-      const arrow = toggle.querySelector<HTMLElement>('.folder-arrow');
+      const folderContent = document.getElementById(
+        toggle.getAttribute("data-folder-id")!,
+      );
+      const arrow = toggle.querySelector<HTMLElement>(".folder-arrow");
       if (!folderContent || !arrow) return;
-      folderContent.style.display = open ? 'block' : 'none';
-      arrow.style.transform = open ? 'rotate(90deg)' : 'rotate(0deg)';
-      toggle.setAttribute('data-expanded', String(open));
+      folderContent.style.display = open ? "block" : "none";
+      arrow.style.transform = open ? "rotate(90deg)" : "rotate(0deg)";
+      toggle.setAttribute("data-expanded", String(open));
     }
 
     function applyExpansionMode(mode: string): void {
-      document.querySelectorAll<HTMLElement>('.folder-toggle').forEach((toggle) => {
-        const isYear = toggle.getAttribute('data-folder-type') === 'year';
-        const open = mode === 'all' || (mode === 'years' && isYear);
-        setFolder(toggle, open);
-      });
+      document
+        .querySelectorAll<HTMLElement>(".folder-toggle")
+        .forEach((toggle) => {
+          const isYear = toggle.getAttribute("data-folder-type") === "year";
+          const open = mode === "all" || (mode === "years" && isYear);
+          setFolder(toggle, open);
+        });
     }
   });
 </script>
@@ -235,7 +271,7 @@ const sortedEntries = Object.entries(content).sort(([keyA, valA], [keyB, valB]) 
   .folder-arrow {
     transition: transform 0.2s ease;
   }
-  
+
   /* Hover effect */
   .folder-toggle:hover {
     opacity: 0.8;

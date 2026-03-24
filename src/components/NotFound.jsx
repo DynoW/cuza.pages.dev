@@ -34,7 +34,10 @@ export default function NotFound() {
         {/* Decorative background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-amber-500/20 blur-[50px] rounded-full pointer-events-none" />
 
-        <motion.div variants={itemVariants} className="flex justify-center mb-6">
+        <motion.div
+          variants={itemVariants}
+          className="flex justify-center mb-6"
+        >
           <div className="p-4 bg-white/5 rounded-full">
             <Ghost className="w-12 h-12 text-amber-300" />
           </div>
@@ -65,7 +68,8 @@ export default function NotFound() {
           variants={itemVariants}
           className="text-lg text-gray-400 mb-8 leading-relaxed"
         >
-          Ne pare rău, pagina pe care o cauți s-a rătăcit în spațiu sau nu mai există.
+          Ne pare rău, pagina pe care o cauți s-a rătăcit în spațiu sau nu mai
+          există.
         </motion.p>
 
         <motion.div variants={itemVariants}>

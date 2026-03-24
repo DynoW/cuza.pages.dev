@@ -1,12 +1,13 @@
-import type { PageData } from './types';
+import type { PageData } from "./types";
 
-const DEFAULT_WORKER_URL = 'https://api.my-lab.ro';
+const DEFAULT_WORKER_URL = "https://api.my-lab.ro";
 
 export class ApiService {
   private readonly baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = (baseUrl ?? import.meta.env.PUBLIC_WORKER_URL) || DEFAULT_WORKER_URL;
+    this.baseUrl =
+      (baseUrl ?? import.meta.env.PUBLIC_WORKER_URL) || DEFAULT_WORKER_URL;
   }
 
   private async fetchJson<T>(url: string): Promise<T | null> {
@@ -17,7 +18,7 @@ export class ApiService {
       }
       return await response.json();
     } catch (error) {
-      console.warn('API fetch failed:', error);
+      console.warn("API fetch failed:", error);
       return null;
     }
   }
@@ -38,11 +39,11 @@ export class ApiService {
     return this.structureCache;
   }
 
-//   async searchFiles(query: string): Promise<string[]> {
-//     const url = `${this.baseUrl}/files?q=${encodeURIComponent(query)}`;
-//     const response = await this.fetchJson<{ files: string[] }>(url);
-//     return response?.files || [];
-//   }
+  //   async searchFiles(query: string): Promise<string[]> {
+  //     const url = `${this.baseUrl}/files?q=${encodeURIComponent(query)}`;
+  //     const response = await this.fetchJson<{ files: string[] }>(url);
+  //     return response?.files || [];
+  //   }
 }
 
 export const apiService = new ApiService();

@@ -132,21 +132,9 @@ const isUploadEnabled = !!workerUrl;
             <label for="file" class="font-bold">Selectează PDF:</label>
             <input type="file" id="file" name="file" accept="application/pdf" required class="p-2 border border-gray-300 rounded" />
 
-            <style>
-                /* Style the native file input button where supported */
-                input[type=file]::-webkit-file-upload-button {
-                    background-color: #3b82f6; /* blue-500 */
-                    color: white;
-                    border: none;
-                    padding: 0.5rem 0.75rem;
-                    margin-right: 0.5rem;
-                    border-radius: 0.375rem; /* rounded */
-                    cursor: pointer;
-                }
-
-                /* Newer spec */
-                input[type=file]::file-selector-button {
-                    background-color: #3b82f6;
+            <style is:global>
+                input[type="file"]::-webkit-file-upload-button {
+                    background-color: rgb(59, 130, 246);
                     color: white;
                     border: none;
                     padding: 0.5rem 0.75rem;
@@ -155,8 +143,17 @@ const isUploadEnabled = !!workerUrl;
                     cursor: pointer;
                 }
 
-                /* Keep the rest of the input looking consistent */
-                input[type=file] {
+                input[type="file"]::file-selector-button {
+                    background-color: rgb(59, 130, 246);
+                    color: white;
+                    border: none;
+                    padding: 0.5rem 0.75rem;
+                    margin-right: 0.5rem;
+                    border-radius: 0.375rem;
+                    cursor: pointer;
+                }
+
+                input[type="file"] {
                     display: inline-block;
                 }
             </style>

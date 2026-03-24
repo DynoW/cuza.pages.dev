@@ -6,23 +6,17 @@ interface Props {
   years?: number[];
 }
 
-const { subject, page, years: propYears } = Astro.props;
-
-let availableYears: number[] = [];
-
-if (propYears !== undefined) {
-  availableYears = propYears;
-}
+const { subject, page, years: availableYears = [] } = Astro.props;
 ---
 
 <div class="shortcuts-container">
   <p class="text-lg font-bold text-white">Accesare rapidă</p>
-  
+
   {
     availableYears.length > 0 ? (
       <div class="shortcuts-grid">
         {availableYears.map((year) => (
-          <a 
+          <a
             href={`#${year}`}
             class="shortcut-button"
             title={`Salt la documentele din ${year}`}
@@ -32,9 +26,7 @@ if (propYears !== undefined) {
         ))}
       </div>
     ) : (
-      <p class="text-slate-400">
-        Niciun an disponibil
-      </p>
+      <p class="text-slate-400">Niciun an disponibil</p>
     )
   }
 </div>

@@ -38,9 +38,11 @@ const month = new Date().getMonth();
 let backgroundStyle = "";
 
 if (month === 11) {
-  backgroundStyle = 'background: url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d, #cc3333); background-attachment: fixed;';
+  backgroundStyle =
+    'background: url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d, #cc3333); background-attachment: fixed;';
 } else if (month === 2 || month === 3) {
-  backgroundStyle = 'background: url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2); background-attachment: fixed;';
+  backgroundStyle =
+    'background: url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2); background-attachment: fixed;';
 }
 ---
 
@@ -79,7 +81,7 @@ if (month === 11) {
         title: title,
         description: description,
         image: "https://cuza.pages.dev/assets/img/site-img.png",
-        imageAlt: "Preview cuza.pages.dev"
+        imageAlt: "Preview cuza.pages.dev",
       }}
       extend={{
         link: [
@@ -180,7 +182,8 @@ if (month === 11) {
         "@type": "WebSite",
         name: "Mate-fizica",
         url: "https://cuza.pages.dev",
-        description: "Subiecte de bac și admitere UPB la fizică, matematică și informatică. Liceul Teoretic Alexandru Ioan Cuza, București",
+        description:
+          "Subiecte de bac și admitere UPB la fizică, matematică și informatică. Liceul Teoretic Alexandru Ioan Cuza, București",
         inLanguage: "ro",
         publisher: {
           "@type": "EducationalOrganization",
@@ -197,12 +200,14 @@ if (month === 11) {
           set:html={JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
-            itemListElement: breadcrumbs.map((crumb: { name: string; url: string }, index: number) => ({
-              "@type": "ListItem",
-              position: index + 1,
-              name: crumb.name,
-              item: crumb.url,
-            })),
+            itemListElement: breadcrumbs.map(
+              (crumb: { name: string; url: string }, index: number) => ({
+                "@type": "ListItem",
+                position: index + 1,
+                name: crumb.name,
+                item: crumb.url,
+              }),
+            ),
           })}
         />
       )
@@ -274,7 +279,7 @@ if (month === 11) {
     <script>
       // Background update
       const backgroundImageElement = document.querySelector(
-        ".backgroundImage"
+        ".backgroundImage",
       ) as HTMLElement;
       if (backgroundImageElement) {
         const month = new Date().getMonth();

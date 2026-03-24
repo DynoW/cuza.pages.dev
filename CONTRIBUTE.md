@@ -85,7 +85,6 @@ Submit the issue:
 
 ![submit](https://raw.githubusercontent.com/DynoW/images/main/cuza.pages.dev/tutorial-13.png)
 
-
 ## Rules:
 
 - Please respect the format of pages.
