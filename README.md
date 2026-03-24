@@ -12,7 +12,7 @@ CuzaPages is an open-source study platform that aggregates courses, past exam pa
 
 | Layer | Technology |
 |---|---|
-| Framework | [Astro](https://astro.build) v5 |
+| Framework | [Astro](https://astro.build) v6 |
 | Styling | [Tailwind CSS](https://tailwindcss.com) v4 |
 | UI components | [React](https://react.dev) v19 |
 | Diagrams | [Excalidraw](https://excalidraw.com) |
