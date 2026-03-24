@@ -3,9 +3,9 @@ title: "Curs-8"
 description: "Transformări"
 ---
 
-a) din baza 10 in baza 2
+## a) Din baza 10 în baza 2
 
-69 (baza 10) = ? (baza 2)
+Exemplu: `69` (baza 10) = `1000101` (baza 2)
 
 ```cpp
 int n = 69;
@@ -21,9 +21,9 @@ while(n != 0) {
 output=>1000101
 ```
 
-b) din baza 2 in baza 10
+## b) Din baza 2 în baza 10
 
-ex: 1000101 (baza 2) = ? (baza 10)
+Exemplu: `1000101` (baza 2) = `69` (baza 10)
 
 ```cpp
 int n = 1000101;
@@ -39,22 +39,32 @@ while(n != 0) {
 output=>69
 ```
 
-c) din baza a in baza b
+## c) Din baza `a` în baza `b`
 
-ex: 123 (baza a) = ? (baza b)
+Exemplu: `123` (baza 4) = `11011` (baza 2)
+
+Metoda standard: întâi transformi în baza 10, apoi din baza 10 în baza `b`.
 
 ```cpp
-int n = 123; // Număr în baza a
-int a = 10; // Baza numărului
-int b = 2; // Baza dorita
+int n = 123; // număr scris cu cifre 0..9, în baza a
+int a = 4;
+int b = 2;
 
-int nrb = 0;
+int zecimal = 0;
 int p = 1;
 while(n != 0) {
-    nrb = nrb + p * (n % b);
-    n = n / b;
+    zecimal = zecimal + (n % 10) * p;
+    n = n / 10;
     p = p * a;
 }
 
-output=>1111011
+int nrb = 0;
+p = 1;
+while(zecimal != 0) {
+    nrb = nrb + p * (zecimal % b);
+    zecimal = zecimal / b;
+    p = p * 10;
+}
+
+output=>11011
 ```

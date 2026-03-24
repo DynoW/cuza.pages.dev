@@ -3,28 +3,23 @@ title: "Curs-6"
 description: "Factori primi"
 ---
 
-90=2^1\*3^2\*5^1
+## Exemplu
 
-| n    | d   | p   |
-| ---- | --- | --- |
-| 90   | 2   | 0   |
-| 45   |     | 1   |
-| ---- | --- | --- |
-| 15   | 3   | 0   |
-| 5    |     | 1   |
-|      |     | 1   |
-| ---- | --- | --- |
-|      | 4   | 0   |
-| ---- | --- | --- |
-| 1    | 5   | 0   |
-|      |     | 1   |
+`90 = 2^1 * 3^2 * 5^1`
 
-Varianta I:
+| Pas | n înainte | d | p după împărțiri |
+| --- | --------- | - | ---------------- |
+| 1   | 90        | 2 | 1                |
+| 2   | 45        | 3 | 2                |
+| 3   | 5         | 5 | 1                |
+
+## Varianta I
+
 ```cpp
 d = 2;
 while(n != 1){
     p = 0;
-    while(n % 2 == d){
+    while(n % d == 0){
         n = n/d;
         p++;
     }
@@ -35,7 +30,8 @@ while(n != 1){
 }
 ```
 
-Varianta II (eficientă):
+## Varianta II (eficientă)
+
 ```cpp
 d = 2;
 while(d * d <= n){

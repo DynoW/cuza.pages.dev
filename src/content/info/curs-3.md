@@ -1,17 +1,19 @@
 ---
 title: "Curs-3"
-description: "Suma divizorilor."
+description: "Suma divizorilor"
 ---
 
-Varianta I:
+## Varianta I
+
 ```cpp
-nrd = 0;
+s = 0;
 for(d = 1; d<=n; d++)
     if(n % d == 0)
-        nrd++;
+    s += d;
 ```
 
-Varianta II (eficientă):
+## Varianta II (eficientă)
+
 ```cpp
 s = 0;
 for(d = 1; d * d < n; d++)

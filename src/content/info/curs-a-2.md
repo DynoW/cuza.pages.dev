@@ -3,7 +3,8 @@ title: "Curs-vectori-2"
 description: "Ordonare (Sortare)"
 ---
 
-Varianta I:
+## Varianta I
+
 ```cpp
 for(i=0;i<n-1;i++)
     for(j=i+1;j<n;j++)
@@ -11,7 +12,8 @@ for(i=0;i<n-1;i++)
             swap(v[i],v[j]);
 ```
 
-Varianta II - bubble sort:
+## Varianta II: Bubble Sort
+
 ```cpp
 do {
     OK=1;

@@ -3,7 +3,8 @@ title: "Curs-5"
 description: "cmmdc/cmmmc"
 ---
 
-Varianta I - împarțiri repetate (Euclid):
+## Varianta I: împărțiri repetate (Euclid)
+
 ```cpp
 if(a * b == 0)
     cmmdc = a + b;
@@ -21,8 +22,11 @@ else {
 cmmmc = a * b / cmmdc;
 ```
 
-Varianta II - scăderi repetate:
+## Varianta II: scăderi repetate
+
 ```cpp
+ca = a;
+cb = b;
 if(a * b == 0)
     cmmdc = a + b;
 else {

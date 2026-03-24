@@ -3,6 +3,8 @@ title: "Curs-1"
 description: "Suma cifrelor"
 ---
 
+## Varianta I (explicită)
+
 ```cpp
 s = 0;
 while(n != 0){
@@ -10,7 +12,9 @@ while(n != 0){
     n = n / 10;
 }
 ```
-sau
+
+## Varianta II (compactă)
+
 ```cpp
 s = 0;
 while(n)

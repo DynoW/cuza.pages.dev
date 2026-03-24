@@ -1,9 +1,16 @@
 ---
 title: "Curs-0"
-description: "Citire de nr."
+description: "Citire de numere"
 ---
 
-Varianta I - citire pană la 0:
+## Ce înveți
+
+- Cum citești valori până la o condiție de oprire.
+- Cum citești exact `n` valori.
+- Cum citești din fișier până la final (EOF).
+
+## Varianta I: citire până la `0`
+
 ```cpp
 cin >> n;
 while(n){
@@ -13,7 +20,8 @@ while(n){
 }
 ```
 
-Varianta II - citire a n nr:
+## Varianta II: citire a `n` numere
+
 ```cpp
 cin >> n;
 for(i=1;i<=n;i++){
@@ -23,7 +31,8 @@ for(i=1;i<=n;i++){
 }
 ```
 
-Varianta III - pană la finalul fișierului (End Of File):
+## Varianta III: citire până la finalul fișierului (EOF)
+
 ```cpp
 // ! Nu uita sa imporți librăria !
 #include <fstream>

@@ -40,4 +40,4 @@ const app = new Hono<{ Bindings: CloudflareBindings }>()
 ```
 
 > Copyright (c) 2026 Daniel C. (DynoW) — https://github.com/DynoW/cuza.pages.dev
-> See [LICENSE](LICENSE) for details.
+> See [LICENSE](LICENSE) for details

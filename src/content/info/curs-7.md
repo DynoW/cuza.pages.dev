@@ -3,6 +3,8 @@ title: "Curs-7"
 description: "Șirul lui Fibonacci"
 ---
 
+## Verificare: `n` aparține șirului?
+
 ```
     c  b  a
 ex: 1, 1, 2, 3, 5, 8, 13, ...

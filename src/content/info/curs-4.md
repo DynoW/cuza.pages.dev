@@ -1,9 +1,10 @@
 ---
 title: "Curs-4"
-description: "Verificare nr. prim"
+description: "Verificare număr prim"
 ---
 
-Varianta I:
+## Varianta I
+
 ```cpp
 nrd = 0;
 for(d = 1; d <= n; d++)
@@ -14,7 +15,8 @@ if(nrd == 2)
     // ...
 ```
 
-Varianta II (eficientă):
+## Varianta II (eficientă)
+
 ```cpp
 nrd = 0;
 for(d = 1; d * d < n; d++)

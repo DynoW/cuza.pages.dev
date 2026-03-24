@@ -2,7 +2,8 @@
 title: "Curs-vectori-4"
 description: "Căutare binară"
 ---
-(se aplică șirurior ordonate)
+
+## Implementare (pentru șiruri ordonate)
 
 ```cpp
 OK=0;
@@ -18,5 +19,5 @@ do {
         else
             ld = mij - 1;
     }
-} while(OK=0 && ls<=ld);
+} while(OK==0 && ls<=ld);
 ```
