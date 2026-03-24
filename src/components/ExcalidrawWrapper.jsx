@@ -1,6 +1,10 @@
-import { Excalidraw } from "@excalidraw/excalidraw";
+import { useEffect, useState, useCallback, useRef, lazy, Suspense } from "react";
 import "@excalidraw/excalidraw/index.css";
-import { useEffect, useState, useCallback, useRef } from "react";
+
+const LazyExcalidraw = lazy(async () => {
+  const module = await import("@excalidraw/excalidraw");
+  return { default: module.Excalidraw };
+});
 
 const LOCAL_STORAGE_KEY = "excalidraw-romana";
 const EXCALIDRAW_FILE = "/assets/excalidraw/romana.excalidraw";
@@ -234,61 +238,79 @@ const ExcalidrawWrapper = () => {
         overflow: "hidden",
       }}
     >
-      <Excalidraw
-        excalidrawAPI={(api) => setExcalidrawAPI(api)}
-        initialData={{
-          elements: excalidrawData?.elements || [],
-          appState: {
-            theme: "dark",
-            gridSize: null,
-            activeTool: {
-              type: "hand",
-              locked: true,
+      <Suspense
+        fallback={
+          <div
+            className="excalidraw-loading"
+            style={{
+              height: "100dvh",
+              maxHeight: "-webkit-fill-available",
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            Loading editor...
+          </div>
+        }
+      >
+        <LazyExcalidraw
+          excalidrawAPI={(api) => setExcalidrawAPI(api)}
+          initialData={{
+            elements: excalidrawData?.elements || [],
+            appState: {
+              theme: "dark",
+              gridSize: null,
+              activeTool: {
+                type: "hand",
+                locked: true,
+              },
+              currentItemType: "hand",
+              ...(excalidrawData?.appState || {}),
             },
-            currentItemType: "hand",
-            ...(excalidrawData?.appState || {}),
-          },
-          scrollToContent: true,
-          files: excalidrawData?.files || {},
-        }}
-        renderTopRightUI={() => {
-          // Determine button style and text based on state
-          const buttonText = updateAvailable
-            ? "Actualizare schema disponibilă"
-            : hasUserChanges
-              ? "Resetează schema română"
-              : "Aceasta este schema initială";
+            scrollToContent: true,
+            files: excalidrawData?.files || {},
+          }}
+          renderTopRightUI={() => {
+            // Determine button style and text based on state
+            const buttonText = updateAvailable
+              ? "Actualizare schema disponibilă"
+              : hasUserChanges
+                ? "Resetează schema română"
+                : "Aceasta este schema initială";
 
-          const buttonBackground = updateAvailable
-            ? "#4CAF50" // Green for update available
-            : "#70b1ec"; // Default blue
+            const buttonBackground = updateAvailable
+              ? "#4CAF50" // Green for update available
+              : "#70b1ec"; // Default blue
 
-          return (
-            <button
-              style={{
-                background: buttonBackground,
-                border: "none",
-                color: "#fff",
-                width: "max-content",
-                fontWeight: "bold",
-                borderRadius: "0.5rem",
-                paddingLeft: "8px",
-                paddingRight: "8px",
-                // Use isSmallScreen state for responsive positioning
-                paddingTop: "4px",
-                paddingBottom: "4px",
-                position: isSmallScreen ? "fixed" : "relative",
-                bottom: isSmallScreen ? "70px" : "auto",
-                right: isSmallScreen ? "15px" : "auto",
-                zIndex: isSmallScreen ? "100" : "auto",
-              }}
-              onClick={handleUpdateSchema}
-            >
-              {buttonText}
-            </button>
-          );
-        }}
-      />
+            return (
+              <button
+                style={{
+                  background: buttonBackground,
+                  border: "none",
+                  color: "#fff",
+                  width: "max-content",
+                  fontWeight: "bold",
+                  borderRadius: "0.5rem",
+                  paddingLeft: "8px",
+                  paddingRight: "8px",
+                  // Use isSmallScreen state for responsive positioning
+                  paddingTop: "4px",
+                  paddingBottom: "4px",
+                  position: isSmallScreen ? "fixed" : "relative",
+                  bottom: isSmallScreen ? "70px" : "auto",
+                  right: isSmallScreen ? "15px" : "auto",
+                  zIndex: isSmallScreen ? "100" : "auto",
+                }}
+                onClick={handleUpdateSchema}
+              >
+                {buttonText}
+              </button>
+            );
+          }}
+        />
+      </Suspense>
     </div>
   );
 };

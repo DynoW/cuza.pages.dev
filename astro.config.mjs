@@ -2,7 +2,7 @@ import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
 import react from "@astrojs/react";
-import compress from "astro-compress";
+import playformCompress from "@playform/compress";
 
 export default defineConfig({
   site: "https://cuza.pages.dev",
@@ -31,11 +31,7 @@ export default defineConfig({
       theme: "github-dark",
     },
   },
-  integrations: [
-    sitemap({
-      filter: (page) => !page.includes("/install") && !page.includes("/upload"),
-    }),
-    react(),
-    compress(),
-  ],
+  integrations: [sitemap({
+    filter: (page) => !page.includes("/install") && !page.includes("/upload"),
+  }), react(), playformCompress()],
 });
