@@ -301,26 +301,33 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
   app.get('/ping', (c) => c.text('Pong!', 200));
 
 /**
- * GET /files?subject=X&page=Y        → { content: FileStructure }
- * GET /files?subject=X&page=Y&years=true → { years: number[] }
+ * GET /files?subject=X&page=Y
+ * Returns { content, extra, years } in one request.
  */
   app.get('/files', async (c) => {
     const subject = c.req.query('subject');
     const page = c.req.query('page');
-    const yearsOnly = c.req.query('years') === 'true';
 
-    if (!subject || !page) return c.json({ error: 'Missing subject or page' }, 400);
+    if (!subject || !page)
+      return c.json({ error: 'Missing subject or page' }, 400);
 
     const index = await getIndex(c.env.FILES);
     const segments = resolvePathSegments(subject, page);
     const subtree = getSubtree(index, segments);
+    const content: FileStructure = (subtree !== null && typeof subtree !== 'string')
+      ? (subtree as FileStructure) : {};
+    const years = extractYears(content);
 
-    if (subtree === null || typeof subtree === 'string') {
-      return yearsOnly ? c.json({ years: [] }) : c.json({ content: {} });
-    }
+  // Extra content
+    const extraSegments = resolvePathSegments(
+      subject,
+      subject.toLowerCase() === 'admitere' ? `${page}/extra` : 'extra',
+    );
+    const extraSubtree = getSubtree(index, extraSegments);
+    const extra: FileStructure = (extraSubtree !== null && typeof extraSubtree !== 'string')
+      ? (extraSubtree as FileStructure) : {};
 
-    if (yearsOnly) return c.json({ years: extractYears(subtree as FileStructure) });
-    return c.json({ content: subtree });
+    return c.json({ content, extra, years });
   });
 
 /**
@@ -499,37 +506,6 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     });
   });
 
-/**
- * GET /page-data?subject=X&page=Y
- * Returns { content, extra, years } in one request.
- */
-  app.get('/page-data', async (c) => {
-    const subject = c.req.query('subject');
-    const page = c.req.query('page');
-
-    if (!subject || !page)
-      return c.json({ error: 'Missing subject or page' }, 400);
-
-    const index = await getIndex(c.env.FILES);
-
-  // Main content + years
-    const segments = resolvePathSegments(subject, page);
-    const subtree = getSubtree(index, segments);
-    const content: FileStructure = (subtree !== null && typeof subtree !== 'string')
-      ? (subtree as FileStructure) : {};
-    const years = extractYears(content);
-
-  // Extra content
-    const extraSegments = resolvePathSegments(
-      subject,
-      subject.toLowerCase() === 'admitere' ? `${page}/extra` : 'extra',
-    );
-    const extraSubtree = getSubtree(index, extraSegments);
-    const extra: FileStructure = (extraSubtree !== null && typeof extraSubtree !== 'string')
-      ? (extraSubtree as FileStructure) : {};
-
-    return c.json({ content, extra, years });
-  });
 
 /**
  * GET /recent-changes?limit=20

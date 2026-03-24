@@ -1,6 +1,4 @@
 ---
-import { apiService } from '../api';
-
 interface Props {
   subject: string;
   page: string;
@@ -11,30 +9,14 @@ interface Props {
 const { subject, page, years: propYears } = Astro.props;
 
 let availableYears: number[] = [];
-let apiError: string | null = null;
 
 if (propYears !== undefined) {
   availableYears = propYears;
-} else {
-  try {
-    availableYears = await apiService.getYears(subject, page);
-  } catch (error) {
-    apiError = `Failed to fetch years: ${error instanceof Error ? error.message : String(error)}`;
-    console.warn("API fetch failed for shortcuts:", error);
-  }
 }
 ---
 
 <div class="shortcuts-container">
   <p class="text-lg font-bold text-white">Accesare rapidă</p>
-  
-  {
-    apiError && (
-      <div class="text-xs text-red-500 mb-2">
-        Nu s-au putut încărca scurtăturile
-      </div>
-    )
-  }
   
   {
     availableYears.length > 0 ? (
@@ -50,11 +32,9 @@ if (propYears !== undefined) {
         ))}
       </div>
     ) : (
-      !apiError && (
-        <p class="text-slate-400">
-          Niciun an disponibil
-        </p>
-      )
+      <p class="text-slate-400">
+        Niciun an disponibil
+      </p>
     )
   }
 </div>

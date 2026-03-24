@@ -1,10 +1,12 @@
 import type { PageData } from './types';
 
+const DEFAULT_WORKER_URL = 'https://api.my-lab.ro';
+
 export class ApiService {
   private readonly baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl ?? import.meta.env.PUBLIC_WORKER_URL;
+    this.baseUrl = (baseUrl ?? import.meta.env.PUBLIC_WORKER_URL) || DEFAULT_WORKER_URL;
   }
 
   private async fetchJson<T>(url: string): Promise<T | null> {
@@ -20,14 +22,8 @@ export class ApiService {
     }
   }
 
-  async getYears(subject: string, page: string): Promise<number[]> {
-    const url = `${this.baseUrl}/files?subject=${encodeURIComponent(subject)}&page=${encodeURIComponent(page)}&years=true`;
-    const response = await this.fetchJson<{ years: number[] }>(url);
-    return response?.years || [];
-  }
-
   async getPageData(subject: string, page: string): Promise<PageData> {
-    const url = `${this.baseUrl}/page-data?subject=${encodeURIComponent(subject)}&page=${encodeURIComponent(page)}`;
+    const url = `${this.baseUrl}/files?subject=${encodeURIComponent(subject)}&page=${encodeURIComponent(page)}`;
     const response = await this.fetchJson<PageData>(url);
     return response ?? { content: {}, extra: {}, years: [] };
   }

@@ -1,5 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
+
+const workerUrl = import.meta.env.PUBLIC_WORKER_URL;
+const isUploadEnabled = !!workerUrl;
 ---
 
 <Layout title="Încarcă PDF by @Daniel C." nofollow noindex bodyClass="mx-4">
@@ -7,6 +10,13 @@ import Layout from "../layouts/Layout.astro";
         <h1 class="text-center text-gray-800">
             Încarcă documentul PDF pentru <a href="https://cuza.pages.dev" class="text-blue-500">cuza.pages.dev</a> - <a href="https://github.com/DynoW" class="text-blue-500">DynoW</a>
         </h1>
+        {!isUploadEnabled && (
+            <div class="mt-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded">
+                <p class="font-bold">Upload momentan indisponibil</p>
+                <p class="text-sm mt-2">Variabila de mediu <code class="bg-yellow-50 px-1">PUBLIC_WORKER_URL</code> nu este configurată. Contactează administratorul pentru a activa încărcarea de fișiere.</p>
+            </div>
+        )}
+        {isUploadEnabled && (
         <form id="uploadForm" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4 mt-4">
             <label for="page" class="font-bold">Pagina:</label>
             <select id="page" name="page" required class="p-2 border border-gray-300 rounded">
@@ -153,10 +163,12 @@ import Layout from "../layouts/Layout.astro";
 
             <button type="submit" class="bg-blue-500 text-white p-2 rounded mt-4 cursor-pointer hover:bg-blue-600">Încarcă</button>
         </form>
+        )}
         <div id="message" class="mt-4 text-center"></div>
     </div>
 
     <!-- The Modal -->
+    {isUploadEnabled && (
     <div id="passwordModal" class="modal fixed inset-0 items-center justify-center bg-black/50 hidden">
         <div class="modal-content bg-white p-6 rounded-lg shadow-lg w-80">
             <div class="modal-content-heading flex justify-between items-center">
@@ -167,7 +179,9 @@ import Layout from "../layouts/Layout.astro";
             <button id="submitPassword" class="bg-blue-500 text-white p-2 rounded mt-4 cursor-pointer hover:bg-blue-600">Trimite</button>
         </div>
     </div>
+    )}
 
+    {isUploadEnabled && (
     <script>
         const pageSelect = document.getElementById("page") as HTMLSelectElement | null;
         let page = pageSelect ? pageSelect.value : '';
@@ -379,18 +393,17 @@ import Layout from "../layouts/Layout.astro";
                     return btoa(binary);
                 };
                 const authHeader = "Bearer " + toBase64(`${username}:${password}`);
+                const workerUrl =
+                    import.meta.env.PUBLIC_WORKER_URL || "https://api.my-lab.ro";
 
                 try {
-                    const response = await fetch(
-                        import.meta.env.PUBLIC_WORKER_URL + "/upload",
-                        {
-                            method: "POST",
-                            headers: {
-                                Authorization: authHeader,
-                            },
-                            body: formData,
+                    const response = await fetch(`${workerUrl}/upload`, {
+                        method: "POST",
+                        headers: {
+                            Authorization: authHeader,
                         },
-                    );
+                        body: formData,
+                    });
 
                     if (response.ok) {
                         messageDiv.textContent = "Fișierul a fost încărcat cu succes!";
@@ -407,4 +420,5 @@ import Layout from "../layouts/Layout.astro";
             };
         }
     </script>
+    )}
 </Layout>

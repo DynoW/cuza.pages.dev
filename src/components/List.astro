@@ -20,7 +20,7 @@ const {
   isExtra?: boolean;
 };
 
-const content: FileStructure = data;
+const content: FileStructure = data ?? {};
 
 // Use explicit prop in recursive calls, derive from page name at root.
 const isExtra = isExtraProp ?? (page === "extra" || page.endsWith("/extra"));
