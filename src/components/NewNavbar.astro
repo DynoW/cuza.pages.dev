@@ -1,5 +1,6 @@
 ---
 import { apiService } from '../api';
+import { getDisplayName } from '../config/labels';
 
 // Get current path for highlighting active links
 const pathname = new URL(Astro.request.url).pathname;
@@ -16,49 +17,7 @@ interface NavStructure {
 const subjectPages = await apiService.getStructure();
 const navStructure: NavStructure = { ...subjectPages, notite: ["info", "romana"] };
 
-const navEntries = Object.entries(navStructure);
-
-// Helper function to get display name for navigation items
-function getDisplayName(name: string): string {
-    switch (name) {
-        case "admitere":
-            return "Admitere";
-        case "romana":
-            return "Română";
-        case "mate":
-            return "Matematică";
-        case "istorie":
-            return "Istorie";
-        case "anat":
-            return "Anatomie";
-        case "bio":
-            return "Biologie";
-        case "chimie":
-            return "Chimie";
-        case "economie":
-            return "Economie";
-        case "filosofie":
-            return "Filosofie";
-        case "fizica":
-            return "Fizică";
-        case "geo":
-            return "Geografie";
-        case "info":
-            return "Informatică";
-        case "logica":
-            return "Logică";
-        case "psihologie":
-            return "Psihologie";
-        case "sociologie":
-            return "Sociologie";
-        case "simulari-judetene":
-            return "Simulări județene/locale";
-        default:
-            return (
-                name.charAt(0).toUpperCase() + name.replace(/-/g, " ").slice(1)
-            );
-    }
-}
+const navEntries = Object.entries(navStructure).filter(([, pages]) => pages.length > 0);
 
 // Helper function to get the URL for a nav item
 function getNavUrl(subject: string, page: string | null): string {

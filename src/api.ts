@@ -1,4 +1,4 @@
-import type { FileStructure, PageData } from './types';
+import type { PageData } from './types';
 
 export class ApiService {
   private readonly baseUrl: string;
@@ -18,12 +18,6 @@ export class ApiService {
       console.warn('API fetch failed:', error);
       return null;
     }
-  }
-
-  async getContent(subject: string, page: string): Promise<FileStructure | null> {
-    const url = `${this.baseUrl}/files?subject=${encodeURIComponent(subject)}&page=${encodeURIComponent(page)}`;
-    const response = await this.fetchJson<{ content: FileStructure }>(url);
-    return response?.content || null;
   }
 
   async getYears(subject: string, page: string): Promise<number[]> {

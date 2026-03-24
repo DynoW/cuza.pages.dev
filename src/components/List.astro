@@ -1,5 +1,4 @@
 ---
-import { apiService } from '../api';
 import type { FileStructure } from '../types';
 
 const isYearFolder = (key: string): boolean => /^20\d{2}$/.test(key);
@@ -15,25 +14,13 @@ const {
 } = Astro.props as {
   subject: string;
   page: string;
-  data?: FileStructure;
+  data: FileStructure;
   depth?: number;
   expansionMode?: "none" | "years" | "all";
   isExtra?: boolean;
 };
 
-let content: FileStructure = {};
-let workerError: string | null = null;
-
-if (!data) {
-  try {
-    content = await apiService.getContent(subject, page) || {};
-  } catch (error) {
-    workerError = `Failed to fetch from API: ${error instanceof Error ? error.message : String(error)}`;
-    console.warn("API fetch failed, falling back to empty structure:", error);
-  }
-} else {
-  content = data;
-}
+const content: FileStructure = data;
 
 // Use explicit prop in recursive calls, derive from page name at root.
 const isExtra = isExtraProp ?? (page === "extra" || page.endsWith("/extra"));
@@ -60,18 +47,6 @@ const sortedEntries = Object.entries(content).sort(([keyA, valA], [keyB, valB]) 
 ---
 
 <div class="w-full" id={`content-${subject}-${page.replace("/", "-")}`}>
-  {
-    workerError && (
-      <div
-        class="text-sm text-red-500"
-        data-track-event="worker_error"
-        data-track-subject={subject}
-        data-track-page={page}
-        data-track-error={workerError}
-      >Failed to load content from worker: {workerError}</div>
-    )
-  }
-
   <div>
     {
        Object.keys(content).length > 0 ? (

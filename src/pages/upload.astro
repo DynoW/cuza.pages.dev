@@ -110,7 +110,7 @@ import Layout from "../layouts/Layout.astro";
 
             <div id="testNumberField" class="hidden">
                 <label for="testNumber" class="font-bold">Număr Test:</label>
-                <input type="number" id="testNumber" name="testNumber" min="1" max="99" class="p-2 border border-gray-300 rounded" oninput="if (this.value && this.value.length === 1) this.value = this.value.padStart(2, '0')" />
+                <input type="number" id="testNumber" name="testNumber" min="1" max="99" class="p-2 border border-gray-300 rounded" />
             </div>
 
             <label for="type2" class="font-bold">Variantă/Barem:</label>
@@ -181,6 +181,13 @@ import Layout from "../layouts/Layout.astro";
         const testNumberField = document.getElementById("testNumberField");
         const titleField = document.getElementById("titleField");
         const typeField = document.getElementById("type") as HTMLSelectElement | null;
+        const testNumberInput = document.getElementById("testNumber") as HTMLInputElement | null;
+
+        testNumberInput?.addEventListener('input', () => {
+            if (testNumberInput.value && testNumberInput.value.length === 1) {
+                testNumberInput.value = testNumberInput.value.padStart(2, '0');
+            }
+        });
 
         function toggleFields(page: string, simulation: string) {
             if (typeField) {

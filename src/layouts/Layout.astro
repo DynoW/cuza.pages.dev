@@ -173,6 +173,7 @@ if (month === 11) {
       }}
     />
     <script
+      is:inline
       type="application/ld+json"
       set:html={JSON.stringify({
         "@context": "https://schema.org",
@@ -191,6 +192,7 @@ if (month === 11) {
     {
       breadcrumbs && (
         <script
+          is:inline
           type="application/ld+json"
           set:html={JSON.stringify({
             "@context": "https://schema.org",
@@ -215,6 +217,7 @@ if (month === 11) {
         <>
           {/* Umami tag */}
           <script
+            is:inline
             defer
             src="https://analytics.my-lab.ro/script.js"
             data-website-id="afbd7bf4-d2a2-41f7-a401-5c7b73a3b42e"

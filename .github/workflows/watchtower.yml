@@ -31,7 +31,7 @@
 #         env:
 #           PUBLIC_WORKER_URL: ${{ variables.PUBLIC_WORKER_URL }}
 #           UPLOAD_PASSWORD: ${{ secrets.UPLOAD_PASSWORD }}
-#         run: python web-scraper/main.py
+#         run: python web-scraper/main.py -u
 
 #       - name: Commit seen_urls changes
 #         uses: stefanzweifel/git-auto-commit-action@v5

@@ -23,6 +23,26 @@ interface FileStructure {
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 const INDEX_KEY = 'index.json';
+const RECENT_CHANGES_KEY = 'recent-changes.json';
+const MAX_RECENT_CHANGES = 100;
+
+interface RecentChange {
+  key: string;
+  filename: string;
+  uploadedAt: string;
+  source: 'form' | 'scraper';
+  page?: string;
+  year?: string;
+}
+
+interface CleanupStats {
+  checkedLeaves: number;
+  keptLeaves: number;
+  removedLeaves: number;
+  removedBranches: number;
+  listedObjects: number;
+  listCalls: number;
+}
 
 async function getIndex(bucket: R2Bucket): Promise<FileStructure> {
   const obj = await bucket.get(INDEX_KEY);
@@ -32,6 +52,36 @@ async function getIndex(bucket: R2Bucket): Promise<FileStructure> {
 
 async function putIndex(bucket: R2Bucket, index: FileStructure): Promise<void> {
   await bucket.put(INDEX_KEY, JSON.stringify(index, null, 2), {
+    httpMetadata: { contentType: 'application/json' },
+  });
+}
+
+async function getRecentChanges(bucket: R2Bucket): Promise<RecentChange[]> {
+  const obj = await bucket.get(RECENT_CHANGES_KEY);
+  if (!obj) return [];
+
+  try {
+    const parsed = await obj.json<unknown>();
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is RecentChange => {
+      if (!item || typeof item !== 'object') return false;
+      const entry = item as Partial<RecentChange>;
+      return (
+        typeof entry.key === 'string' &&
+        typeof entry.filename === 'string' &&
+        typeof entry.uploadedAt === 'string' &&
+        (entry.source === 'form' || entry.source === 'scraper')
+      );
+    });
+  } catch {
+    return [];
+  }
+}
+
+async function appendRecentChange(bucket: R2Bucket, change: RecentChange): Promise<void> {
+  const current = await getRecentChanges(bucket);
+  const next = [change, ...current].slice(0, MAX_RECENT_CHANGES);
+  await bucket.put(RECENT_CHANGES_KEY, JSON.stringify(next, null, 2), {
     httpMetadata: { contentType: 'application/json' },
   });
 }
@@ -115,6 +165,57 @@ function isValidAuth(authHeader: string, password: string): boolean {
   } catch {
     return false;
   }
+}
+
+async function listAllObjectKeys(bucket: R2Bucket, stats: CleanupStats): Promise<Set<string>> {
+  const keys = new Set<string>();
+  let cursor: string | undefined;
+
+  while (true) {
+    const listed = await bucket.list(cursor ? { cursor } : undefined);
+    stats.listCalls += 1;
+    stats.listedObjects += listed.objects.length;
+
+    for (const object of listed.objects) {
+      keys.add(object.key);
+    }
+
+    if (!listed.truncated || !listed.cursor) break;
+    cursor = listed.cursor;
+  }
+
+  return keys;
+}
+
+function pruneMissingIndexLeaves(
+  node: FileStructure | string,
+  existingKeys: Set<string>,
+  stats: CleanupStats,
+): FileStructure | string | null {
+  if (typeof node === 'string') {
+    stats.checkedLeaves += 1;
+    if (existingKeys.has(node)) {
+      stats.keptLeaves += 1;
+      return node;
+    }
+    stats.removedLeaves += 1;
+    return null;
+  }
+
+  const cleaned: FileStructure = {};
+  for (const [key, value] of Object.entries(node)) {
+    const pruned = pruneMissingIndexLeaves(value, existingKeys, stats);
+    if (pruned !== null) {
+      cleaned[key] = pruned;
+    }
+  }
+
+  if (Object.keys(cleaned).length === 0) {
+    stats.removedBranches += 1;
+    return null;
+  }
+
+  return cleaned;
 }
 
 const VALID_PAGES = new Set(['bac', 'teste', 'sim']);
@@ -284,6 +385,15 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     setInIndex(index, r2Key.split('/'), r2Key);
     await putIndex(c.env.FILES, index);
 
+    await appendRecentChange(c.env.FILES, {
+      key: r2Key,
+      filename: r2Key.split('/').at(-1) ?? r2Key,
+      uploadedAt: new Date().toISOString(),
+      source: 'form',
+      page,
+      year,
+    });
+
     await triggerDeploy(c.env.DEPLOY_HOOK_URL);
     return c.text(`Fișier încărcat cu succes: ${r2Key.split('/').at(-1)}`, 200);
   });
@@ -327,6 +437,13 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     setInIndex(index, key.split('/'), key);
     await putIndex(c.env.FILES, index);
 
+    await appendRecentChange(c.env.FILES, {
+      key,
+      filename: key.split('/').at(-1) ?? key,
+      uploadedAt: new Date().toISOString(),
+      source: 'scraper',
+    });
+
     return c.json({ success: true, key });
   });
 
@@ -341,6 +458,45 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     }
     await triggerDeploy(c.env.DEPLOY_HOOK_URL);
     return c.json({ success: true });
+  });
+
+/**
+ * POST /cleanup-index?dryRun=true|false
+ * Remove stale index leaves that no longer exist as R2 objects.
+ */
+  app.post('/cleanup-index', async (c) => {
+    const authHeader = c.req.header('Authorization');
+    if (!authHeader || !isValidAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
+      return c.text('Unauthorized', 401);
+    }
+
+    const dryRun = c.req.query('dryRun') === 'true';
+    const index = await getIndex(c.env.FILES);
+    const stats: CleanupStats = {
+      checkedLeaves: 0,
+      keptLeaves: 0,
+      removedLeaves: 0,
+      removedBranches: 0,
+      listedObjects: 0,
+      listCalls: 0,
+    };
+
+    const existingKeys = await listAllObjectKeys(c.env.FILES, stats);
+    const pruned = pruneMissingIndexLeaves(index, existingKeys, stats);
+    const cleanedIndex = (pruned && typeof pruned === 'object')
+      ? pruned as FileStructure
+      : {};
+
+    if (!dryRun) {
+      await putIndex(c.env.FILES, cleanedIndex);
+    }
+
+    return c.json({
+      success: true,
+      dryRun,
+      stats,
+      subjects: Object.keys(cleanedIndex),
+    });
   });
 
 /**
@@ -373,6 +529,19 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
       ? (extraSubtree as FileStructure) : {};
 
     return c.json({ content, extra, years });
+  });
+
+/**
+ * GET /recent-changes?limit=20
+ * Returns { changes } sorted newest-first.
+ */
+  app.get('/recent-changes', async (c) => {
+    const limitRaw = c.req.query('limit');
+    const parsedLimit = Number.parseInt(limitRaw ?? '20', 10);
+    const limit = Number.isNaN(parsedLimit) ? 20 : Math.min(Math.max(parsedLimit, 1), MAX_RECENT_CHANGES);
+
+    const changes = await getRecentChanges(c.env.FILES);
+    return c.json({ changes: changes.slice(0, limit) });
   });
 
 /**

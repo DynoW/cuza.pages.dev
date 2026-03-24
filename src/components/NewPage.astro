@@ -7,6 +7,7 @@ import Extra from "../components/Extra.astro";
 import Footer from "../components/Footer.astro";
 import CountdownTimer from "./CountdownTimer.astro";
 import { apiService } from "../api";
+import { getDisplayName, PAGE_DISPLAY_NAMES } from "../config/labels";
 import type { FileStructure } from "../types";
 
 // Props for the component
@@ -24,41 +25,8 @@ const years: number[] = pageData.years;
 const extra: FileStructure = pageData.extra;
 
 // ── SEO helpers ──────────────────────────────────────────────────────────────
-const SUBJECT_NAMES: Record<string, string> = {
-    fizica: "Fizică",
-    mate: "Matematică",
-    info: "Informatică",
-    admitere: "Admitere UPB",
-    romana: "Română",
-    bio: "Biologie",
-    chimie: "Chimie",
-    geo: "Geografie",
-    anat: "Anatomie",
-    economie: "Economie",
-    filosofie: "Filosofie",
-    istorie: "Istorie",
-    logica: "Logică",
-    psihologie: "Psihologie",
-    sociologie: "Sociologie",
-};
-const PAGE_NAMES: Record<string, string> = {
-    bac: "BAC",
-    fizica: "Fizică",
-    mate: "Matematică",
-    info: "Informatică",
-    "simulari-judetene": "Simulări Județene",
-    "mate-info-C": "Mate-Info (C)",
-    "mate-info-Pascal": "Mate-Info (Pascal)",
-    "st-nat-C": "Științe Ale Naturii (C)",
-    "st-nat-Pascal": "Științe Ale Naturii (Pascal)",
-};
-
-const subjectLabel =
-    SUBJECT_NAMES[subject] ??
-    subject.charAt(0).toUpperCase() + subject.slice(1);
-const pageLabel =
-    PAGE_NAMES[page] ??
-    page.charAt(0).toUpperCase() + page.replace(/-/g, " ").slice(1);
+const subjectLabel = subject === "admitere" ? "Admitere UPB" : getDisplayName(subject);
+const pageLabel = PAGE_DISPLAY_NAMES[page] ?? getDisplayName(page);
 const isHome = subject === "fizica" && page === "bac";
 
 const pageTitle = isHome

@@ -17,19 +17,38 @@ from urllib.parse import urljoin, urlparse
 import requests
 
 
+def load_local_env(env_path: Path) -> None:
+    """Load KEY=VALUE pairs from a local .env file if variables are missing."""
+    if not env_path.exists():
+        return
+
+    for line in env_path.read_text(encoding='utf-8').splitlines():
+        entry = line.strip()
+        if not entry or entry.startswith('#') or '=' not in entry:
+            continue
+
+        key, value = entry.split('=', 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
 class BacExamScraper:
-    def __init__(self, worker_url: str, upload_password: str, year: int = None):
+    def __init__(self, worker_url: str, upload_password: str, year: int | None = None, upload_enabled: bool = False):
         self.worker_url = worker_url.rstrip('/')
         self.upload_password = upload_password
+        self.upload_enabled = upload_enabled
 
         self.web_scraper_dir = Path(__file__).parent
         self.seen_urls_file = self.web_scraper_dir / "seen_urls.txt"
         self.temp_dir = self.web_scraper_dir / "temp"
+        self.files_dir = self.web_scraper_dir / "files"
         
         self.current_year = str(year) if year else str(datetime.now().year)
         
         # URL patterns for the current year
-        self.archive_on = True
+        self.archive_on = False
         self.set_archive = self.current_year if self.archive_on else ""
 
         self.urls = [
@@ -144,7 +163,7 @@ class BacExamScraper:
 
     # ── Subject & subcategory extraction ────────────────────────────────────────
 
-    def extract_subject_from_pdf_name(self, pdf_filename: str) -> str:
+    def extract_subject_from_pdf_name(self, pdf_filename: str) -> str | None:
         """Extract subject from PDF filename to determine correct folder."""
         filename_lower = pdf_filename.lower()
         
@@ -210,7 +229,7 @@ class BacExamScraper:
 
     # ── R2 upload ───────────────────────────────────────────────────────────────
 
-    def build_r2_key(self, pdf_filename: str, exam_type: str, year: str) -> str:
+    def build_r2_key(self, pdf_filename: str, exam_type: str, year: str) -> tuple[str | None, str | None]:
         """Build the R2 object key for a PDF file."""
         filename = pdf_filename
         # Clean up filename by removing language suffixes
@@ -272,10 +291,22 @@ class BacExamScraper:
             print(f"  Upload error: {e}")
             return False
 
+    def save_file_locally(self, pdf_path: Path, r2_key: str) -> bool:
+        """Save a PDF file to local files directory using the R2 key structure."""
+        try:
+            target = self.files_dir / Path(r2_key)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(pdf_path, target)
+            print(f"  Saved locally: {target.relative_to(self.web_scraper_dir)}")
+            return True
+        except OSError as e:
+            print(f"  Local save error: {e}")
+            return False
+
     def upload_pdf(self, pdf_path: Path, exam_type: str, year: str) -> bool:
-        """Upload a single PDF to R2 with the correct key."""
+        """Upload a single PDF to R2 or save it locally with the correct key."""
         filename = pdf_path.name
-        r2_key, clean_filename = self.build_r2_key(filename, exam_type, year)
+        r2_key, _clean_filename = self.build_r2_key(filename, exam_type, year)
         if not r2_key:
             print(f"Warning: Could not determine subject for: {filename}")
             return False
@@ -287,11 +318,17 @@ class BacExamScraper:
             new_sub = subcategory.replace('bareme', '')
             c_key = r2_key.replace(subcategory, new_sub + 'C')
             pascal_key = r2_key.replace(subcategory, new_sub + 'Pascal')
-            ok_c = self.upload_to_r2(pdf_path, c_key)
-            ok_p = self.upload_to_r2(pdf_path, pascal_key)
+            if self.upload_enabled:
+                ok_c = self.upload_to_r2(pdf_path, c_key)
+                ok_p = self.upload_to_r2(pdf_path, pascal_key)
+            else:
+                ok_c = self.save_file_locally(pdf_path, c_key)
+                ok_p = self.save_file_locally(pdf_path, pascal_key)
             return ok_c or ok_p
 
-        return self.upload_to_r2(pdf_path, r2_key)
+        if self.upload_enabled:
+            return self.upload_to_r2(pdf_path, r2_key)
+        return self.save_file_locally(pdf_path, r2_key)
 
     # ── ZIP processing ───────────────────────────────────────────────────────────
 
@@ -375,6 +412,8 @@ class BacExamScraper:
     def run(self):
         """Main scraper execution."""
         print(f"Starting BAC exam scraper for year {self.current_year}")
+        mode = "R2 upload" if self.upload_enabled else "local save"
+        print(f"Mode: {mode}")
         print(f"Worker URL: {self.worker_url}")
         
         zips_count = 0
@@ -405,7 +444,7 @@ class BacExamScraper:
         self.save_seen_urls()
 
         # Trigger a deploy only once, after all uploads are done
-        if zips_count > 0:
+        if self.upload_enabled and zips_count > 0:
             self.trigger_deploy()
         
         return zips_count
@@ -413,6 +452,14 @@ class BacExamScraper:
 
 def main():
     """Entry point for the scraper."""
+    load_local_env(Path(__file__).parent / '.env')
+
+    default_password = (
+        os.environ.get('UPLOAD_PASSWORD')
+        or os.environ.get('WORKER_UPLOAD_PASSWORD')
+        or ''
+    )
+
     parser = argparse.ArgumentParser(
         description='Web scraper for Romanian Baccalaureate exam files from subiecte.edu.ro'
     )
@@ -425,20 +472,25 @@ def main():
     parser.add_argument(
         '--worker-url', '-w',
         type=str,
-        default=os.environ.get('PUBLIC_WORKER_URL', 'https://cuza-worker.dynow.workers.dev'),
+        default=os.environ.get('PUBLIC_WORKER_URL', 'https://api.my-lab.ro'),
         help='Worker URL for R2 uploads'
     )
     parser.add_argument(
         '--password', '-p',
         type=str,
-        default=os.environ.get('UPLOAD_PASSWORD', ''),
+        default=default_password,
         help='Upload password for the worker API'
+    )
+    parser.add_argument(
+        '--upload', '-u',
+        action='store_true',
+        help='Upload files to R2 (default: save files locally in ./files)'
     )
     
     args = parser.parse_args()
     
-    if not args.password:
-        print("Error: Upload password is required. Set UPLOAD_PASSWORD env var or use --password.")
+    if args.upload and not args.password:
+        print("Error: Upload password is required in upload mode. Set UPLOAD_PASSWORD env var or use --password.")
         import sys
         sys.exit(1)
     
@@ -447,6 +499,7 @@ def main():
             worker_url=args.worker_url,
             upload_password=args.password,
             year=args.year,
+            upload_enabled=args.upload,
         )
         zips_count = scraper.run()
         

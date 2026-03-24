@@ -9,6 +9,15 @@ pnpm install
 pnpm run dev
 ```
 
+Recent uploads
+
+```txt
+GET /recent-changes?limit=20
+```
+
+Returns the latest uploaded files (newest first) from both `/upload` and `/upload-scraper`.
+`limit` is optional and clamped between 1 and 100.
+
 Deploy
 
 ```txt

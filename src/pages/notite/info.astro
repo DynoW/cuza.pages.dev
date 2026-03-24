@@ -1,8 +1,8 @@
 ---
 import Layout from "../../layouts/Layout.astro";
-import Navbar from "../../components/Navbar.astro";
+import NewNavbar from "../../components/NewNavbar.astro";
 import Footer from "../../components/Footer.astro";
-import MainContainer from "../../layouts/MainContainer.astro";
+import ContentContainer from "../../layouts/ContentContainer.astro";
 import Curs from "../../components/Curs.astro";
 import { getCollection } from 'astro:content';
 const infoCourses = (await getCollection('info')).sort((a, b) =>
@@ -11,29 +11,11 @@ const infoCourses = (await getCollection('info')).sort((a, b) =>
 ---
 
 <Layout title="informatica | cuza.pages.dev">
-  <Navbar />
-  <MainContainer>
-    <div class="bg-[rgba(10,13,16,.9)] rounded-3xl p-5 mb-2.5 w-full basis-1/4">
-      <span class="text-lg text-white">Linkuri utile:</span>
-      <ul class="extra-list">
-        <li class="extra-link">
-          <a href="https://www.w3schools.com/cpp/default.asp">Learn C++</a>
-        </li>
-        <li class="extra-link">
-          <a href="https://onecompiler.com/cpp">OneCompiler</a>
-        </li>
-        <li class="text-slate-400 hover:text-slate-300">
-          <a href="https://www.pbinfo.ro/articole/16/subiecte-bacalaureat"
-            >&gt; Varinate bac (pbinfo)</a
-          >
-        </li>
-        <li class="text-slate-400 hover:text-slate-300">
-          <a href="https://www.pbinfo.ro/">&gt; Probleme bac (pbinfo)</a>
-        </li>
-      </ul>
-    </div>
-    <div class="flex grow shrink"></div>
-    <div class="basis-4/6 text-white">
+  <ContentContainer>
+    <aside slot="left" class="flex flex-col gap-2 lg:ml-2 lg:mt-2">
+      <NewNavbar />
+    </aside>
+    <div slot="middle" class="flex flex-col gap-2 text-white">
       <h1 class="bg-[#0d1117] rounded-3xl p-5 pr-4 mb-1">
         Notițe din liceu (2022-2025) by Daniel: <a
           href="https://github.com/DynoW/CS-files-storage"
@@ -59,6 +41,30 @@ const infoCourses = (await getCollection('info')).sort((a, b) =>
         }
       </ul>
     </div>
-  </MainContainer>
+    <aside
+      slot="right"
+      class="flex flex-col gap-2 md:mt-2 md:mr-2 md:sticky md:top-2 md:right-2"
+    >
+      <div class="bg-[rgba(10,13,16,.9)] rounded-3xl p-5 mb-2.5 w-full">
+        <span class="text-lg text-white">Linkuri utile:</span>
+        <ul class="extra-list">
+          <li class="extra-link">
+            <a href="https://www.w3schools.com/cpp/default.asp">Learn C++</a>
+          </li>
+          <li class="extra-link">
+            <a href="https://onecompiler.com/cpp">OneCompiler</a>
+          </li>
+          <li class="text-slate-400 hover:text-slate-300">
+            <a href="https://www.pbinfo.ro/articole/16/subiecte-bacalaureat"
+              >&gt; Varinate bac (pbinfo)</a
+            >
+          </li>
+          <li class="text-slate-400 hover:text-slate-300">
+            <a href="https://www.pbinfo.ro/">&gt; Probleme bac (pbinfo)</a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+  </ContentContainer>
   <Footer />
 </Layout>
