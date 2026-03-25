@@ -200,7 +200,10 @@ async function enforceUploadAuth(
   });
 
   if (!success) {
-    return c.text("Prea multe încercări eșuate. Încearcă din nou în 1 minut.", 429);
+    return c.text(
+      "Prea multe încercări eșuate. Încearcă din nou în 1 minut.",
+      429,
+    );
   }
 
   return c.text("Neautorizat", 401);
