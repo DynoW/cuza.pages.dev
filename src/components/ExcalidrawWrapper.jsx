@@ -1,4 +1,11 @@
-import { useEffect, useState, useCallback, useRef, lazy, Suspense } from "react";
+import {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  lazy,
+  Suspense,
+} from "react";
 import "@excalidraw/excalidraw/index.css";
 
 const LazyExcalidraw = lazy(async () => {

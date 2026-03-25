@@ -31,7 +31,11 @@ export default defineConfig({
       theme: "github-dark",
     },
   },
-  integrations: [sitemap({
-    filter: (page) => !page.includes("/install") && !page.includes("/upload"),
-  }), react(), playformCompress()],
+  integrations: [
+    sitemap({
+      filter: (page) => !page.includes("/install") && !page.includes("/upload"),
+    }),
+    react(),
+    playformCompress(),
+  ],
 });
