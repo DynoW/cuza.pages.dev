@@ -36,11 +36,13 @@ const {
 // Determine background at build time
 const month = new Date().getMonth();
 let backgroundStyle = "";
+const isWinterTheme = backgroundImage && month === 11;
+const isSpringTheme = backgroundImage && (month === 2 || month === 3);
 
-if (month === 11) {
+if (isWinterTheme) {
   backgroundStyle =
     'background: url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d, #cc3333); background-attachment: fixed;';
-} else if (month === 2 || month === 3) {
+} else if (isSpringTheme) {
   backgroundStyle =
     'background: url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2); background-attachment: fixed;';
 }
@@ -245,6 +247,15 @@ if (month === 11) {
     style={backgroundStyle}
   >
     <slot />
+    {
+      isSpringTheme && (
+        <>
+          <div class="clouds" />
+          <div class="bunny" />
+          <div class="grass" />
+        </>
+      )
+    }
     <div class="fixed bottom-10 right-4">
       <button
         id="scrollToTop"
@@ -276,32 +287,49 @@ if (month === 11) {
         document.title = document.hidden ? "Cuza Hub 😉" : _originalTitle;
       });
     </script>
-    <script>
-      // Background update
-      const backgroundImageElement = document.querySelector(
-        ".backgroundImage",
-      ) as HTMLElement;
-      if (backgroundImageElement) {
+    <!-- <script>
+      // Build-time season picks initial theme, then client-side corrects stale builds.
+      const backgroundImageElement = document.querySelector(".backgroundImage");
+
+      if (backgroundImageElement instanceof HTMLElement) {
+        const removeSpringLayers = () => {
+          document
+            .querySelectorAll(".clouds, .bunny, .grass")
+            .forEach((element) => element.remove());
+        };
+
+        const ensureSpringLayers = () => {
+          const body = document.body;
+          if (!body) return;
+
+          ["clouds", "bunny", "grass"].forEach((className) => {
+            if (!document.querySelector(`.${className}`)) {
+              const element = document.createElement("div");
+              element.className = className;
+              body.appendChild(element);
+            }
+          });
+        };
+
         const month = new Date().getMonth();
+
         if (month === 11) {
           backgroundImageElement.style.background =
-            'url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d,#cc3333)'; // dark-reader: to left, #290a0a, #a32929
+            'url("/assets/img/background/bg-pattern-cr.webp"), linear-gradient(to left, #330d0d, #cc3333)';
           backgroundImageElement.style.backgroundAttachment = "fixed";
-        }
-        if (month === 2 || month === 3) {
+          removeSpringLayers();
+        } else if (month === 2 || month === 3) {
           backgroundImageElement.style.background =
             'url("/assets/img/background/bg-pattern.webp"), linear-gradient(to top, #5c6b7e, #6091d2 23%, #7faeec 95%, #6091d2)';
           backgroundImageElement.style.backgroundAttachment = "fixed";
-          const container = document.querySelector("body");
-          if (container) {
-            ["clouds", "bunny", "grass"].forEach((className) => {
-              const element = document.createElement("div");
-              element.className = className;
-              container.appendChild(element);
-            });
-          }
+          ensureSpringLayers();
+        } else {
+          // Revert to default CSS theme outside seasonal windows.
+          backgroundImageElement.style.background = "";
+          backgroundImageElement.style.backgroundAttachment = "";
+          removeSpringLayers();
         }
       }
-    </script>
+    </script> -->
   </body>
 </html>
