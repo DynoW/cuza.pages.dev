@@ -38,6 +38,7 @@ for(i=1;i<=n;i++){
 #include <fstream>
 ifstream f("fisier.txt");
 ```
+
 ```cpp
 while(f>>n){
     // prelucrare n

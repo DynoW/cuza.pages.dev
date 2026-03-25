@@ -8,7 +8,9 @@ const subject = Astro.params?.subject;
 const page = Astro.params?.page;
 
 if (!subject || !page) {
-  throw new Error(`Subject and page parameters are required. Received params: ${JSON.stringify(Astro.params)}`);
+  throw new Error(
+    `Subject and page parameters are required. Received params: ${JSON.stringify(Astro.params)}`,
+  );
 }
 ---
 

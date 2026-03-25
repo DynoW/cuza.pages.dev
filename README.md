@@ -10,16 +10,16 @@ CuzaPages is an open-source study platform that aggregates courses, past exam pa
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | [Astro](https://astro.build) v6 |
-| Styling | [Tailwind CSS](https://tailwindcss.com) v4 |
-| UI components | [React](https://react.dev) v19 |
-| Diagrams | [Excalidraw](https://excalidraw.com) |
-| Backend / API | [Hono](https://hono.dev) on Cloudflare Workers |
-| File storage | Cloudflare R2 |
-| Hosting | Cloudflare Pages |
-| Package manager | [pnpm](https://pnpm.io) |
+| Layer           | Technology                                     |
+| --------------- | ---------------------------------------------- |
+| Framework       | [Astro](https://astro.build) v6                |
+| Styling         | [Tailwind CSS](https://tailwindcss.com) v4     |
+| UI components   | [React](https://react.dev) v19                 |
+| Diagrams        | [Excalidraw](https://excalidraw.com)           |
+| Backend / API   | [Hono](https://hono.dev) on Cloudflare Workers |
+| File storage    | Cloudflare R2                                  |
+| Hosting         | Cloudflare Pages                               |
+| Package manager | [pnpm](https://pnpm.io)                        |
 
 ## Project Structure
 

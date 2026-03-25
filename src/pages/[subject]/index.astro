@@ -3,7 +3,7 @@ import NewPage from "../../components/NewPage.astro";
 import { subjectIndexPaths } from "../../paths";
 
 export async function getStaticPaths() {
-  const excludedSubjects = ["fizica","admitere"];
+  const excludedSubjects = ["fizica", "admitere"];
   return subjectIndexPaths(excludedSubjects);
 }
 

@@ -1,5 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
+
+const workerUrl = import.meta.env.PUBLIC_WORKER_URL;
+const isUploadEnabled = !!workerUrl;
 ---
 
 <Layout title="Încarcă PDF by @Daniel C." nofollow noindex bodyClass="mx-4">
@@ -7,6 +10,13 @@ import Layout from "../layouts/Layout.astro";
         <h1 class="text-center text-gray-800">
             Încarcă documentul PDF pentru <a href="https://cuza.pages.dev" class="text-blue-500">cuza.pages.dev</a> - <a href="https://github.com/DynoW" class="text-blue-500">DynoW</a>
         </h1>
+        {!isUploadEnabled && (
+            <div class="mt-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded">
+                <p class="font-bold">Upload momentan indisponibil</p>
+                <p class="text-sm mt-2">Variabila de mediu <code class="bg-yellow-50 px-1">PUBLIC_WORKER_URL</code> nu este configurată. Contactează administratorul pentru a activa încărcarea de fișiere.</p>
+            </div>
+        )}
+        {isUploadEnabled && (
         <form id="uploadForm" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4 mt-4">
             <label for="page" class="font-bold">Pagina:</label>
             <select id="page" name="page" required class="p-2 border border-gray-300 rounded">
@@ -122,21 +132,9 @@ import Layout from "../layouts/Layout.astro";
             <label for="file" class="font-bold">Selectează PDF:</label>
             <input type="file" id="file" name="file" accept="application/pdf" required class="p-2 border border-gray-300 rounded" />
 
-            <style>
-                /* Style the native file input button where supported */
-                input[type=file]::-webkit-file-upload-button {
-                    background-color: #3b82f6; /* blue-500 */
-                    color: white;
-                    border: none;
-                    padding: 0.5rem 0.75rem;
-                    margin-right: 0.5rem;
-                    border-radius: 0.375rem; /* rounded */
-                    cursor: pointer;
-                }
-
-                /* Newer spec */
-                input[type=file]::file-selector-button {
-                    background-color: #3b82f6;
+            <style is:global>
+                input[type="file"]::-webkit-file-upload-button {
+                    background-color: rgb(59, 130, 246);
                     color: white;
                     border: none;
                     padding: 0.5rem 0.75rem;
@@ -145,29 +143,50 @@ import Layout from "../layouts/Layout.astro";
                     cursor: pointer;
                 }
 
-                /* Keep the rest of the input looking consistent */
-                input[type=file] {
+                input[type="file"]::file-selector-button {
+                    background-color: rgb(59, 130, 246);
+                    color: white;
+                    border: none;
+                    padding: 0.5rem 0.75rem;
+                    margin-right: 0.5rem;
+                    border-radius: 0.375rem;
+                    cursor: pointer;
+                }
+
+                input[type="file"] {
                     display: inline-block;
                 }
             </style>
 
             <button type="submit" class="bg-blue-500 text-white p-2 rounded mt-4 cursor-pointer hover:bg-blue-600">Încarcă</button>
         </form>
+        )}
         <div id="message" class="mt-4 text-center"></div>
     </div>
 
     <!-- The Modal -->
+    {isUploadEnabled && (
     <div id="passwordModal" class="modal fixed inset-0 items-center justify-center bg-black/50 hidden">
         <div class="modal-content bg-white p-6 rounded-lg shadow-lg w-80">
             <div class="modal-content-heading flex justify-between items-center">
                 <label for="passwordInput" class="passwordInputText font-bold">Introdu parola</label>
                 <span class="close cursor-pointer text-gray-500 text-2xl font-bold">&times;</span>
             </div>
-            <input type="password" id="passwordInput" class="p-2 border border-gray-300 rounded mt-4" />
+            <input
+                type="password"
+                id="passwordInput"
+                autocomplete="off"
+                autocapitalize="off"
+                autocorrect="off"
+                spellcheck="false"
+                class="p-2 border border-gray-300 rounded mt-4"
+            />
             <button id="submitPassword" class="bg-blue-500 text-white p-2 rounded mt-4 cursor-pointer hover:bg-blue-600">Trimite</button>
         </div>
     </div>
+    )}
 
+    {isUploadEnabled && (
     <script>
         const pageSelect = document.getElementById("page") as HTMLSelectElement | null;
         let page = pageSelect ? pageSelect.value : '';
@@ -314,34 +333,73 @@ import Layout from "../layouts/Layout.astro";
         const closeModal = document.getElementsByClassName("close")[0];
         const submitPasswordBtn = document.getElementById("submitPassword");
 
-        let password = "";
-
         if (form && messageDiv && modal && closeModal && submitPasswordBtn) {
-            form.addEventListener("submit", async (event) => {
-                event.preventDefault();
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
-            });
+            const passwordInput = document.getElementById("passwordInput") as HTMLInputElement | null;
+            const submitPasswordButton = submitPasswordBtn as HTMLButtonElement;
+            const defaultSubmitPasswordLabel = submitPasswordButton.textContent || "Trimite";
 
-            (closeModal as HTMLElement).onclick = function () {
+            const setSubmitPasswordLoading = (isLoading: boolean) => {
+                submitPasswordButton.disabled = isLoading;
+                submitPasswordButton.textContent = isLoading
+                    ? "Se trimite..."
+                    : defaultSubmitPasswordLabel;
+                submitPasswordButton.classList.toggle("opacity-60", isLoading);
+                submitPasswordButton.classList.toggle("cursor-not-allowed", isLoading);
+            };
+
+            const hideModalAndClearPassword = () => {
+                if (passwordInput) {
+                    passwordInput.value = "";
+                    passwordInput.blur();
+                }
                 modal.classList.add("hidden");
                 modal.classList.remove("flex");
             };
 
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+                if (passwordInput) {
+                    passwordInput.value = "";
+                    passwordInput.focus();
+                }
+            });
+
+            (closeModal as HTMLElement).onclick = function () {
+                hideModalAndClearPassword();
+            };
+
             window.addEventListener("click", function (event) {
                 if (event.target == modal) {
-                    modal.classList.add("hidden");
-                    modal.classList.remove("flex");
+                    hideModalAndClearPassword();
+                }
+            });
+
+            window.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" && !modal.classList.contains("hidden")) {
+                    hideModalAndClearPassword();
                 }
             });
 
             submitPasswordBtn.onclick = async function () {
-                const passwordInput = document.getElementById("passwordInput");
-                if (passwordInput) {
-                    password = (passwordInput as HTMLInputElement).value;
+                if (submitPasswordButton.disabled) {
+                    return;
                 }
-                modal.classList.add("hidden");
-                modal.classList.remove("flex");
+                setSubmitPasswordLoading(true);
+
+                let password = "";
+                if (passwordInput) {
+                    password = passwordInput.value;
+                }
+                hideModalAndClearPassword();
+
+                if (!password) {
+                    messageDiv.textContent = "Introdu parola pentru a continua.";
+                    messageDiv.className = "text-red-500";
+                    setSubmitPasswordLoading(false);
+                    return;
+                }
 
                 messageDiv.textContent = "Se încarcă...";
                 messageDiv.className = "text-blue-500";
@@ -379,18 +437,17 @@ import Layout from "../layouts/Layout.astro";
                     return btoa(binary);
                 };
                 const authHeader = "Bearer " + toBase64(`${username}:${password}`);
+                const workerUrl =
+                    import.meta.env.PUBLIC_WORKER_URL || "https://api.my-lab.ro";
 
                 try {
-                    const response = await fetch(
-                        import.meta.env.PUBLIC_WORKER_URL + "/upload",
-                        {
-                            method: "POST",
-                            headers: {
-                                Authorization: authHeader,
-                            },
-                            body: formData,
+                    const response = await fetch(`${workerUrl}/upload`, {
+                        method: "POST",
+                        headers: {
+                            Authorization: authHeader,
                         },
-                    );
+                        body: formData,
+                    });
 
                     if (response.ok) {
                         messageDiv.textContent = "Fișierul a fost încărcat cu succes!";
@@ -403,8 +460,11 @@ import Layout from "../layouts/Layout.astro";
                 } catch (error) {
                     messageDiv.textContent = "A apărut o eroare în timpul încărcării.";
                     messageDiv.className = "text-red-500";
+                } finally {
+                    setSubmitPasswordLoading(false);
                 }
             };
         }
     </script>
+    )}
 </Layout>

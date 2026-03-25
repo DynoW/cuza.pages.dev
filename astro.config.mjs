@@ -1,19 +1,19 @@
-import { defineConfig } from 'astro/config';
-import tailwindcss from '@tailwindcss/vite';
-import sitemap from '@astrojs/sitemap';
-import react from '@astrojs/react';
-import compress from 'astro-compress';
+import { defineConfig } from "astro/config";
+import tailwindcss from "@tailwindcss/vite";
+import sitemap from "@astrojs/sitemap";
+import react from "@astrojs/react";
+import playformCompress from "@playform/compress";
 
 export default defineConfig({
-  site: 'https://cuza.pages.dev',
-  trailingSlash: 'never',
+  site: "https://cuza.pages.dev",
+  trailingSlash: "never",
   redirects: {
-    '/fizica': '/',
+    "/fizica": "/",
   },
   build: {
-    format: 'file',
-    inlineStylesheets: 'always',
-    assets: 'file'
+    format: "file",
+    inlineStylesheets: "always",
+    assets: "file",
   },
   vite: {
     build: {
@@ -24,20 +24,18 @@ export default defineConfig({
         },
       },
     },
-    plugins: [
-      tailwindcss()
-    ]
+    plugins: [tailwindcss()],
   },
   markdown: {
     shikiConfig: {
-      theme: 'github-dark'
-    }
+      theme: "github-dark",
+    },
   },
   integrations: [
     sitemap({
-      filter: (page) => !page.includes('/install') && !page.includes('/upload')
+      filter: (page) => !page.includes("/install") && !page.includes("/upload"),
     }),
     react(),
-    compress()
-  ]
+    playformCompress(),
+  ],
 });

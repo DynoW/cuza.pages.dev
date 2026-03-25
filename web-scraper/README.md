@@ -1,6 +1,7 @@
 # Web Scraper Runner
 
 Use `run.sh` as the single entrypoint for both Python tools:
+
 - `main.py` (scrape)
 - `upload_local_files.py` (manual upload)
 
@@ -16,6 +17,7 @@ From `web-scraper/`:
 ```
 
 This opens an interactive menu where you can choose:
+
 1. Scrape subiecte.edu.ro
 2. Upload local PDFs
 3. Cleanup worker index
@@ -119,6 +121,7 @@ Skip package installation when the environment is already prepared:
 ```
 
 `--skip-install`:
+
 - still loads `.env` if present
 - still activates existing `venv` if available
 - only skips dependency installation

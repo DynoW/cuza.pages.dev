@@ -1,10 +1,13 @@
-import type { PageData } from './types';
+import type { PageData } from "./types";
+
+const DEFAULT_WORKER_URL = "https://api.my-lab.ro";
 
 export class ApiService {
   private readonly baseUrl: string;
 
   constructor(baseUrl?: string) {
-    this.baseUrl = baseUrl ?? import.meta.env.PUBLIC_WORKER_URL;
+    this.baseUrl =
+      (baseUrl ?? import.meta.env.PUBLIC_WORKER_URL) || DEFAULT_WORKER_URL;
   }
 
   private async fetchJson<T>(url: string): Promise<T | null> {
@@ -15,21 +18,29 @@ export class ApiService {
       }
       return await response.json();
     } catch (error) {
-      console.warn('API fetch failed:', error);
+      console.warn("API fetch failed:", error);
       return null;
     }
   }
 
-  async getYears(subject: string, page: string): Promise<number[]> {
-    const url = `${this.baseUrl}/files?subject=${encodeURIComponent(subject)}&page=${encodeURIComponent(page)}&years=true`;
-    const response = await this.fetchJson<{ years: number[] }>(url);
-    return response?.years || [];
-  }
-
   async getPageData(subject: string, page: string): Promise<PageData> {
-    const url = `${this.baseUrl}/page-data?subject=${encodeURIComponent(subject)}&page=${encodeURIComponent(page)}`;
+    const url = `${this.baseUrl}/files?subject=${encodeURIComponent(subject)}&page=${encodeURIComponent(page)}`;
     const response = await this.fetchJson<PageData>(url);
-    return response ?? { content: {}, extra: {}, years: [] };
+    if (!response) {
+      return { content: {}, extra: {}, years: [] };
+    }
+
+    const content =
+      response.content && typeof response.content === "object"
+        ? response.content
+        : {};
+    const extra =
+      response.extra && typeof response.extra === "object"
+        ? response.extra
+        : {};
+    const years = Array.isArray(response.years) ? response.years : [];
+
+    return { content, extra, years };
   }
 
   private structureCache: Record<string, string[]> | null = null;
@@ -42,11 +53,11 @@ export class ApiService {
     return this.structureCache;
   }
 
-//   async searchFiles(query: string): Promise<string[]> {
-//     const url = `${this.baseUrl}/files?q=${encodeURIComponent(query)}`;
-//     const response = await this.fetchJson<{ files: string[] }>(url);
-//     return response?.files || [];
-//   }
+  //   async searchFiles(query: string): Promise<string[]> {
+  //     const url = `${this.baseUrl}/files?q=${encodeURIComponent(query)}`;
+  //     const response = await this.fetchJson<{ files: string[] }>(url);
+  //     return response?.files || [];
+  //   }
 }
 
 export const apiService = new ApiService();
