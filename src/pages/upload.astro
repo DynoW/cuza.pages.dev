@@ -172,7 +172,15 @@ const isUploadEnabled = !!workerUrl;
                 <label for="passwordInput" class="passwordInputText font-bold">Introdu parola</label>
                 <span class="close cursor-pointer text-gray-500 text-2xl font-bold">&times;</span>
             </div>
-            <input type="password" id="passwordInput" class="p-2 border border-gray-300 rounded mt-4" />
+            <input
+                type="password"
+                id="passwordInput"
+                autocomplete="off"
+                autocapitalize="off"
+                autocorrect="off"
+                spellcheck="false"
+                class="p-2 border border-gray-300 rounded mt-4"
+            />
             <button id="submitPassword" class="bg-blue-500 text-white p-2 rounded mt-4 cursor-pointer hover:bg-blue-600">Trimite</button>
         </div>
     </div>
@@ -325,34 +333,73 @@ const isUploadEnabled = !!workerUrl;
         const closeModal = document.getElementsByClassName("close")[0];
         const submitPasswordBtn = document.getElementById("submitPassword");
 
-        let password = "";
-
         if (form && messageDiv && modal && closeModal && submitPasswordBtn) {
-            form.addEventListener("submit", async (event) => {
-                event.preventDefault();
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
-            });
+            const passwordInput = document.getElementById("passwordInput") as HTMLInputElement | null;
+            const submitPasswordButton = submitPasswordBtn as HTMLButtonElement;
+            const defaultSubmitPasswordLabel = submitPasswordButton.textContent || "Trimite";
 
-            (closeModal as HTMLElement).onclick = function () {
+            const setSubmitPasswordLoading = (isLoading: boolean) => {
+                submitPasswordButton.disabled = isLoading;
+                submitPasswordButton.textContent = isLoading
+                    ? "Se trimite..."
+                    : defaultSubmitPasswordLabel;
+                submitPasswordButton.classList.toggle("opacity-60", isLoading);
+                submitPasswordButton.classList.toggle("cursor-not-allowed", isLoading);
+            };
+
+            const hideModalAndClearPassword = () => {
+                if (passwordInput) {
+                    passwordInput.value = "";
+                    passwordInput.blur();
+                }
                 modal.classList.add("hidden");
                 modal.classList.remove("flex");
             };
 
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                modal.classList.remove("hidden");
+                modal.classList.add("flex");
+                if (passwordInput) {
+                    passwordInput.value = "";
+                    passwordInput.focus();
+                }
+            });
+
+            (closeModal as HTMLElement).onclick = function () {
+                hideModalAndClearPassword();
+            };
+
             window.addEventListener("click", function (event) {
                 if (event.target == modal) {
-                    modal.classList.add("hidden");
-                    modal.classList.remove("flex");
+                    hideModalAndClearPassword();
+                }
+            });
+
+            window.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" && !modal.classList.contains("hidden")) {
+                    hideModalAndClearPassword();
                 }
             });
 
             submitPasswordBtn.onclick = async function () {
-                const passwordInput = document.getElementById("passwordInput");
-                if (passwordInput) {
-                    password = (passwordInput as HTMLInputElement).value;
+                if (submitPasswordButton.disabled) {
+                    return;
                 }
-                modal.classList.add("hidden");
-                modal.classList.remove("flex");
+                setSubmitPasswordLoading(true);
+
+                let password = "";
+                if (passwordInput) {
+                    password = passwordInput.value;
+                }
+                hideModalAndClearPassword();
+
+                if (!password) {
+                    messageDiv.textContent = "Introdu parola pentru a continua.";
+                    messageDiv.className = "text-red-500";
+                    setSubmitPasswordLoading(false);
+                    return;
+                }
 
                 messageDiv.textContent = "Se încarcă...";
                 messageDiv.className = "text-blue-500";
@@ -413,6 +460,8 @@ const isUploadEnabled = !!workerUrl;
                 } catch (error) {
                     messageDiv.textContent = "A apărut o eroare în timpul încărcării.";
                     messageDiv.className = "text-red-500";
+                } finally {
+                    setSubmitPasswordLoading(false);
                 }
             };
         }

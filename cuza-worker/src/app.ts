@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (c) 2026 Daniel C. (DynoW) — https://github.com/DynoW/cuza.pages.dev
 
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -10,6 +10,9 @@ export type Bindings = {
   UPLOAD_PASSWORD: string;
   DEPLOY_HOOK_URL: string;
   RATE_LIMITER: { limit(opts: { key: string }): Promise<{ success: boolean }> };
+  AUTH_FAIL_LIMITER: {
+    limit(opts: { key: string }): Promise<{ success: boolean }>;
+  };
 };
 
 /**
@@ -176,6 +179,31 @@ function isValidBearerAuth(authHeader: string, password: string): boolean {
   } catch {
     return false;
   }
+}
+
+function getClientIp(c: Context<{ Bindings: Bindings }>): string {
+  return c.req.header("CF-Connecting-IP") ?? "unknown";
+}
+
+async function enforceUploadAuth(
+  c: Context<{ Bindings: Bindings }>,
+): Promise<Response | null> {
+  const authHeader = c.req.header("Authorization");
+  if (authHeader && isValidBearerAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
+    return null;
+  }
+
+  // Track only failed auth attempts with a dedicated limiter key.
+  const ip = getClientIp(c);
+  const { success } = await c.env.AUTH_FAIL_LIMITER.limit({
+    key: `auth-fail:${ip}`,
+  });
+
+  if (!success) {
+    return c.text("Prea multe încercări eșuate. Încearcă din nou în 1 minut.", 429);
+  }
+
+  return c.text("Neautorizat", 401);
 }
 
 async function listAllObjectKeys(
@@ -385,9 +413,9 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
    * POST /upload — Upload a single PDF to R2 (from the web form).
    */
   app.post("/upload", async (c) => {
-    const authHeader = c.req.header("Authorization");
-    if (!authHeader || !isValidBearerAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
-      return c.text("Neautorizat", 401);
+    const authError = await enforceUploadAuth(c);
+    if (authError) {
+      return authError;
     }
 
     const contentType = c.req.header("Content-Type") || "";
@@ -464,9 +492,9 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
       return c.text("Failed to parse form data", 400);
     }
 
-    const authHeader = c.req.header("Authorization");
-    if (!authHeader || !isValidBearerAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
-      return c.text("Unauthorized", 401);
+    const authError = await enforceUploadAuth(c);
+    if (authError) {
+      return authError;
     }
 
     const key = formData.get("key") as string;
