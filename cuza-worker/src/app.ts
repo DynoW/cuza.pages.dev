@@ -265,7 +265,16 @@ function pruneMissingIndexLeaves(
 
 const VALID_PAGES = new Set(["bac", "teste", "sim"]);
 const VALID_SIMULATIONS = new Set(["judetene", "locale"]);
+const VALID_TYPE2 = new Set(["var", "bar"]);
+const BAC_TITLE_TO_CODE: Record<string, string> = {
+  Model: "SM",
+  Simulare: "sim",
+  "Sesiunea-I": "S1",
+  "Sesiunea-II": "S2",
+  "Sesiune-speciala": "SS",
+};
 const YEAR_RE = /^20[1-3]\d$/;
+const TEST_NUMBER_RE = /^\d{1,2}$/;
 const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 MB
 
 /**
@@ -275,12 +284,11 @@ const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 MB
 function validateFormData(formData: FormData): string | null {
   const page = formData.get("page") as string | null;
   const year = formData.get("year") as string | null;
-  const type = formData.get("type") as string | null;
   const type2 = formData.get("type2") as string | null;
   const file = formData.get("file") as unknown as File | null;
 
   // ── Required fields ────────────────────────────────────────────────────────
-  if (!page || !year || !type || !type2 || !file) {
+  if (!page || !year || !type2 || !file) {
     return "Câmpuri obligatorii lipsă";
   }
 
@@ -291,6 +299,9 @@ function validateFormData(formData: FormData): string | null {
   if (!YEAR_RE.test(year)) {
     return "An invalid (format așteptat: 20XX)";
   }
+  if (!VALID_TYPE2.has(type2)) {
+    return "Tip variantă/barem invalid";
+  }
   if (file.type !== "application/pdf") {
     return "Fișierul trebuie să fie PDF";
   }
@@ -299,11 +310,23 @@ function validateFormData(formData: FormData): string | null {
   }
 
   // ── Page-specific validation ───────────────────────────────────────────────
-  if (page === "bac" && !formData.get("title")) {
-    return "Lipsă titlu";
+  if (page === "bac") {
+    const title = formData.get("title") as string | null;
+    if (!title) {
+      return "Lipsă titlu";
+    }
+    if (!(title in BAC_TITLE_TO_CODE)) {
+      return "Titlu BAC invalid";
+    }
   }
-  if (page === "teste" && !formData.get("testNumber")) {
-    return "Lipsă număr test";
+  if (page === "teste") {
+    const testNumber = formData.get("testNumber") as string | null;
+    if (!testNumber) {
+      return "Lipsă număr test";
+    }
+    if (!TEST_NUMBER_RE.test(testNumber)) {
+      return "Număr test invalid";
+    }
   }
   if (page === "sim") {
     const simulation = formData.get("simulation") as string | null;
@@ -319,14 +342,17 @@ function validateFormData(formData: FormData): string | null {
 }
 
 const sanitizePathSegment = (s: string | null | undefined): string =>
-  (s ?? "").replace(/[^a-zA-Z0-9_\-ăîșțâĂÎȘȚÂ ]/g, "").trim();
+  (s ?? "")
+    .replace(/[^a-zA-Z0-9_\-ăîșțâĂÎȘȚÂ ]/g, "")
+    .trim()
+    .replace(/\s+/g, "_");
 
 interface UploadPathData {
   page: string;
   year: string;
   title: string | null;
-  type: string;
   type2: string;
+  reserve: boolean;
   testNumber: string | null;
   simulation: string | null;
   county: string | null;
@@ -334,19 +360,23 @@ interface UploadPathData {
 }
 
 function generateUploadPath(data: UploadPathData): { r2Key: string } {
-  const { page, year, type, type2, testNumber, simulation } = data;
+  const { page, year, type2, testNumber, simulation, reserve } = data;
   const title = sanitizePathSegment(data.title);
   const county = sanitizePathSegment(data.county);
   const local = sanitizePathSegment(data.local);
 
   if (page === "bac") {
+    const baseCode = BAC_TITLE_TO_CODE[data.title ?? ""];
+    const code = reserve ? `${baseCode}R` : baseCode;
     return {
-      r2Key: `fizica/pages/bac/${year}/${title}/E_d_fizica_teoretic_vocational_${year}_${type2}_${type}.pdf`,
+      r2Key: `fizica/pages/bac/${year}/${title}/E_d_fizica_${year}_${code}_${type2}.pdf`,
     };
   }
   if (page === "teste") {
+    const testNumberNormalized = (testNumber ?? "").padStart(2, "0");
+    const testType = type2 === "bar" ? "Bar" : "Test";
     return {
-      r2Key: `fizica/pages/teste-de-antrenament/${year}/E_d_fizica_${year}_${type2}_${testNumber}.pdf`,
+      r2Key: `fizica/pages/teste-de-antrenament/${year}/E_d_fizica_${year}_${testType}_${testNumberNormalized}.pdf`,
     };
   }
   const location = simulation === "judetene" ? county : local;
@@ -438,8 +468,9 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     const page = formData.get("page") as string;
     const year = formData.get("year") as string;
     const title = formData.get("title") as string | null;
-    const type = formData.get("type") as string;
     const type2 = formData.get("type2") as string;
+    const reserveRaw = formData.get("reserve") as string | null;
+    const reserve = reserveRaw === "on" || reserveRaw === "true";
     const testNumber = formData.get("testNumber") as string | null;
     const simulation = formData.get("simulation") as string | null;
     const county = formData.get("county") as string | null;
@@ -450,8 +481,8 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
       page,
       year,
       title,
-      type,
       type2,
+      reserve,
       testNumber,
       simulation,
       county,
