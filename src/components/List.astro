@@ -12,6 +12,25 @@ interface Props {
 
 const isYearFolder = (key: string): boolean => /^20\d{2}$/.test(key);
 const formatKey = (key: string): string => key.replace(/_/g, " ");
+const getFolderPriority = (key: string): number => {
+  const normalized = key.toLowerCase().replace(/[-_]+/g, " ");
+
+  const priorityRules: Array<[RegExp, number]> = [
+    [/\badmitere\b/, 0],
+    [/\bpreadmitere\b/, 1],
+    [/\bsimululare\b/, 2],
+    [/\bsesiunea\s*(ii|2)\b/, 3],
+    [/\bsesiunea\s*(i|1)\b/, 4],
+    [/(special|olimp)/, 5],
+    [/\bmodel\b/, 6],
+  ];
+
+  for (const [pattern, priority] of priorityRules) {
+    if (pattern.test(normalized)) return priority;
+  }
+
+  return 100;
+};
 
 const {
   subject,
@@ -27,12 +46,21 @@ const isExtra = isExtraProp ?? (page === "extra" || page.endsWith("/extra"));
 const cx = isExtra ? "extra" : "content";
 
 const paddingLeft = `${depth}rem`;
-const contentKeys = Object.keys(content);
-
 const sortedEntries = Object.entries(content).sort(
   ([keyA, valA], [keyB, valB]) => {
+    const aIsYear = isYearFolder(keyA);
+    const bIsYear = isYearFolder(keyB);
     const aIsFile = typeof valA === "string";
     const bIsFile = typeof valB === "string";
+
+    if (aIsYear && bIsYear) {
+      return Number(keyB) - Number(keyA);
+    }
+
+    if (aIsYear !== bIsYear) {
+      return aIsYear ? -1 : 1;
+    }
+
     if (aIsFile && bIsFile) {
       const matchA = keyA.match(/_(var|bar)_(\d{2})/i);
       const matchB = keyB.match(/_(var|bar)_(\d{2})/i);
@@ -44,6 +72,14 @@ const sortedEntries = Object.entries(content).sort(
         return typeA - typeB;
       }
     }
+
+    if (aIsFile !== bIsFile) {
+      return aIsFile ? 1 : -1;
+    }
+
+    const priorityDiff = getFolderPriority(keyA) - getFolderPriority(keyB);
+    if (priorityDiff !== 0) return priorityDiff;
+
     return keyB.localeCompare(keyA);
   },
 );
@@ -52,13 +88,21 @@ const sortedEntries = Object.entries(content).sort(
 <div class="w-full" id={`content-${subject}-${page.replace("/", "-")}`}>
   <div>
     {
-      contentKeys.length > 0 ? (
+      sortedEntries.length > 0 ? (
         <ul class={`${cx}-list`} style={`padding-left: ${paddingLeft}`}>
-          {sortedEntries.map(([key, value]) => {
+          {sortedEntries.map(([key, value], index) => {
+            const showDivider = depth === 1 && index === 0;
+
             if (typeof value === "string") {
               // It's a file
               return (
-                <li>
+                <Fragment>
+                  {showDivider && (
+                    <li aria-hidden="true" class="list-none">
+                      <hr class="border-black m-2" />
+                    </li>
+                  )}
+                  <li>
                   <a
                     class={`${cx}-link flex items-center break-normal`}
                     href={`https://cuza.pages.dev/api/file/${value}`}
@@ -90,14 +134,12 @@ const sortedEntries = Object.entries(content).sort(
                       </Fragment>
                     ))}
                   </a>
-                </li>
+                  </li>
+                </Fragment>
               );
             } else if (typeof value === "object" && value !== null) {
               // It's a directory
               const isYear = isYearFolder(key);
-              const showDivider =
-                depth === 1 &&
-                key === contentKeys[contentKeys.length - 1];
               const folderId = `folder-${subject}-${page}-${key}-${depth}`;
 
               // Determine if folder should be expanded by default
@@ -112,51 +154,57 @@ const sortedEntries = Object.entries(content).sort(
                 : "display: none;";
 
               return (
-                <li class="space-y-2" id={isYear ? key : undefined}>
-                  {showDivider && <hr class="border-black m-2" />}{" "}
-                  {/* dark-reader: border-zinc-400 */}
-                  <div class="folder-container">
-                    <div
-                      class={`${cx}-text flex items-center cursor-pointer folder-toggle`}
-                      data-folder-id={folderId}
-                      data-folder-type={isYear ? "year" : "folder"}
-                      data-expanded={shouldBeExpanded ? "true" : "false"}
-                    >
-                      <svg
-                        class="w-5 h-5 mr-2 transition-transform duration-200 folder-arrow"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        style={`transform: ${arrowRotation}`}
+                <Fragment>
+                  {showDivider && (
+                    <li aria-hidden="true" class="list-none">
+                      <hr class="border-black m-2" />
+                    </li>
+                  )}
+                  <li class="space-y-2" id={isYear ? key : undefined}>
+                    {/* dark-reader: border-zinc-400 */}
+                    <div class="folder-container">
+                      <div
+                        class={`${cx}-text flex items-center cursor-pointer folder-toggle`}
+                        data-folder-id={folderId}
+                        data-folder-type={isYear ? "year" : "folder"}
+                        data-expanded={shouldBeExpanded ? "true" : "false"}
                       >
-                        <path d="M6 6L14 10L6 14V6Z" />
-                      </svg>
-                      <div class="flex items-center">
                         <svg
-                          class="w-5 h-5 mr-1"
+                          class="w-5 h-5 mr-2 transition-transform duration-200 folder-arrow"
                           fill="currentColor"
                           viewBox="0 0 20 20"
+                          style={`transform: ${arrowRotation}`}
                         >
-                          <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+                          <path d="M6 6L14 10L6 14V6Z" />
                         </svg>
-                        <span>{formatKey(key)}</span>
+                        <div class="flex items-center">
+                          <svg
+                            class="w-5 h-5 mr-1"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+                          </svg>
+                          <span>{formatKey(key)}</span>
+                        </div>
+                      </div>
+                      <div
+                        id={folderId}
+                        class="folder-content mt-2"
+                        style={displayStyle}
+                      >
+                        <Astro.self
+                          subject={subject}
+                          page={key}
+                          content={value}
+                          depth={depth + 1}
+                          expansionMode={expansionMode}
+                          isExtra={isExtra}
+                        />
                       </div>
                     </div>
-                    <div
-                      id={folderId}
-                      class="folder-content mt-2"
-                      style={displayStyle}
-                    >
-                      <Astro.self
-                        subject={subject}
-                        page={key}
-                        content={value}
-                        depth={depth + 1}
-                        expansionMode={expansionMode}
-                        isExtra={isExtra}
-                      />
-                    </div>
-                  </div>
-                </li>
+                  </li>
+                </Fragment>
               );
             }
           })}
