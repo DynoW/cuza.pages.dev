@@ -167,7 +167,14 @@ function extractYears(structure: FileStructure): number[] {
 
 async function triggerDeploy(hookUrl: string | undefined): Promise<void> {
   if (!hookUrl) return;
-  await fetch(hookUrl, { method: "POST" });
+
+  const formData = new FormData();
+  formData.append("branch", "main");
+
+  await fetch(hookUrl, {
+    method: "POST",
+    body: formData,
+  });
 }
 
 function isValidBearerAuth(authHeader: string, password: string): boolean {
