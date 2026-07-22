@@ -7,7 +7,8 @@ export class ApiService {
 
   constructor(baseUrl?: string) {
     this.baseUrl =
-      (baseUrl ?? import.meta.env.PUBLIC_WORKER_URL) || DEFAULT_WORKER_URL;
+      (baseUrl ?? import.meta.env.PUBLIC_WORKER_URL.replace(/\/$/, '')) ||
+      DEFAULT_WORKER_URL;
   }
 
   private async fetchJson<T>(url: string): Promise<T | null> {

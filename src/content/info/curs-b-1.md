@@ -3,12 +3,6 @@ title: 'Curs-matrici-1'
 description: 'Declarare și citire de matrice'
 ---
 
-## Ce înveți
-
-- Cum declari o matrice bidimensională.
-- Cum citești valorile unei matrice.
-- Cum parcurgi elementele unei matrice.
-
 ## Declarare
 
 ```cpp

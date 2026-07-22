@@ -6,7 +6,7 @@ import List from './List.astro';
 import Extra from '../components/Extra.astro';
 import Footer from '../components/Footer.astro';
 import CountdownTimer from './CountdownTimer.astro';
-import ExternalLink from './ExternalLink.astro';
+import SiteLinks from './SiteLinks.astro';
 import { apiService } from '../api';
 import { getDisplayName, PAGE_DISPLAY_NAMES } from '../config/labels';
 import type { FileStructure } from '../types';
@@ -60,25 +60,7 @@ const breadcrumbs = [
   <ContentContainer>
     <aside slot="left" class="flex flex-col gap-2 lg:ml-2 lg:mt-2">
       <NewNavbar />
-      <div class="flex gap-2 items-center flex-wrap">
-        <ExternalLink
-          href="https://old.cuza.pages.dev"
-          label="Site vechi"
-          umamiEvent="click_bugs"
-          external
-        />
-        <ExternalLink
-          href="https://forms.gle/sGxodj1XqWrnjNNx5"
-          label="Bug-uri"
-          umamiEvent="click_old_site"
-          external
-        />
-        <ExternalLink
-          href="/install"
-          label="Instalare aplicație"
-          umamiEvent="click_install"
-        />
-      </div>
+      <SiteLinks wrapperClass="hidden lg:flex" />
     </aside>
     <div slot="middle" class="flex flex-col gap-2">
       <div class="bg-gray-100/90 rounded-3xl p-5 pr-2.5 font-bold">

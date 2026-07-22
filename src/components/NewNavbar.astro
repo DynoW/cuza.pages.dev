@@ -1,6 +1,7 @@
 ---
 import { apiService } from '../api';
 import { getDisplayName } from '../config/labels';
+import SiteLinks from './SiteLinks.astro';
 
 // Get current path for highlighting active links
 const pathname = new URL(Astro.request.url).pathname;
@@ -199,6 +200,7 @@ function isPageActive(subject: string, page: string | null = null): boolean {
         }
       </ul>
     </nav>
+    <SiteLinks wrapperClass="lg:hidden" />
   </div>
   <style is:inline>
     /* Custom scrollbar */

@@ -2,7 +2,6 @@
   "plugins": ["prettier-plugin-astro"],
   "singleQuote": true,
   "semi": true,
-  "trailingComma": "all",
   "overrides": [
     {
       "files": "*.astro",

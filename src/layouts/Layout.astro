@@ -243,7 +243,7 @@ if (isWinterTheme) {
     }
   </head>
   <body
-    class={`font-sans select-none overflow-x-hidden relative min-h-screen p-0${backgroundImage ? ' backgroundImage' : ''}${bodyClass ? ` ${bodyClass}` : ''}`}
+    class={`font-sans select-none overflow-x-hidden relative min-h-svh p-0${backgroundImage ? ' backgroundImage' : ''}${bodyClass ? ` ${bodyClass}` : ''}`}
     style={backgroundStyle}
   >
     <slot />
@@ -280,6 +280,11 @@ if (isWinterTheme) {
         });
       </script>
     </div>
+    <script is:inline>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sws.js');
+      }
+    </script>
     {
       // <script>
       //   // Tab visibility title change

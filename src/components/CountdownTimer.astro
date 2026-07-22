@@ -10,11 +10,11 @@ const config = getCountdownConfig() ?? {
 
 <div
   id="countdown-container"
-  class="bg-zinc-950/90 rounded-3xl py-3 px-4 text-white"
+  class="bg-zinc-950/90 rounded-3xl py-3 px-4 text-slate-300"
 >
   <div class="flex justify-between items-center">
     <h3 id="countdown-title" class="text-lg font-bold">{config.title}</h3>
-    <button id="toggle-countdown" class="text-white hover:text-gray-300">
+    <button id="toggle-countdown" class="text-slate-300 hover:text-slate-100">
       <span id="toggle-icon" class="cursor-pointer">▼</span>
     </button>
   </div>
@@ -50,7 +50,7 @@ const config = getCountdownConfig() ?? {
       <div class="w-full bg-[rgba(30,33,36,.9)] rounded-full h-5 mb-2">
         <div
           id="progress-bar"
-          class="bg-blue-600 h-5 rounded-full text-xs text-center leading-5 text-white transition-all duration-300"
+          class="bg-blue-600 h-5 rounded-full text-xs text-center leading-5 text-slate-200 transition-all duration-300"
           style="width: 0%"
         >
         </div>
@@ -61,7 +61,7 @@ const config = getCountdownConfig() ?? {
     <div id="completion-message" class="hidden">
       <div class="w-full bg-[rgba(30,33,36,.9)] rounded-full h-5 mb-2">
         <div
-          class="bg-green-600 h-5 rounded-full text-xs text-center leading-5 text-white w-full"
+          class="bg-green-600 h-5 rounded-full text-xs text-center leading-5 text-slate-200 w-full"
         >
           Completed
         </div>

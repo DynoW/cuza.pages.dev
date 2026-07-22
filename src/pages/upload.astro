@@ -552,7 +552,8 @@ const isUploadEnabled = !!workerUrl;
         };
         const authHeader = 'Bearer ' + toBase64(`${username}:${password}`);
         const workerUrl =
-          import.meta.env.PUBLIC_WORKER_URL || 'https://api.my-lab.ro';
+          import.meta.env.PUBLIC_WORKER_URL.replace(/\/$/, '') ||
+          'https://api.my-lab.ro';
 
         try {
           const response = await fetch(`${workerUrl}/upload`, {

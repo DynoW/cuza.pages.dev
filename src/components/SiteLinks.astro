@@ -1,0 +1,31 @@
+---
+import ExternalLink from './ExternalLink.astro';
+
+interface Props {
+  wrapperClass?: string;
+}
+
+const { wrapperClass } = Astro.props;
+---
+
+<div
+  class={`flex gap-2 items-center flex-wrap${wrapperClass ? ' ' + wrapperClass : ''}`}
+>
+  <ExternalLink
+    href="https://old.cuza.pages.dev"
+    label="Site vechi"
+    umamiEvent="click_bugs"
+    external
+  />
+  <ExternalLink
+    href="https://forms.gle/sGxodj1XqWrnjNNx5"
+    label="Bug-uri"
+    umamiEvent="click_old_site"
+    external
+  />
+  <ExternalLink
+    href="/install"
+    label="Instalare aplicație"
+    umamiEvent="click_install"
+  />
+</div>

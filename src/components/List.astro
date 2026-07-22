@@ -41,9 +41,9 @@ const {
   isExtra: isExtraProp,
 } = Astro.props as Props;
 
-const workerUrl = (
-  import.meta.env.PUBLIC_WORKER_URL || 'https://api.my-lab.ro'
-).replace(/\/$/, '');
+const workerUrl =
+  import.meta.env.PUBLIC_WORKER_URL.replace(/\/$/, '') ||
+  'https://api.my-lab.ro';
 
 // Use explicit prop in recursive calls, derive from page name at root.
 const isExtra = isExtraProp ?? (page === 'extra' || page.endsWith('/extra'));

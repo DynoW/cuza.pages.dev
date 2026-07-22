@@ -13,22 +13,26 @@ const { href, label, umamiEvent, external } = Astro.props;
   <a
     href={href}
     {...external ? { target: '_blank', rel: 'noopener' } : {}}
-    class="flex items-center gap-2 text-white font-medium hover:text-gray-300 transition-colors"
+    class="flex items-center gap-2 text-slate-200 font-medium hover:text-white transition-colors"
     data-umami-event={umamiEvent}
   >
     {label}
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="w-4 h-4 shrink-0"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
-      <path d="M7 17L17 7"></path>
-      <path d="M7 7h10v10"></path>
-    </svg>
+    {
+      external && (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4 shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M7 17L17 7" />
+          <path d="M7 7h10v10" />
+        </svg>
+      )
+    }
   </a>
 </div>

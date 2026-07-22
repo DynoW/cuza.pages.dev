@@ -5,7 +5,7 @@
     <span class="text-sm font-medium text-slate-300 mr-2"
       >Vizualizare dosare:</span
     >
-    <div class="flex gap-2 text-white">
+    <div class="flex gap-2 text-slate-200">
       <button
         id="collapse-all"
         class="expansion-option text-xs px-2 py-1 rounded bg-slate-700 cursor-pointer"
@@ -66,7 +66,7 @@
     function updateActiveButton(mode: ExpansionMode): void {
       // Remove active class from all buttons
       document.querySelectorAll('.expansion-option').forEach((btn) => {
-        btn.classList.remove('active', 'bg-blue-600', 'text-white');
+        btn.classList.remove('active', 'bg-blue-600', 'text-slate-200');
         btn.classList.add('bg-slate-700');
       });
 
@@ -86,7 +86,7 @@
 
       if (activeButton) {
         activeButton.classList.remove('bg-slate-700');
-        activeButton.classList.add('active', 'bg-blue-600', 'text-white');
+        activeButton.classList.add('active', 'bg-blue-600', 'text-slate-200');
       }
     }
 

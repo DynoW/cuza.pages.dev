@@ -3,12 +3,6 @@ title: 'Curs-0'
 description: 'Citire de numere'
 ---
 
-## Ce înveți
-
-- Cum citești valori până la o condiție de oprire.
-- Cum citești exact `n` valori.
-- Cum citești din fișier până la final (EOF).
-
 ## Varianta I: citire până la `0`
 
 ```cpp
