@@ -9,7 +9,7 @@ interface Props {
 const { href, label, umamiEvent, external } = Astro.props;
 ---
 
-<div class="bg-zinc-950/90 rounded-3xl py-3 px-4">
+<div class="lg:bg-zinc-950/90 rounded-3xl py-3 px-4">
   <a
     href={href}
     {...external ? { target: '_blank', rel: 'noopener' } : {}}
