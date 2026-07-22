@@ -1,11 +1,11 @@
 var CACHE = 'cuza-pages-v3';
 
-self.addEventListener('install', function (event) {
+self.addEventListener('install', function (_event) {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', function (event) {
-  event.waitUntil(
+self.addEventListener('activate', function (_event) {
+  _event.waitUntil(
     caches.keys().then(function (keys) {
       return Promise.all(
         keys
@@ -20,9 +20,9 @@ self.addEventListener('activate', function (event) {
   );
 });
 
-self.addEventListener('fetch', function (event) {
-  if (event.request.method !== 'GET') return;
-  event.respondWith(networkFirst(event.request));
+self.addEventListener('fetch', function (e) {
+  if (e.request.method !== 'GET') return;
+  e.respondWith(networkFirst(e.request));
 });
 
 async function networkFirst(request) {

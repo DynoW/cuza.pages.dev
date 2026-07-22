@@ -129,35 +129,35 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
   </div>
-</Layout>
+  <script is:inline>
+    var installBtn = document.getElementById('installBtn');
+    var deferredPrompt = null;
+    var isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    var isMobile = /Mobi|Android/.test(navigator.userAgent);
 
-<script is:inline>
-  var installBtn = document.getElementById('installBtn');
-  var deferredPrompt = null;
-  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  var isMobile = /Mobi|Android/.test(navigator.userAgent);
+    if (isIOS) {
+      installBtn.style.display = 'none';
+      var iosEl = document.getElementById('iosInstructions');
+      if (iosEl) iosEl.style.display = 'block';
+    } else if (!isMobile) {
+      installBtn.style.display = 'none';
+      var desktopEl = document.getElementById('desktopInstructions');
+      if (desktopEl) desktopEl.style.display = 'block';
+    }
 
-  if (isIOS) {
-    installBtn.style.display = 'none';
-    var iosEl = document.getElementById('iosInstructions');
-    if (iosEl) iosEl.style.display = 'block';
-  } else if (!isMobile) {
-    installBtn.style.display = 'none';
-    var desktopEl = document.getElementById('desktopInstructions');
-    if (desktopEl) desktopEl.style.display = 'block';
-  }
-
-  window.addEventListener('beforeinstallprompt', function (e) {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.removeAttribute('disabled');
-    installBtn.style.display = '';
-    installBtn.onclick = function () {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(function () {
-        deferredPrompt = null;
-        installBtn.setAttribute('disabled', '');
-      });
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.removeAttribute('disabled');
+      installBtn.style.display = '';
+      installBtn.onclick = function () {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function () {
+          deferredPrompt = null;
+          installBtn.setAttribute('disabled', '');
+        });
+      };
     });
-  });
-</script>
+  </script>
+</Layout>
