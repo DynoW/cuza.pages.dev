@@ -1,6 +1,6 @@
 ---
-title: "Curs-5"
-description: "cmmdc/cmmmc"
+title: 'Curs-5'
+description: 'cmmdc/cmmmc'
 ---
 
 ## Varianta I: împărțiri repetate (Euclid)

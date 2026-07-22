@@ -1,6 +1,6 @@
 ---
-title: "Curs-matrici-1"
-description: "Declarare și citire de matrice"
+title: 'Curs-matrici-1'
+description: 'Declarare și citire de matrice'
 ---
 
 ## Ce înveți

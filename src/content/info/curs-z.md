@@ -1,6 +1,6 @@
 ---
-title: "Curs-git"
-description: "Contribuții open-source la acest proiect"
+title: 'Curs-git'
+description: 'Contribuții open-source la acest proiect'
 ---
 
 <br>

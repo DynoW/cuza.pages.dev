@@ -1,460 +1,575 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import Layout from '../layouts/Layout.astro';
 
 const workerUrl = import.meta.env.PUBLIC_WORKER_URL;
 const isUploadEnabled = !!workerUrl;
 ---
 
 <Layout title="Încarcă PDF by @Daniel C." nofollow noindex bodyClass="mx-4">
-    <div class="max-w-sm md:max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/3">
-        <h1 class="text-center text-gray-800">
-            Încarcă documentul PDF pentru <a href="https://cuza.pages.dev" class="text-blue-500">cuza.pages.dev</a> - <a href="https://github.com/DynoW" class="text-blue-500">DynoW</a>
-        </h1>
-        {!isUploadEnabled && (
-            <div class="mt-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded">
-                <p class="font-bold">Upload momentan indisponibil</p>
-                <p class="text-sm mt-2">Variabila de mediu <code class="bg-yellow-50 px-1">PUBLIC_WORKER_URL</code> nu este configurată. Contactează administratorul pentru a activa încărcarea de fișiere.</p>
-            </div>
-        )}
-        {isUploadEnabled && (
-        <form id="uploadForm" method="POST" enctype="multipart/form-data" class="flex flex-col gap-4 mt-4">
-            <label for="page" class="font-bold">Pagina:</label>
-            <select id="page" name="page" required class="p-2 border border-gray-300 rounded">
-                <option value="bac">Bac</option>
-                <option value="teste">Teste de antrenament</option>
-                <option value="sim">Simulări județene</option>
-            </select>
-
-            <label for="year" class="font-bold">An:</label>
-            <input type="number" id="year" name="year" required class="p-2 border border-gray-300 rounded" />
-
-            <div id="titleField" class="hidden">
-                <label for="title" class="font-bold">Tip:</label>
-                <select id="title" name="title" class="p-2 border border-gray-300 rounded">
-                    <option value="Simulare">Simulare</option>
-                    <option value="Model">Model</option>
-                    <option value="Sesiunea-I">Sesiunea I</option>
-                    <option value="Sesiunea-II">Sesiunea II</option>
-                    <option value="Sesiune-speciala">Sesiunea speciala</option>
-                </select>
-            </div>
-
-            <div id="reserveField" class="hidden items-center gap-2">
-                <label for="reserve" class="font-bold">Este rezervă?</label>
-                <input type="checkbox" id="reserve" name="reserve" class="h-4 w-4" />
-            </div>
-
-            <div id="simulationField" class="hidden">
-                <label for="simulation" class="font-bold">Tip simulare:</label>
-                <select id="simulation" name="simulation" class="p-2 border border-gray-300 rounded">
-                    <option value="judetene">Județeană</option>
-                    <option value="locale">Locală</option>
-                </select>
-            </div>
-
-            <div id="countyField" class="hidden">
-                <label for="county" class="font-bold">Județ:</label>
-                <select id="county" name="county" class="p-2 border border-gray-300 rounded">
-                    <option value="Alba">Alba</option>
-                    <option value="Arad">Arad</option>
-                    <option value="Argeș">Argeș</option>
-                    <option value="Bacău">Bacău</option>
-                    <option value="Bihor">Bihor</option>
-                    <option value="Bistrița-Năsăud">Bistrița-Năsăud</option>
-                    <option value="Botoșani">Botoșani</option>
-                    <option value="Brașov">Brașov</option>
-                    <option value="Brăila">Brăila</option>
-                    <option value="Buzău">Buzău</option>
-                    <option value="Caraș-Severin">Caraș-Severin</option>
-                    <option value="Călărași">Călărași</option>
-                    <option value="Cluj">Cluj</option>
-                    <option value="Constanța">Constanța</option>
-                    <option value="Covasna">Covasna</option>
-                    <option value="Dâmbovița">Dâmbovița</option>
-                    <option value="Dolj">Dolj</option>
-                    <option value="Galați">Galați</option>
-                    <option value="Giurgiu">Giurgiu</option>
-                    <option value="Gorj">Gorj</option>
-                    <option value="Harghita">Harghita</option>
-                    <option value="Hunedoara">Hunedoara</option>
-                    <option value="Ialomița">Ialomița</option>
-                    <option value="Iași">Iași</option>
-                    <option value="Ilfov">Ilfov</option>
-                    <option value="Maramureș">Maramureș</option>
-                    <option value="Mehedinți">Mehedinți</option>
-                    <option value="Mureș">Mureș</option>
-                    <option value="Neamț">Neamț</option>
-                    <option value="Olt">Olt</option>
-                    <option value="Prahova">Prahova</option>
-                    <option value="Satu Mare">Satu Mare</option>
-                    <option value="Sălaj">Sălaj</option>
-                    <option value="Sibiu">Sibiu</option>
-                    <option value="Suceava">Suceava</option>
-                    <option value="Teleorman">Teleorman</option>
-                    <option value="Timiș">Timiș</option>
-                    <option value="Tulcea">Tulcea</option>
-                    <option value="Vaslui">Vaslui</option>
-                    <option value="Vâlcea">Vâlcea</option>
-                    <option value="Vrancea">Vrancea</option>
-                    <option value="București">București</option>
-                </select>
-            </div>
-
-            <div id="localField" class="hidden">
-                <label for="local" class="font-bold">Localitate/Liceu (poate fi LAICUZA):</label>
-                <input type="text" id="local" name="local" class="p-2 border border-gray-300 rounded" />
-            </div>
-
-            <div id="testNumberField" class="hidden">
-                <label for="testNumber" class="font-bold">Număr Test:</label>
-                <input type="number" id="testNumber" name="testNumber" min="1" max="99" class="p-2 border border-gray-300 rounded" />
-            </div>
-
-            <div class="flex items-center gap-1">
-                <label class="font-bold whitespace-nowrap">Variantă/Barem:</label>
-                <input type="hidden" id="type2" name="type2" value="var" />
-                <label class="relative inline-flex h-9.5 w-36 cursor-pointer select-none items-center rounded border border-gray-300 p-1">
-                    <input id="type2Toggle" type="checkbox" class="peer sr-only" />
-                    <span class="absolute inset-y-1 left-1 w-94/200 rounded bg-blue-500 transition-transform duration-300 ease-out peer-checked:translate-x-full"></span>
-                    <span class="relative z-10 flex w-1/2 items-center justify-center text-sm font-semibold text-white transition-colors duration-300 peer-checked:text-slate-700">Var</span>
-                    <span class="relative z-10 flex w-1/2 items-center justify-center text-sm font-semibold text-slate-700 transition-colors duration-300 peer-checked:text-white">Bar</span>
-                </label>
-            </div>
-
-            <label for="file" class="font-bold">Selectează PDF:</label>
-            <input type="file" id="file" name="file" accept="application/pdf" required class="p-2 border border-gray-300 rounded" />
-
-            <style is:global>
-                input[type="file"]::-webkit-file-upload-button {
-                    background-color: rgb(59, 130, 246);
-                    color: white;
-                    border: none;
-                    padding: 0.5rem 0.75rem;
-                    margin-right: 0.5rem;
-                    border-radius: 0.375rem;
-                    cursor: pointer;
-                }
-
-                input[type="file"]::file-selector-button {
-                    background-color: rgb(59, 130, 246);
-                    color: white;
-                    border: none;
-                    padding: 0.5rem 0.75rem;
-                    margin-right: 0.5rem;
-                    border-radius: 0.375rem;
-                    cursor: pointer;
-                }
-
-                input[type="file"] {
-                    display: inline-block;
-                }
-            </style>
-
-            <button type="submit" class="bg-blue-500 text-white p-2 rounded mt-4 cursor-pointer hover:bg-blue-600">Încarcă</button>
-        </form>
-        )}
-        <div id="message" class="mt-4 text-center"></div>
-    </div>
-
-    <!-- The Modal -->
-    {isUploadEnabled && (
-    <div id="passwordModal" class="modal fixed inset-0 items-center justify-center bg-black/50 hidden">
-        <div class="modal-content bg-white p-6 rounded-lg shadow-lg w-80">
-            <div class="modal-content-heading flex justify-between items-center">
-                <label for="passwordInput" class="passwordInputText font-bold">Introdu parola</label>
-                <span class="close cursor-pointer text-gray-500 text-2xl font-bold">&times;</span>
-            </div>
-            <input
-                type="password"
-                id="passwordInput"
-                autocomplete="off"
-                autocapitalize="off"
-                autocorrect="off"
-                spellcheck="false"
-                class="p-2 border border-gray-300 rounded mt-4"
-            />
-            <button id="submitPassword" class="bg-blue-500 text-white p-2 rounded mt-4 cursor-pointer hover:bg-blue-600">Trimite</button>
+  <div
+    class="max-w-sm md:max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/3"
+  >
+    <h1 class="text-center text-gray-800">
+      Încarcă documentul PDF pentru <a
+        href="https://cuza.pages.dev"
+        class="text-blue-500">cuza.pages.dev</a
+      > - <a href="https://github.com/DynoW" class="text-blue-500">DynoW</a>
+    </h1>
+    {
+      !isUploadEnabled && (
+        <div class="mt-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded">
+          <p class="font-bold">Upload momentan indisponibil</p>
+          <p class="text-sm mt-2">
+            Variabila de mediu{' '}
+            <code class="bg-yellow-50 px-1">PUBLIC_WORKER_URL</code> nu este
+            configurată. Contactează administratorul pentru a activa încărcarea
+            de fișiere.
+          </p>
         </div>
-    </div>
-    )}
+      )
+    }
+    {
+      isUploadEnabled && (
+        <form
+          id="uploadForm"
+          method="POST"
+          enctype="multipart/form-data"
+          class="flex flex-col gap-4 mt-4"
+        >
+          <label for="page" class="font-bold">
+            Pagina:
+          </label>
+          <select
+            id="page"
+            name="page"
+            required
+            class="p-2 border border-gray-300 rounded"
+          >
+            <option value="bac">Bac</option>
+            <option value="teste">Teste de antrenament</option>
+            <option value="sim">Simulări județene</option>
+          </select>
 
-    {isUploadEnabled && (
-    <script>
-        const pageSelect = document.getElementById("page") as HTMLSelectElement | null;
-        let page = pageSelect ? pageSelect.value : '';
-        const simulationSelect = document.getElementById("simulation") as HTMLSelectElement | null;
-        let simulation = simulationSelect ? simulationSelect.value : '';
-        const titleSelect = document.getElementById("title") as HTMLSelectElement | null;
-        let title = titleSelect ? titleSelect.value : '';
-        const simulationField = document.getElementById("simulationField");
-        const countyField = document.getElementById("countyField");
-        const localField = document.getElementById("localField");
-        const testNumberField = document.getElementById("testNumberField");
-        const titleField = document.getElementById("titleField");
-        const reserveField = document.getElementById("reserveField");
-        const reserveInput = document.getElementById("reserve") as HTMLInputElement | null;
-        const testNumberInput = document.getElementById("testNumber") as HTMLInputElement | null;
-        const type2Toggle = document.getElementById("type2Toggle") as HTMLInputElement | null;
-        const type2Input = document.getElementById("type2") as HTMLInputElement | null;
+          <label for="year" class="font-bold">
+            An:
+          </label>
+          <input
+            type="number"
+            id="year"
+            name="year"
+            required
+            class="p-2 border border-gray-300 rounded"
+          />
 
-        function toggleFields(page: string, simulation: string) {
-            if (page === 'bac') {
-                titleField?.classList.remove('hidden');
-                titleField?.querySelector('select')?.setAttribute('required', 'true');
-                reserveField?.classList.remove('hidden');
-                reserveField?.classList.add('flex');
-                simulationField?.classList.add('hidden');
-                simulationField?.querySelector('select')?.removeAttribute('required');
-                testNumberField?.classList.add('hidden');
-                testNumberField?.querySelector('input')?.removeAttribute('required');
-                countyField?.classList.add('hidden');
-                countyField?.querySelector('select')?.removeAttribute('required');
-                localField?.classList.add('hidden');
-                localField?.querySelector('input')?.removeAttribute('required');
-            } else if (page === 'teste') {
-                titleField?.classList.add('hidden');
-                titleField?.querySelector('select')?.removeAttribute('required');
-                reserveField?.classList.add('hidden');
-                reserveField?.classList.remove('flex');
-                if (reserveInput) reserveInput.checked = false;
-                simulationField?.classList.add('hidden');
-                simulationField?.querySelector('select')?.removeAttribute('required');
-                testNumberField?.classList.remove('hidden');
-                testNumberField?.querySelector('input')?.setAttribute('required', 'true');
-                countyField?.classList.add('hidden');
-                countyField?.querySelector('select')?.removeAttribute('required');
-                localField?.classList.add('hidden');
-                localField?.querySelector('input')?.removeAttribute('required');
-            } else if (page === 'sim') {
-                titleField?.classList.add('hidden');
-                titleField?.querySelector('select')?.removeAttribute('required');
-                reserveField?.classList.add('hidden');
-                reserveField?.classList.remove('flex');
-                if (reserveInput) reserveInput.checked = false;
-                simulationField?.classList.remove('hidden');
-                simulationField?.querySelector('select')?.setAttribute('required', 'true');
-                testNumberField?.classList.add('hidden');
-                testNumberField?.querySelector('input')?.removeAttribute('required');
-                if (simulation === 'judetene') {
-                    countyField?.classList.remove('hidden');
-                    countyField?.querySelector('select')?.setAttribute('required', 'true');
-                    localField?.classList.add('hidden');
-                    localField?.querySelector('input')?.removeAttribute('required');
-                } else {
-                    countyField?.classList.add('hidden');
-                    countyField?.querySelector('select')?.removeAttribute('required');
-                    localField?.classList.remove('hidden');
-                    localField?.querySelector('input')?.setAttribute('required', 'true');
-                }
-            } else {
-                titleField?.classList.add('hidden');
-                titleField?.querySelector('select')?.removeAttribute('required');
-                reserveField?.classList.add('hidden');
-                reserveField?.classList.remove('flex');
-                if (reserveInput) reserveInput.checked = false;
-                simulationField?.classList.add('hidden');
-                simulationField?.querySelector('select')?.removeAttribute('required');
-                testNumberField?.classList.add('hidden');
-                testNumberField?.querySelector('input')?.removeAttribute('required');
-                countyField?.classList.add('hidden');
-                countyField?.querySelector('select')?.removeAttribute('required');
-                localField?.classList.add('hidden');
-                localField?.querySelector('input')?.removeAttribute('required');
-            }
+          <div id="titleField" class="hidden">
+            <label for="title" class="font-bold">
+              Tip:
+            </label>
+            <select
+              id="title"
+              name="title"
+              class="p-2 border border-gray-300 rounded"
+            >
+              <option value="Simulare">Simulare</option>
+              <option value="Model">Model</option>
+              <option value="Sesiunea-I">Sesiunea I</option>
+              <option value="Sesiunea-II">Sesiunea II</option>
+              <option value="Sesiune-speciala">Sesiunea speciala</option>
+            </select>
+          </div>
+
+          <div id="reserveField" class="hidden items-center gap-2">
+            <label for="reserve" class="font-bold">
+              Este rezervă?
+            </label>
+            <input
+              type="checkbox"
+              id="reserve"
+              name="reserve"
+              class="h-4 w-4"
+            />
+          </div>
+
+          <div id="simulationField" class="hidden">
+            <label for="simulation" class="font-bold">
+              Tip simulare:
+            </label>
+            <select
+              id="simulation"
+              name="simulation"
+              class="p-2 border border-gray-300 rounded"
+            >
+              <option value="judetene">Județeană</option>
+              <option value="locale">Locală</option>
+            </select>
+          </div>
+
+          <div id="countyField" class="hidden">
+            <label for="county" class="font-bold">
+              Județ:
+            </label>
+            <select
+              id="county"
+              name="county"
+              class="p-2 border border-gray-300 rounded"
+            >
+              <option value="Alba">Alba</option>
+              <option value="Arad">Arad</option>
+              <option value="Argeș">Argeș</option>
+              <option value="Bacău">Bacău</option>
+              <option value="Bihor">Bihor</option>
+              <option value="Bistrița-Năsăud">Bistrița-Năsăud</option>
+              <option value="Botoșani">Botoșani</option>
+              <option value="Brașov">Brașov</option>
+              <option value="Brăila">Brăila</option>
+              <option value="Buzău">Buzău</option>
+              <option value="Caraș-Severin">Caraș-Severin</option>
+              <option value="Călărași">Călărași</option>
+              <option value="Cluj">Cluj</option>
+              <option value="Constanța">Constanța</option>
+              <option value="Covasna">Covasna</option>
+              <option value="Dâmbovița">Dâmbovița</option>
+              <option value="Dolj">Dolj</option>
+              <option value="Galați">Galați</option>
+              <option value="Giurgiu">Giurgiu</option>
+              <option value="Gorj">Gorj</option>
+              <option value="Harghita">Harghita</option>
+              <option value="Hunedoara">Hunedoara</option>
+              <option value="Ialomița">Ialomița</option>
+              <option value="Iași">Iași</option>
+              <option value="Ilfov">Ilfov</option>
+              <option value="Maramureș">Maramureș</option>
+              <option value="Mehedinți">Mehedinți</option>
+              <option value="Mureș">Mureș</option>
+              <option value="Neamț">Neamț</option>
+              <option value="Olt">Olt</option>
+              <option value="Prahova">Prahova</option>
+              <option value="Satu Mare">Satu Mare</option>
+              <option value="Sălaj">Sălaj</option>
+              <option value="Sibiu">Sibiu</option>
+              <option value="Suceava">Suceava</option>
+              <option value="Teleorman">Teleorman</option>
+              <option value="Timiș">Timiș</option>
+              <option value="Tulcea">Tulcea</option>
+              <option value="Vaslui">Vaslui</option>
+              <option value="Vâlcea">Vâlcea</option>
+              <option value="Vrancea">Vrancea</option>
+              <option value="București">București</option>
+            </select>
+          </div>
+
+          <div id="localField" class="hidden">
+            <label for="local" class="font-bold">
+              Localitate/Liceu (poate fi LAICUZA):
+            </label>
+            <input
+              type="text"
+              id="local"
+              name="local"
+              class="p-2 border border-gray-300 rounded"
+            />
+          </div>
+
+          <div id="testNumberField" class="hidden">
+            <label for="testNumber" class="font-bold">
+              Număr Test:
+            </label>
+            <input
+              type="number"
+              id="testNumber"
+              name="testNumber"
+              min="1"
+              max="99"
+              class="p-2 border border-gray-300 rounded"
+            />
+          </div>
+
+          <div class="flex items-center gap-1">
+            <label class="font-bold whitespace-nowrap">Variantă/Barem:</label>
+            <input type="hidden" id="type2" name="type2" value="var" />
+            <label class="relative inline-flex h-9.5 w-36 cursor-pointer select-none items-center rounded border border-gray-300 p-1">
+              <input id="type2Toggle" type="checkbox" class="peer sr-only" />
+              <span class="absolute inset-y-1 left-1 w-94/200 rounded bg-blue-500 transition-transform duration-300 ease-out peer-checked:translate-x-full" />
+              <span class="relative z-10 flex w-1/2 items-center justify-center text-sm font-semibold text-white transition-colors duration-300 peer-checked:text-slate-700">
+                Var
+              </span>
+              <span class="relative z-10 flex w-1/2 items-center justify-center text-sm font-semibold text-slate-700 transition-colors duration-300 peer-checked:text-white">
+                Bar
+              </span>
+            </label>
+          </div>
+
+          <label for="file" class="font-bold">
+            Selectează PDF:
+          </label>
+          <input
+            type="file"
+            id="file"
+            name="file"
+            accept="application/pdf"
+            required
+            class="p-2 border border-gray-300 rounded"
+          />
+
+          <button
+            type="submit"
+            class="bg-blue-500 text-white p-2 rounded mt-4 cursor-pointer hover:bg-blue-600"
+          >
+            Încarcă
+          </button>
+        </form>
+      )
+    }
+    <div id="message" class="mt-4 text-center"></div>
+  </div>
+
+  <style is:global>
+    input[type='file']::-webkit-file-upload-button {
+      background-color: rgb(59 130 246);
+      color: white;
+      border: none;
+      padding: 0.5rem 0.75rem;
+      margin-right: 0.5rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+    }
+
+    input[type='file']::file-selector-button {
+      background-color: rgb(59 130 246);
+      color: white;
+      border: none;
+      padding: 0.5rem 0.75rem;
+      margin-right: 0.5rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+    }
+
+    input[type='file'] {
+      display: inline-block;
+    }
+  </style>
+
+  <!-- The Modal -->
+  {
+    isUploadEnabled && (
+      <div
+        id="passwordModal"
+        class="modal fixed inset-0 items-center justify-center bg-black/50 hidden"
+      >
+        <div class="modal-content bg-white p-6 rounded-lg shadow-lg w-80">
+          <div class="modal-content-heading flex justify-between items-center">
+            <label for="passwordInput" class="passwordInputText font-bold">
+              Introdu parola
+            </label>
+            <span class="close cursor-pointer text-gray-500 text-2xl font-bold">
+              &times;
+            </span>
+          </div>
+          <input
+            type="password"
+            id="passwordInput"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            class="p-2 border border-gray-300 rounded mt-4"
+          />
+          <button
+            id="submitPassword"
+            class="bg-blue-500 text-white p-2 rounded mt-4 cursor-pointer hover:bg-blue-600"
+          >
+            Trimite
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  <script lang="js">
+    const pageSelect = document.getElementById('page');
+    let page = pageSelect ? pageSelect.value : '';
+    const simulationSelect = document.getElementById('simulation');
+    let simulation = simulationSelect ? simulationSelect.value : '';
+    const titleSelect = document.getElementById('title');
+    let title = titleSelect ? titleSelect.value : '';
+    const simulationField = document.getElementById('simulationField');
+    const countyField = document.getElementById('countyField');
+    const localField = document.getElementById('localField');
+    const testNumberField = document.getElementById('testNumberField');
+    const titleField = document.getElementById('titleField');
+    const reserveField = document.getElementById('reserveField');
+    const reserveInput = document.getElementById('reserve');
+    const testNumberInput = document.getElementById('testNumber');
+    const type2Toggle = document.getElementById('type2Toggle');
+    const type2Input = document.getElementById('type2');
+
+    function toggleFields(page, simulation) {
+      if (page === 'bac') {
+        titleField?.classList.remove('hidden');
+        titleField?.querySelector('select')?.setAttribute('required', 'true');
+        reserveField?.classList.remove('hidden');
+        reserveField?.classList.add('flex');
+        simulationField?.classList.add('hidden');
+        simulationField?.querySelector('select')?.removeAttribute('required');
+        testNumberField?.classList.add('hidden');
+        testNumberField?.querySelector('input')?.removeAttribute('required');
+        countyField?.classList.add('hidden');
+        countyField?.querySelector('select')?.removeAttribute('required');
+        localField?.classList.add('hidden');
+        localField?.querySelector('input')?.removeAttribute('required');
+      } else if (page === 'teste') {
+        titleField?.classList.add('hidden');
+        titleField?.querySelector('select')?.removeAttribute('required');
+        reserveField?.classList.add('hidden');
+        reserveField?.classList.remove('flex');
+        if (reserveInput) reserveInput.checked = false;
+        simulationField?.classList.add('hidden');
+        simulationField?.querySelector('select')?.removeAttribute('required');
+        testNumberField?.classList.remove('hidden');
+        testNumberField
+          ?.querySelector('input')
+          ?.setAttribute('required', 'true');
+        countyField?.classList.add('hidden');
+        countyField?.querySelector('select')?.removeAttribute('required');
+        localField?.classList.add('hidden');
+        localField?.querySelector('input')?.removeAttribute('required');
+      } else if (page === 'sim') {
+        titleField?.classList.add('hidden');
+        titleField?.querySelector('select')?.removeAttribute('required');
+        reserveField?.classList.add('hidden');
+        reserveField?.classList.remove('flex');
+        if (reserveInput) reserveInput.checked = false;
+        simulationField?.classList.remove('hidden');
+        simulationField
+          ?.querySelector('select')
+          ?.setAttribute('required', 'true');
+        testNumberField?.classList.add('hidden');
+        testNumberField?.querySelector('input')?.removeAttribute('required');
+        if (simulation === 'judetene') {
+          countyField?.classList.remove('hidden');
+          countyField
+            ?.querySelector('select')
+            ?.setAttribute('required', 'true');
+          localField?.classList.add('hidden');
+          localField?.querySelector('input')?.removeAttribute('required');
+        } else {
+          countyField?.classList.add('hidden');
+          countyField?.querySelector('select')?.removeAttribute('required');
+          localField?.classList.remove('hidden');
+          localField?.querySelector('input')?.setAttribute('required', 'true');
+        }
+      } else {
+        titleField?.classList.add('hidden');
+        titleField?.querySelector('select')?.removeAttribute('required');
+        reserveField?.classList.add('hidden');
+        reserveField?.classList.remove('flex');
+        if (reserveInput) reserveInput.checked = false;
+        simulationField?.classList.add('hidden');
+        simulationField?.querySelector('select')?.removeAttribute('required');
+        testNumberField?.classList.add('hidden');
+        testNumberField?.querySelector('input')?.removeAttribute('required');
+        countyField?.classList.add('hidden');
+        countyField?.querySelector('select')?.removeAttribute('required');
+        localField?.classList.add('hidden');
+        localField?.querySelector('input')?.removeAttribute('required');
+      }
+    }
+
+    function onDOMContentLoaded() {
+      const yearInput = document.getElementById('year');
+      if (yearInput && !yearInput.value) {
+        yearInput.value = new Date().getFullYear().toString();
+      }
+      if (testNumberInput && !testNumberInput.value) {
+        testNumberInput.value = '01';
+      }
+
+      syncType2Value();
+      toggleFields(page, simulation);
+    }
+    document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
+
+    function onPageChange(event) {
+      const target = event.target;
+      page = target.value;
+      toggleFields(page, simulation);
+      if (page === 'teste' && testNumberInput && !testNumberInput.value) {
+        testNumberInput.value = '01';
+      }
+    }
+    pageSelect?.addEventListener('change', onPageChange);
+
+    function onTitleChange(event) {
+      const target = event.target;
+      title = target.value;
+    }
+    titleSelect?.addEventListener('change', onTitleChange);
+
+    function onTestNumberInput() {
+      if (
+        testNumberInput &&
+        testNumberInput.value &&
+        testNumberInput.value.length === 1
+      ) {
+        testNumberInput.value = testNumberInput.value.padStart(2, '0');
+      }
+    }
+
+    testNumberInput?.addEventListener('input', onTestNumberInput);
+
+    const syncType2Value = () => {
+      if (!type2Toggle || !type2Input) return;
+      type2Input.value = type2Toggle.checked ? 'bar' : 'var';
+    };
+
+    type2Toggle?.addEventListener('change', syncType2Value);
+
+    function onSimulationChange(event) {
+      const target = event.target;
+      simulation = target.value;
+      toggleFields(page, simulation);
+    }
+    simulationSelect?.addEventListener('change', onSimulationChange);
+
+    const form = document.getElementById('uploadForm');
+    const messageDiv = document.getElementById('message');
+    const modal = document.getElementById('passwordModal');
+    const closeModal = document.getElementsByClassName('close')[0];
+    const submitPasswordBtn = document.getElementById('submitPassword');
+
+    if (form && messageDiv && modal && closeModal && submitPasswordBtn) {
+      const passwordInput = document.getElementById('passwordInput');
+      const submitPasswordButton = submitPasswordBtn;
+      const defaultSubmitPasswordLabel =
+        submitPasswordButton.textContent || 'Trimite';
+
+      const setSubmitPasswordLoading = (isLoading) => {
+        submitPasswordButton.disabled = isLoading;
+        submitPasswordButton.textContent = isLoading
+          ? 'Se trimite...'
+          : defaultSubmitPasswordLabel;
+        submitPasswordButton.classList.toggle('opacity-60', isLoading);
+        submitPasswordButton.classList.toggle('cursor-not-allowed', isLoading);
+      };
+
+      const hideModalAndClearPassword = () => {
+        if (passwordInput) {
+          passwordInput.value = '';
+          passwordInput.blur();
+        }
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      };
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        if (passwordInput) {
+          passwordInput.value = '';
+          passwordInput.focus();
+        }
+      });
+
+      closeModal.onclick = function () {
+        hideModalAndClearPassword();
+      };
+
+      window.addEventListener('click', function (event) {
+        if (event.target == modal) {
+          hideModalAndClearPassword();
+        }
+      });
+
+      window.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
+          hideModalAndClearPassword();
+        }
+      });
+
+      submitPasswordBtn.onclick = async function () {
+        if (submitPasswordButton.disabled) {
+          return;
+        }
+        setSubmitPasswordLoading(true);
+
+        let password = '';
+        if (passwordInput) {
+          password = passwordInput.value;
+        }
+        hideModalAndClearPassword();
+
+        if (!password) {
+          messageDiv.textContent = 'Introdu parola pentru a continua.';
+          messageDiv.className = 'text-red-500';
+          setSubmitPasswordLoading(false);
+          return;
         }
 
-        function onDOMContentLoaded() {
-            const yearInput = document.getElementById('year') as HTMLInputElement | null;
-            if (yearInput && !yearInput.value) {
-                yearInput.value = new Date().getFullYear().toString();
-            }
-            if (testNumberInput && !testNumberInput.value) {
-                testNumberInput.value = '01';
-            }
+        messageDiv.textContent = 'Se încarcă...';
+        messageDiv.className = 'text-blue-500';
 
-            syncType2Value();
-            toggleFields(page, simulation);
-        }
-        document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
+        const formData = new FormData(form);
 
-        function onPageChange(event: Event) {
-            const target = event.target as HTMLSelectElement;
-            page = target.value;
-            toggleFields(page, simulation);
-            if (page === 'teste' && testNumberInput && !testNumberInput.value) {
-                testNumberInput.value = '01';
-            }
-        }
-        pageSelect?.addEventListener('change', onPageChange);
-
-        function onTitleChange(event: Event) {
-            const target = event.target as HTMLSelectElement;
-            title = target.value;
-        }
-        titleSelect?.addEventListener('change', onTitleChange);
-
-        function onTestNumberInput() {
-            if (testNumberInput && testNumberInput.value && testNumberInput.value.length === 1) {
-                testNumberInput.value = testNumberInput.value.padStart(2, '0');
-            }
+        if (page === 'bac') {
+          formData.delete('simulation');
+          formData.delete('county');
+          formData.delete('local');
+          formData.delete('testNumber');
+        } else if (page === 'teste') {
+          formData.delete('title');
+          formData.delete('reserve');
+          formData.delete('simulation');
+          formData.delete('county');
+          formData.delete('local');
+        } else if (page === 'sim') {
+          formData.delete('title');
+          formData.delete('reserve');
+          formData.delete('testNumber');
+          if (simulation === 'judetene') {
+            formData.delete('local');
+          } else {
+            formData.delete('county');
+          }
         }
 
-        testNumberInput?.addEventListener('input', onTestNumberInput);
-
-        const syncType2Value = () => {
-            if (!type2Toggle || !type2Input) return;
-            type2Input.value = type2Toggle.checked ? 'bar' : 'var';
+        const username = 'admin';
+        const toBase64 = (value) => {
+          const bytes = new TextEncoder().encode(value);
+          let binary = '';
+          bytes.forEach((b) => {
+            binary += String.fromCharCode(b);
+          });
+          return btoa(binary);
         };
+        const authHeader = 'Bearer ' + toBase64(`${username}:${password}`);
+        const workerUrl =
+          import.meta.env.PUBLIC_WORKER_URL || 'https://api.my-lab.ro';
 
-        type2Toggle?.addEventListener('change', syncType2Value);
+        try {
+          const response = await fetch(`${workerUrl}/upload`, {
+            method: 'POST',
+            headers: {
+              Authorization: authHeader,
+            },
+            body: formData,
+          });
 
-        function onSimulationChange(event: Event) {
-            const target = event.target as HTMLSelectElement;
-            simulation = target.value;
-            toggleFields(page, simulation);
+          if (response.ok) {
+            messageDiv.textContent = 'Fișierul a fost încărcat cu succes!';
+            messageDiv.className = 'text-green-500';
+          } else {
+            const result = await response.text();
+            messageDiv.textContent = `Eroare: ${result}`;
+            messageDiv.className = 'text-red-500';
+          }
+        } catch (error) {
+          messageDiv.textContent = 'A apărut o eroare în timpul încărcării.';
+          messageDiv.className = 'text-red-500';
+        } finally {
+          setSubmitPasswordLoading(false);
         }
-        simulationSelect?.addEventListener('change', onSimulationChange);
-
-
-        const form = document.getElementById("uploadForm");
-        const messageDiv = document.getElementById("message");
-        const modal = document.getElementById("passwordModal");
-        const closeModal = document.getElementsByClassName("close")[0];
-        const submitPasswordBtn = document.getElementById("submitPassword");
-
-        if (form && messageDiv && modal && closeModal && submitPasswordBtn) {
-            const passwordInput = document.getElementById("passwordInput") as HTMLInputElement | null;
-            const submitPasswordButton = submitPasswordBtn as HTMLButtonElement;
-            const defaultSubmitPasswordLabel = submitPasswordButton.textContent || "Trimite";
-
-            const setSubmitPasswordLoading = (isLoading: boolean) => {
-                submitPasswordButton.disabled = isLoading;
-                submitPasswordButton.textContent = isLoading
-                    ? "Se trimite..."
-                    : defaultSubmitPasswordLabel;
-                submitPasswordButton.classList.toggle("opacity-60", isLoading);
-                submitPasswordButton.classList.toggle("cursor-not-allowed", isLoading);
-            };
-
-            const hideModalAndClearPassword = () => {
-                if (passwordInput) {
-                    passwordInput.value = "";
-                    passwordInput.blur();
-                }
-                modal.classList.add("hidden");
-                modal.classList.remove("flex");
-            };
-
-            form.addEventListener("submit", async (event) => {
-                event.preventDefault();
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
-                if (passwordInput) {
-                    passwordInput.value = "";
-                    passwordInput.focus();
-                }
-            });
-
-            (closeModal as HTMLElement).onclick = function () {
-                hideModalAndClearPassword();
-            };
-
-            window.addEventListener("click", function (event) {
-                if (event.target == modal) {
-                    hideModalAndClearPassword();
-                }
-            });
-
-            window.addEventListener("keydown", function (event) {
-                if (event.key === "Escape" && !modal.classList.contains("hidden")) {
-                    hideModalAndClearPassword();
-                }
-            });
-
-            submitPasswordBtn.onclick = async function () {
-                if (submitPasswordButton.disabled) {
-                    return;
-                }
-                setSubmitPasswordLoading(true);
-
-                let password = "";
-                if (passwordInput) {
-                    password = passwordInput.value;
-                }
-                hideModalAndClearPassword();
-
-                if (!password) {
-                    messageDiv.textContent = "Introdu parola pentru a continua.";
-                    messageDiv.className = "text-red-500";
-                    setSubmitPasswordLoading(false);
-                    return;
-                }
-
-                messageDiv.textContent = "Se încarcă...";
-                messageDiv.className = "text-blue-500";
-
-                const formData = new FormData(form as HTMLFormElement);
-
-                if (page === 'bac') {
-                    formData.delete('simulation');
-                    formData.delete('county');
-                    formData.delete('local');
-                    formData.delete('testNumber');
-                } else if (page === 'teste') {
-                    formData.delete('title');
-                    formData.delete('reserve');
-                    formData.delete('simulation');
-                    formData.delete('county');
-                    formData.delete('local');
-                } else if (page === 'sim') {
-                    formData.delete('title');
-                    formData.delete('reserve');
-                    formData.delete('testNumber');
-                    if (simulation === 'judetene') {
-                        formData.delete('local');
-                    } else {
-                        formData.delete('county');
-                    }
-                }
-
-                const username = "admin";
-                const toBase64 = (value: string) => {
-                    const bytes = new TextEncoder().encode(value);
-                    let binary = "";
-                    bytes.forEach((b) => {
-                        binary += String.fromCharCode(b);
-                    });
-                    return btoa(binary);
-                };
-                const authHeader = "Bearer " + toBase64(`${username}:${password}`);
-                const workerUrl =
-                    import.meta.env.PUBLIC_WORKER_URL || "https://api.my-lab.ro";
-
-                try {
-                    const response = await fetch(`${workerUrl}/upload`, {
-                        method: "POST",
-                        headers: {
-                            Authorization: authHeader,
-                        },
-                        body: formData,
-                    });
-
-                    if (response.ok) {
-                        messageDiv.textContent = "Fișierul a fost încărcat cu succes!";
-                        messageDiv.className = "text-green-500";
-                    } else {
-                        const result = await response.text();
-                        messageDiv.textContent = `Eroare: ${result}`;
-                        messageDiv.className = "text-red-500";
-                    }
-                } catch (error) {
-                    messageDiv.textContent = "A apărut o eroare în timpul încărcării.";
-                    messageDiv.className = "text-red-500";
-                } finally {
-                    setSubmitPasswordLoading(false);
-                }
-            };
-        }
-    </script>
-    )}
+      };
+    }
+  </script>
 </Layout>

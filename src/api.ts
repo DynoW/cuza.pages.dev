@@ -1,6 +1,6 @@
-import type { PageData } from "./types";
+import type { PageData } from './types';
 
-const DEFAULT_WORKER_URL = "https://api.my-lab.ro";
+const DEFAULT_WORKER_URL = 'https://api.my-lab.ro';
 
 export class ApiService {
   private readonly baseUrl: string;
@@ -18,7 +18,7 @@ export class ApiService {
       }
       return await response.json();
     } catch (error) {
-      console.warn("API fetch failed:", error);
+      console.warn('API fetch failed:', error);
       return null;
     }
   }
@@ -31,11 +31,11 @@ export class ApiService {
     }
 
     const content =
-      response.content && typeof response.content === "object"
+      response.content && typeof response.content === 'object'
         ? response.content
         : {};
     const extra =
-      response.extra && typeof response.extra === "object"
+      response.extra && typeof response.extra === 'object'
         ? response.extra
         : {};
     const years = Array.isArray(response.years) ? response.years : [];

@@ -1,6 +1,6 @@
 ---
-title: "Curs-6"
-description: "Factori primi"
+title: 'Curs-6'
+description: 'Factori primi'
 ---
 
 ## Exemplu

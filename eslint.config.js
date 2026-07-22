@@ -1,12 +1,12 @@
-import eslintPluginAstro from "eslint-plugin-astro";
+import eslintPluginAstro from 'eslint-plugin-astro';
 export default [
   {
     ignores: [
-      "**/dist/**",
-      "**/node_modules/**",
-      "**/.astro/**",
-      "**/.wrangler/**",
-      "**/coverage/**",
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/.astro/**',
+      '**/.wrangler/**',
+      '**/coverage/**',
     ],
   },
   // add more generic rule sets here, such as:

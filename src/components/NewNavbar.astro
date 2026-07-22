@@ -1,14 +1,14 @@
 ---
-import { apiService } from "../api";
-import { getDisplayName } from "../config/labels";
+import { apiService } from '../api';
+import { getDisplayName } from '../config/labels';
 
 // Get current path for highlighting active links
 const pathname = new URL(Astro.request.url).pathname;
-const currentPath: string[] = pathname.replace(".html", "").split("/").slice(1);
+const currentPath: string[] = pathname.replace('.html', '').split('/').slice(1);
 
 const isHome =
   currentPath.length === 1 &&
-  (currentPath[0] === "" || currentPath[0] === "index");
+  (currentPath[0] === '' || currentPath[0] === 'index');
 
 // Define the navStructure type to avoid TypeScript errors
 interface NavStructure {
@@ -19,7 +19,7 @@ interface NavStructure {
 const subjectPages = await apiService.getStructure();
 const navStructure: NavStructure = {
   ...subjectPages,
-  notite: ["info", "romana"],
+  notite: ['info', 'romana'],
 };
 
 const navEntries = Object.entries(navStructure).filter(
@@ -28,20 +28,20 @@ const navEntries = Object.entries(navStructure).filter(
 
 // Helper function to get the URL for a nav item
 function getNavUrl(subject: string, page: string | null): string {
-  if (page === "bac") return subject === "fizica" ? "/" : `/${subject}`;
+  if (page === 'bac') return subject === 'fizica' ? '/' : `/${subject}`;
   return `/${subject}/${page}`;
 }
 
 // Check if current path matches subject/page
 function isSubjectActive(subject: string): boolean {
-  return currentPath[0] === subject || (subject === "fizica" && isHome);
+  return currentPath[0] === subject || (subject === 'fizica' && isHome);
 }
 
 function isPageActive(subject: string, page: string | null = null): boolean {
-  if (page == "bac") {
+  if (page == 'bac') {
     return (
       (currentPath[0] === subject && currentPath.length === 1) ||
-      (subject === "fizica" && isHome)
+      (subject === 'fizica' && isHome)
     );
   }
   return currentPath[0] === subject && currentPath[1] === page;
@@ -141,9 +141,9 @@ function isPageActive(subject: string, page: string | null = null): boolean {
                   <>
                     <button
                       type="button"
-                      class={`nav-link ${isSubjectActive(subject) ? "active" : ""}`}
+                      class={`nav-link ${isSubjectActive(subject) ? 'active' : ''}`}
                       aria-expanded={
-                        isSubjectActive(subject) ? "true" : "false"
+                        isSubjectActive(subject) ? 'true' : 'false'
                       }
                       aria-controls={dropdownId}
                       data-nav-trigger
@@ -167,14 +167,14 @@ function isPageActive(subject: string, page: string | null = null): boolean {
                       </svg>
                     </button>
                     <div
-                      class={`submenu ${isSubjectActive(subject) ? "open" : ""}`}
+                      class={`submenu ${isSubjectActive(subject) ? 'open' : ''}`}
                       id={dropdownId}
                       data-dropdown={subject}
                     >
                       <div class="min-h-0">
                         {pages.map((page: string) => (
                           <a
-                            class={`submenu-link ${isPageActive(subject, page) ? "active" : ""}`}
+                            class={`submenu-link ${isPageActive(subject, page) ? 'active' : ''}`}
                             href={getNavUrl(subject, page)}
                             data-nav-link
                           >
@@ -186,7 +186,7 @@ function isPageActive(subject: string, page: string | null = null): boolean {
                   </>
                 ) : (
                   <a
-                    class={`nav-link ${isSubjectActive(subject) ? "active" : ""}`}
+                    class={`nav-link ${isSubjectActive(subject) ? 'active' : ''}`}
                     href={getNavUrl(subject, pages[0])}
                     data-nav-link
                   >
@@ -248,7 +248,7 @@ function isPageActive(subject: string, page: string | null = null): boolean {
     }
 
     .nav-link::before {
-      content: "";
+      content: '';
       position: absolute;
       left: 0;
       top: 0;
@@ -290,7 +290,7 @@ function isPageActive(subject: string, page: string | null = null): boolean {
     .nav-link.active::before {
       transform: scaleY(1);
     }
-    .nav-link[aria-expanded="true"] .chevron {
+    .nav-link[aria-expanded='true'] .chevron {
       transform: rotate(90deg);
     }
 
@@ -323,7 +323,7 @@ function isPageActive(subject: string, page: string | null = null): boolean {
     }
 
     .submenu-link::before {
-      content: "";
+      content: '';
       position: absolute;
       left: 1.25rem;
       top: 50%;
@@ -374,93 +374,93 @@ function isPageActive(subject: string, page: string | null = null): boolean {
   </style>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const mobileToggle = document.getElementById("mobile-menu-toggle");
-      const mobileClose = document.getElementById("mobile-close-button");
-      const overlay = document.getElementById("mobile-overlay");
-      const sideNav = document.getElementById("side-nav");
+    document.addEventListener('DOMContentLoaded', () => {
+      const mobileToggle = document.getElementById('mobile-menu-toggle');
+      const mobileClose = document.getElementById('mobile-close-button');
+      const overlay = document.getElementById('mobile-overlay');
+      const sideNav = document.getElementById('side-nav');
 
       // Open/close mobile menu helpers
       const toggleMenu = (isOpen: boolean) => {
         if (!sideNav || !overlay || !mobileToggle) return;
-        sideNav.classList.toggle("open", isOpen);
-        sideNav.classList.toggle("translate-x-0", isOpen);
-        sideNav.classList.toggle("-translate-x-full", !isOpen);
-        overlay.classList.toggle("open", isOpen);
-        mobileToggle.style.display = isOpen ? "none" : "";
-        document.body.style.overflow = isOpen ? "hidden" : "";
+        sideNav.classList.toggle('open', isOpen);
+        sideNav.classList.toggle('translate-x-0', isOpen);
+        sideNav.classList.toggle('-translate-x-full', !isOpen);
+        overlay.classList.toggle('open', isOpen);
+        mobileToggle.style.display = isOpen ? 'none' : '';
+        document.body.style.overflow = isOpen ? 'hidden' : '';
       };
 
       const openMenu = () => toggleMenu(true);
       const closeMenu = () => toggleMenu(false);
 
-      if (mobileToggle) mobileToggle.addEventListener("click", openMenu);
-      if (mobileClose) mobileClose.addEventListener("click", closeMenu);
-      if (overlay) overlay.addEventListener("click", closeMenu);
+      if (mobileToggle) mobileToggle.addEventListener('click', openMenu);
+      if (mobileClose) mobileClose.addEventListener('click', closeMenu);
+      if (overlay) overlay.addEventListener('click', closeMenu);
 
       // Handle submenu toggles
-      const navTriggers = document.querySelectorAll("[data-nav-trigger]");
+      const navTriggers = document.querySelectorAll('[data-nav-trigger]');
       navTriggers.forEach((triggerEl) => {
-        triggerEl.addEventListener("click", (e) => {
+        triggerEl.addEventListener('click', (e) => {
           e.preventDefault();
 
-          const dropdownId = triggerEl.getAttribute("aria-controls");
+          const dropdownId = triggerEl.getAttribute('aria-controls');
           if (!dropdownId) return;
           const dropdown = document.getElementById(dropdownId);
           if (!dropdown) return;
 
-          const isExpanded = triggerEl.getAttribute("aria-expanded") === "true";
-          triggerEl.setAttribute("aria-expanded", (!isExpanded).toString());
+          const isExpanded = triggerEl.getAttribute('aria-expanded') === 'true';
+          triggerEl.setAttribute('aria-expanded', (!isExpanded).toString());
           if (isExpanded) {
-            dropdown.classList.remove("open");
+            dropdown.classList.remove('open');
           } else {
-            dropdown.classList.add("open");
+            dropdown.classList.add('open');
           }
         });
       });
 
       // Close mobile menu when clicking on a link
-      const navLinks = document.querySelectorAll("[data-nav-link]");
+      const navLinks = document.querySelectorAll('[data-nav-link]');
       navLinks.forEach((link) => {
-        link.addEventListener("click", () => {
+        link.addEventListener('click', () => {
           if (window.innerWidth < 1024) closeMenu();
         });
       });
 
       // Handle escape key
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && sideNav && sideNav.classList.contains("open"))
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sideNav && sideNav.classList.contains('open'))
           closeMenu();
       });
 
       const month = new Date().getMonth();
       if (month === 11) {
-        const logoContainer = document.getElementById("page-title");
+        const logoContainer = document.getElementById('page-title');
 
         const updateHatStyles = () => {
           const img =
-            logoContainer?.querySelector<HTMLImageElement>("img[data-hat]");
+            logoContainer?.querySelector<HTMLImageElement>('img[data-hat]');
           if (img) {
             img.width = window.innerWidth >= 1280 ? 32 : 22;
-            img.style.top = window.innerWidth >= 1280 ? "-6px" : "-3px";
-            img.style.left = window.innerWidth >= 1280 ? "-9px" : "-7px";
+            img.style.top = window.innerWidth >= 1280 ? '-6px' : '-3px';
+            img.style.left = window.innerWidth >= 1280 ? '-9px' : '-7px';
           }
         };
 
-        if (logoContainer && !logoContainer.querySelector("img[data-hat]")) {
-          const img = document.createElement("img");
-          img.src = "/assets/img/logo/sapca.png";
+        if (logoContainer && !logoContainer.querySelector('img[data-hat]')) {
+          const img = document.createElement('img');
+          img.src = '/assets/img/logo/sapca.png';
           img.width = window.innerWidth >= 1280 ? 32 : 22;
-          img.alt = "sapca";
-          img.dataset.hat = "true";
-          img.style.position = "absolute";
-          img.style.top = window.innerWidth >= 1280 ? "-6px" : "-3px";
-          img.style.left = window.innerWidth >= 1280 ? "-9px" : "-7px";
+          img.alt = 'sapca';
+          img.dataset.hat = 'true';
+          img.style.position = 'absolute';
+          img.style.top = window.innerWidth >= 1280 ? '-6px' : '-3px';
+          img.style.left = window.innerWidth >= 1280 ? '-9px' : '-7px';
           // @ts-ignore
           logoContainer.prepend(img);
         }
 
-        window.addEventListener("resize", updateHatStyles);
+        window.addEventListener('resize', updateHatStyles);
       }
     });
   </script>

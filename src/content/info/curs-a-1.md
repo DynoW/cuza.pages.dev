@@ -1,6 +1,6 @@
 ---
-title: "Curs-vectori-1"
-description: "Introducere"
+title: 'Curs-vectori-1'
+description: 'Introducere'
 ---
 
 ## Tablouri unidimensionale

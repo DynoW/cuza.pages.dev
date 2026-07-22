@@ -1,6 +1,6 @@
 ---
-title: "Curs-7"
-description: "Șirul lui Fibonacci"
+title: 'Curs-7'
+description: 'Șirul lui Fibonacci'
 ---
 
 ## Verificare: `n` aparține șirului?

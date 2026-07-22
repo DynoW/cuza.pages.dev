@@ -1,6 +1,6 @@
 ---
-title: "Curs-matrici-2"
-description: "Suma și parcurgerea elementelor"
+title: 'Curs-matrici-2'
+description: 'Suma și parcurgerea elementelor'
 ---
 
 ## Suma tuturor elementelor

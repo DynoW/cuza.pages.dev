@@ -1,6 +1,6 @@
 ---
-title: "Curs-matrici-5"
-description: "Diagonala principală și secundară"
+title: 'Curs-matrici-5'
+description: 'Diagonala principală și secundară'
 ---
 
 ## Diagonala principală

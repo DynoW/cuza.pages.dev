@@ -1,6 +1,6 @@
 ---
-title: "Curs-3"
-description: "Suma divizorilor"
+title: 'Curs-3'
+description: 'Suma divizorilor'
 ---
 
 ## Varianta I

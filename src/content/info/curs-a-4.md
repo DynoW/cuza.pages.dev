@@ -1,6 +1,6 @@
 ---
-title: "Curs-vectori-4"
-description: "Căutare binară"
+title: 'Curs-vectori-4'
+description: 'Căutare binară'
 ---
 
 ## Implementare (pentru șiruri ordonate)

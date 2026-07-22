@@ -1,5 +1,5 @@
 ---
-import { getCountdownConfig } from "../config/countdown";
+import { getCountdownConfig } from '../config/countdown';
 
 const config = getCountdownConfig();
 ---
@@ -110,26 +110,26 @@ const config = getCountdownConfig();
   };
   const showElement = (element: HTMLElement | null): void => {
     if (element) {
-      element.classList.remove("hidden");
-      element.style.display = "";
+      element.classList.remove('hidden');
+      element.style.display = '';
     }
   };
   const hideElement = (element: HTMLElement | null): void => {
     if (element) {
-      element.classList.add("hidden");
-      element.style.display = "none";
+      element.classList.add('hidden');
+      element.style.display = 'none';
     }
   };
   const padNumber = (num: number): string =>
     num < 10 ? `0${num}` : num.toString();
 
   // --- storage utils ---
-  const getStorageItem = (key: string, defaultValue: string = ""): string => {
-    if (typeof localStorage === "undefined") return defaultValue;
+  const getStorageItem = (key: string, defaultValue: string = ''): string => {
+    if (typeof localStorage === 'undefined') return defaultValue;
     return localStorage.getItem(key) || defaultValue;
   };
   const setStorageItem = (key: string, value: string): void => {
-    if (typeof localStorage !== "undefined") localStorage.setItem(key, value);
+    if (typeof localStorage !== 'undefined') localStorage.setItem(key, value);
   };
 
   class CountdownManager {
@@ -146,18 +146,18 @@ const config = getCountdownConfig();
       this.endDate = new Date(config.endDate).getTime();
 
       this.elements = {
-        days: getElementById("days"),
-        hours: getElementById("hours"),
-        minutes: getElementById("minutes"),
-        seconds: getElementById("seconds"),
-        title: getElementById("countdown-title"),
-        countdownToExam: getElementById("countdown-to-exam"),
-        progressToResults: getElementById("progress-to-results"),
-        completionMessage: getElementById("completion-message"),
-        progressBar: getElementById("progress-bar"),
-        toggleButton: getElementById("toggle-countdown"),
-        toggleIcon: getElementById("toggle-icon"),
-        countdownContent: getElementById("countdown-content"),
+        days: getElementById('days'),
+        hours: getElementById('hours'),
+        minutes: getElementById('minutes'),
+        seconds: getElementById('seconds'),
+        title: getElementById('countdown-title'),
+        countdownToExam: getElementById('countdown-to-exam'),
+        progressToResults: getElementById('progress-to-results'),
+        completionMessage: getElementById('completion-message'),
+        progressBar: getElementById('progress-bar'),
+        toggleButton: getElementById('toggle-countdown'),
+        toggleIcon: getElementById('toggle-icon'),
+        countdownContent: getElementById('countdown-content'),
       };
 
       this.init();
@@ -172,13 +172,13 @@ const config = getCountdownConfig();
       const { toggleButton, countdownContent, toggleIcon } = this.elements;
       if (!toggleButton || !countdownContent || !toggleIcon) return;
 
-      const isCollapsed = getStorageItem("countdownCollapsed") === "true";
+      const isCollapsed = getStorageItem('countdownCollapsed') === 'true';
       this.setCollapseState(isCollapsed);
 
-      toggleButton.addEventListener("click", () => {
-        const isCurrentlyVisible = countdownContent.style.display !== "none";
+      toggleButton.addEventListener('click', () => {
+        const isCurrentlyVisible = countdownContent.style.display !== 'none';
         this.setCollapseState(isCurrentlyVisible);
-        setStorageItem("countdownCollapsed", isCurrentlyVisible.toString());
+        setStorageItem('countdownCollapsed', isCurrentlyVisible.toString());
       });
     }
 
@@ -186,8 +186,8 @@ const config = getCountdownConfig();
       const { countdownContent, toggleIcon } = this.elements;
       if (!countdownContent || !toggleIcon) return;
 
-      countdownContent.style.display = collapsed ? "none" : "block";
-      toggleIcon.textContent = collapsed ? "▲" : "▼";
+      countdownContent.style.display = collapsed ? 'none' : 'block';
+      toggleIcon.textContent = collapsed ? '▲' : '▼';
     }
 
     private startUpdating(): void {
@@ -267,12 +267,12 @@ const config = getCountdownConfig();
   }
 
   // Initialize when DOM is ready
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener('DOMContentLoaded', () => {
     const configScript = document.querySelector(
-      "script[data-countdown-config]",
+      'script[data-countdown-config]',
     );
     if (configScript) {
-      const config = JSON.parse(configScript.textContent || "{}");
+      const config = JSON.parse(configScript.textContent || '{}');
       new CountdownManager(config);
     }
   });
@@ -280,9 +280,9 @@ const config = getCountdownConfig();
 
 <script is:inline define:vars={{ config }}>
   // Pass config to the main script
-  const scriptEl = document.createElement("script");
-  scriptEl.type = "application/json";
-  scriptEl.dataset.countdownConfig = "true";
+  const scriptEl = document.createElement('script');
+  scriptEl.type = 'application/json';
+  scriptEl.dataset.countdownConfig = 'true';
   scriptEl.textContent = JSON.stringify(config);
   document.head.appendChild(scriptEl);
 </script>

@@ -1,6 +1,6 @@
 ---
-title: "Curs-1"
-description: "Suma cifrelor"
+title: 'Curs-1'
+description: 'Suma cifrelor'
 ---
 
 ## Varianta I (explicită)

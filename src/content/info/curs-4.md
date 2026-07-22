@@ -1,6 +1,6 @@
 ---
-title: "Curs-4"
-description: "Verificare număr prim"
+title: 'Curs-4'
+description: 'Verificare număr prim'
 ---
 
 ## Varianta I

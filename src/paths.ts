@@ -1,4 +1,4 @@
-import { apiService } from "./api";
+import { apiService } from './api';
 
 interface StaticPathParams {
   subject: string;
@@ -19,7 +19,7 @@ export async function subjectIndexPaths(
     .filter(([subject]) => !excludedSubjects.includes(subject))
     .map(([subject, pages]) => ({
       params: { subject },
-      props: { firstPage: pages[0] ?? "bac" },
+      props: { firstPage: pages[0] ?? 'bac' },
     }));
 }
 
@@ -29,7 +29,7 @@ export async function subjectPagePaths(): Promise<StaticPath[]> {
   const paths: StaticPath[] = [];
   for (const [subject, pages] of Object.entries(subjectPages)) {
     for (const page of pages) {
-      if (page !== "bac") {
+      if (page !== 'bac') {
         paths.push({ params: { subject, page } });
       }
     }

@@ -1,6 +1,6 @@
 ---
-title: "Curs-0"
-description: "Citire de numere"
+title: 'Curs-0'
+description: 'Citire de numere'
 ---
 
 ## Ce înveți

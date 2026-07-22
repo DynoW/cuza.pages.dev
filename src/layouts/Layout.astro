@@ -1,7 +1,7 @@
 ---
-import { SEO } from "astro-seo";
-import UpArrow from "../icons/UpArrow.astro";
-import "../styles/global.css";
+import { SEO } from 'astro-seo';
+import UpArrow from '../icons/UpArrow.astro';
+import '../styles/global.css';
 
 interface Props {
   title: string;
@@ -20,8 +20,8 @@ interface Props {
 
 const {
   title,
-  description = "Subiecte de bac și admitere UPB la fizică, matematică și informatică. Liceul Teoretic Alexandru Ioan Cuza, București",
-  keywords = "bac, bacalaureat, subiecte, fizica, matematica, informatica, examen, admitere, upb, poli, programare, algoritmi, variante, teste, simulari, mate-fizica, mate-info, info, Liceul Teoretic Alexandru Ioan Cuza, București, LTAIC, cuza",
+  description = 'Subiecte de bac și admitere UPB la fizică, matematică și informatică. Liceul Teoretic Alexandru Ioan Cuza, București',
+  keywords = 'bac, bacalaureat, subiecte, fizica, matematica, informatica, examen, admitere, upb, poli, programare, algoritmi, variante, teste, simulari, mate-fizica, mate-info, info, Liceul Teoretic Alexandru Ioan Cuza, București, LTAIC, cuza',
   noindex,
   nofollow,
   canonicalUrl,
@@ -35,7 +35,7 @@ const {
 
 // Determine background at build time
 const month = new Date().getMonth();
-let backgroundStyle = "";
+let backgroundStyle = '';
 const isWinterTheme = backgroundImage && month === 11;
 const isSpringTheme = backgroundImage && (month === 2 || month === 3);
 
@@ -61,95 +61,95 @@ if (isWinterTheme) {
       openGraph={{
         basic: {
           title: title,
-          type: "website",
-          image: "https://cuza.pages.dev/assets/img/site-img.png",
+          type: 'website',
+          image: 'https://cuza.pages.dev/assets/img/site-img.png',
           url: Astro.url.href,
         },
         optional: {
           description: description,
-          locale: "ro_RO",
-          siteName: "Mate-fizica",
+          locale: 'ro_RO',
+          siteName: 'Mate-fizica',
         },
         image: {
-          alt: "Preview cuza.pages.dev",
+          alt: 'Preview cuza.pages.dev',
           width: 1200,
           height: 630,
         },
       }}
       twitter={{
-        card: "summary_large_image",
-        site: "https://cuza.pages.dev",
-        creator: "@DynoW",
+        card: 'summary_large_image',
+        site: 'https://cuza.pages.dev',
+        creator: '@DynoW',
         title: title,
         description: description,
-        image: "https://cuza.pages.dev/assets/img/site-img.png",
-        imageAlt: "Preview cuza.pages.dev",
+        image: 'https://cuza.pages.dev/assets/img/site-img.png',
+        imageAlt: 'Preview cuza.pages.dev',
       }}
       extend={{
         link: [
           {
-            rel: "preload",
-            href: "/assets/fonts/inter-medium.woff2",
-            as: "font",
-            type: "font/woff2",
-            crossorigin: "anonymous",
+            rel: 'preload',
+            href: '/assets/fonts/inter-medium.woff2',
+            as: 'font',
+            type: 'font/woff2',
+            crossorigin: 'anonymous',
           },
           {
-            rel: "apple-touch-icon",
-            type: "image/png",
-            sizes: "180x180",
-            href: "/assets/img/logo/atoms_180px.png",
+            rel: 'apple-touch-icon',
+            type: 'image/png',
+            sizes: '180x180',
+            href: '/assets/img/logo/atoms_180px.png',
           },
           {
-            rel: "icon",
-            type: "image/png",
-            sizes: "16x16",
-            href: "/assets/img/logo/atoms_16px.png",
+            rel: 'icon',
+            type: 'image/png',
+            sizes: '16x16',
+            href: '/assets/img/logo/atoms_16px.png',
           },
           {
-            rel: "icon",
-            type: "image/png",
-            sizes: "32x32",
-            href: "/assets/img/logo/atoms_32px.png",
+            rel: 'icon',
+            type: 'image/png',
+            sizes: '32x32',
+            href: '/assets/img/logo/atoms_32px.png',
           },
           {
-            rel: "icon",
-            type: "image/png",
-            sizes: "180x180",
-            href: "/assets/img/logo/atoms_180px.png",
+            rel: 'icon',
+            type: 'image/png',
+            sizes: '180x180',
+            href: '/assets/img/logo/atoms_180px.png',
           },
           {
-            rel: "icon",
-            type: "image/png",
-            sizes: "192x192",
-            href: "/assets/img/logo/atoms_192px.png",
+            rel: 'icon',
+            type: 'image/png',
+            sizes: '192x192',
+            href: '/assets/img/logo/atoms_192px.png',
           },
           {
-            rel: "icon",
-            type: "image/png",
-            sizes: "512x512",
-            href: "/assets/img/logo/atoms_512px.png",
+            rel: 'icon',
+            type: 'image/png',
+            sizes: '512x512',
+            href: '/assets/img/logo/atoms_512px.png',
           },
           {
-            rel: "shortcut icon",
-            type: "image/png",
-            sizes: "32x32",
-            href: "/assets/img/logo/atoms_32px.png",
+            rel: 'shortcut icon',
+            type: 'image/png',
+            sizes: '32x32',
+            href: '/assets/img/logo/atoms_32px.png',
           },
           {
-            rel: "manifest",
-            href: "/manifest.webmanifest",
+            rel: 'manifest',
+            href: '/manifest.webmanifest',
           },
           {
-            rel: "sitemap",
-            type: "application/xml",
-            href: "/sitemap-index.xml",
+            rel: 'sitemap',
+            type: 'application/xml',
+            href: '/sitemap-index.xml',
           },
           ...(markdown
             ? [
                 {
-                  rel: "stylesheet",
-                  href: "/assets/css/github-markdown.css",
+                  rel: 'stylesheet',
+                  href: '/assets/css/github-markdown.css',
                 },
               ]
             : []),
@@ -157,20 +157,20 @@ if (isWinterTheme) {
         ],
         meta: [
           {
-            name: "viewport",
-            content: "width=device-width, initial-scale=1.0, shrink-to-fit=no",
+            name: 'viewport',
+            content: 'width=device-width, initial-scale=1.0, shrink-to-fit=no',
           },
           {
-            name: "keywords",
+            name: 'keywords',
             content: keywords,
           },
           {
-            name: "theme-color",
-            content: "#0e1720",
+            name: 'theme-color',
+            content: '#0e1720',
           },
           {
-            name: "author",
-            content: "Liceul Teoretic Alexandru Ioan Cuza, București",
+            name: 'author',
+            content: 'Liceul Teoretic Alexandru Ioan Cuza, București',
           },
           ...(Array.isArray(extendMeta) ? extendMeta : []),
         ],
@@ -180,17 +180,17 @@ if (isWinterTheme) {
       is:inline
       type="application/ld+json"
       set:html={JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        name: "Mate-fizica",
-        url: "https://cuza.pages.dev",
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Mate-fizica',
+        url: 'https://cuza.pages.dev',
         description:
-          "Subiecte de bac și admitere UPB la fizică, matematică și informatică. Liceul Teoretic Alexandru Ioan Cuza, București",
-        inLanguage: "ro",
+          'Subiecte de bac și admitere UPB la fizică, matematică și informatică. Liceul Teoretic Alexandru Ioan Cuza, București',
+        inLanguage: 'ro',
         publisher: {
-          "@type": "EducationalOrganization",
-          name: "Liceul Teoretic Alexandru Ioan Cuza, București",
-          url: "https://laicuza.ro",
+          '@type': 'EducationalOrganization',
+          name: 'Liceul Teoretic Alexandru Ioan Cuza, București',
+          url: 'https://laicuza.ro',
         },
       })}
     />
@@ -200,11 +200,11 @@ if (isWinterTheme) {
           is:inline
           type="application/ld+json"
           set:html={JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BreadcrumbList",
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
             itemListElement: breadcrumbs.map(
               (crumb: { name: string; url: string }, index: number) => ({
-                "@type": "ListItem",
+                '@type': 'ListItem',
                 position: index + 1,
                 name: crumb.name,
                 item: crumb.url,
@@ -216,7 +216,7 @@ if (isWinterTheme) {
     }
     {/* Excalidraw asset path */}
     <script is:inline>
-      window.EXCALIDRAW_ASSET_PATH = "/assets";
+      window.EXCALIDRAW_ASSET_PATH = '/assets';
     </script>
 
     {
@@ -243,7 +243,7 @@ if (isWinterTheme) {
     }
   </head>
   <body
-    class={`font-sans select-none overflow-x-hidden relative min-h-screen p-0${backgroundImage ? " backgroundImage" : ""}${bodyClass ? ` ${bodyClass}` : ""}`}
+    class={`font-sans select-none overflow-x-hidden relative min-h-screen p-0${backgroundImage ? ' backgroundImage' : ''}${bodyClass ? ` ${bodyClass}` : ''}`}
     style={backgroundStyle}
   >
     <slot />
@@ -270,12 +270,12 @@ if (isWinterTheme) {
       </button>
       <script is:inline>
         function scrollToTop() {
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-        window.addEventListener("scroll", function () {
-          const button = document.getElementById("scrollToTop");
+        window.addEventListener('scroll', function () {
+          const button = document.getElementById('scrollToTop');
           if (button) {
-            button.style.display = window.scrollY > 0 ? "block" : "none";
+            button.style.display = window.scrollY > 0 ? 'block' : 'none';
           }
         });
       </script>
@@ -283,8 +283,8 @@ if (isWinterTheme) {
     <script>
       // Tab visibility title change
       const _originalTitle = document.title;
-      document.addEventListener("visibilitychange", () => {
-        document.title = document.hidden ? "Cuza Hub 😉" : _originalTitle;
+      document.addEventListener('visibilitychange', () => {
+        document.title = document.hidden ? 'Cuza Hub 😉' : _originalTitle;
       });
     </script>
     <!-- <script>

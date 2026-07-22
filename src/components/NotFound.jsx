@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
-import { Home, Ghost } from "lucide-react";
+import { motion } from 'framer-motion';
+import { Home, Ghost } from 'lucide-react';
 
 export default function NotFound() {
   // Animation variants for staggered entrance
@@ -19,7 +19,7 @@ export default function NotFound() {
     visible: {
       y: 0,
       opacity: 1,
-      transition: { type: "spring", stiffness: 100 },
+      transition: { type: 'spring', stiffness: 100 },
     },
   };
 
@@ -50,7 +50,7 @@ export default function NotFound() {
             <motion.span
               className="inline-block text-amber-400"
               animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             >
               404
             </motion.span>

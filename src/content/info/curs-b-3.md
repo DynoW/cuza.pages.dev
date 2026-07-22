@@ -1,6 +1,6 @@
 ---
-title: "Curs-matrici-3"
-description: "Transpunerea unei matrice"
+title: 'Curs-matrici-3'
+description: 'Transpunerea unei matrice'
 ---
 
 ## Ideea

@@ -1,6 +1,6 @@
 ---
-title: "Curs-matrici-4"
-description: "Înmulțirea a două matrice"
+title: 'Curs-matrici-4'
+description: 'Înmulțirea a două matrice'
 ---
 
 ## Regula

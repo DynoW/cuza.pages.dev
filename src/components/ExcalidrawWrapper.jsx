@@ -5,24 +5,24 @@ import {
   useRef,
   lazy,
   Suspense,
-} from "react";
-import "@excalidraw/excalidraw/index.css";
+} from 'react';
+import '@excalidraw/excalidraw/index.css';
 
 const LazyExcalidraw = lazy(async () => {
-  const module = await import("@excalidraw/excalidraw");
+  const module = await import('@excalidraw/excalidraw');
   return { default: module.Excalidraw };
 });
 
-const LOCAL_STORAGE_KEY = "excalidraw-romana";
-const EXCALIDRAW_FILE = "/assets/excalidraw/romana.excalidraw";
+const LOCAL_STORAGE_KEY = 'excalidraw-romana';
+const EXCALIDRAW_FILE = '/assets/excalidraw/romana.excalidraw';
 
 // Pure hash: includes version so edits to existing elements are detected
 const hashElements = (elements) => {
-  if (!elements || !elements.length) return "";
+  if (!elements || !elements.length) return '';
   return elements
     .map((el) => `${el.id}:${el.version ?? 0}`)
     .sort()
-    .join("|");
+    .join('|');
 };
 
 const ExcalidrawWrapper = () => {
@@ -46,10 +46,10 @@ const ExcalidrawWrapper = () => {
     checkScreenSize();
 
     // Add event listener for window resize
-    window.addEventListener("resize", checkScreenSize);
+    window.addEventListener('resize', checkScreenSize);
 
     // Cleanup
-    return () => window.removeEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
   // Check if a schema update is available from the server
@@ -72,7 +72,7 @@ const ExcalidrawWrapper = () => {
         setUpdateAvailable(serverHash !== localHash);
       }
     } catch (error) {
-      console.error("Error checking for schema updates:", error);
+      console.error('Error checking for schema updates:', error);
     }
   }, []); // Fetch the initial schema from the server
   const fetchSchema = useCallback(async () => {
@@ -104,10 +104,10 @@ const ExcalidrawWrapper = () => {
         setHasUserChanges(false);
         setUpdateAvailable(false);
       } else {
-        console.error("Fetched schema has no elements");
+        console.error('Fetched schema has no elements');
       }
     } catch (error) {
-      console.error("Error loading Excalidraw file:", error);
+      console.error('Error loading Excalidraw file:', error);
     } finally {
       setIsLoading(false);
     }
@@ -141,12 +141,12 @@ const ExcalidrawWrapper = () => {
               await checkForSchemaUpdates();
             } else {
               console.warn(
-                "Saved data has no elements, fetching from server instead",
+                'Saved data has no elements, fetching from server instead',
               );
               await fetchSchema();
             }
           } catch (parseError) {
-            console.error("Error parsing saved data:", parseError);
+            console.error('Error parsing saved data:', parseError);
             await fetchSchema();
           }
         } else {
@@ -154,7 +154,7 @@ const ExcalidrawWrapper = () => {
           await fetchSchema();
         }
       } catch (error) {
-        console.error("Error loading Excalidraw data:", error);
+        console.error('Error loading Excalidraw data:', error);
         // If error occurs with local data, try fetching from server
         await fetchSchema();
       } finally {
@@ -181,7 +181,7 @@ const ExcalidrawWrapper = () => {
     if (!excalidrawAPI) return;
 
     excalidrawAPI.setActiveTool({
-      type: "hand",
+      type: 'hand',
       locked: true,
     });
 
@@ -199,12 +199,12 @@ const ExcalidrawWrapper = () => {
           setHasUserChanges(currentHash !== originalSchemaHashRef.current);
         }
       } catch (error) {
-        console.error("Error saving Excalidraw data:", error);
+        console.error('Error saving Excalidraw data:', error);
       }
     });
 
     return () => {
-      if (typeof unsubscribe === "function") unsubscribe();
+      if (typeof unsubscribe === 'function') unsubscribe();
     };
   }, [excalidrawAPI]);
 
@@ -212,7 +212,7 @@ const ExcalidrawWrapper = () => {
   const handleUpdateSchema = async () => {
     if (
       window.confirm(
-        "Acest lucru va actualiza schema română și va înlocui modificările făcute de tine. Ești sigur?",
+        'Acest lucru va actualiza schema română și va înlocui modificările făcute de tine. Ești sigur?',
       )
     ) {
       await fetchSchema();
@@ -223,12 +223,12 @@ const ExcalidrawWrapper = () => {
       <div
         className="excalidraw-loading"
         style={{
-          height: "100dvh" /* dynamic viewport height */,
-          maxHeight: "-webkit-fill-available" /* for iOS Safari */,
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          height: '100dvh' /* dynamic viewport height */,
+          maxHeight: '-webkit-fill-available' /* for iOS Safari */,
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         Loading scene...
@@ -239,10 +239,10 @@ const ExcalidrawWrapper = () => {
     <div
       className="excalidraw-container"
       style={{
-        height: "100dvh" /* dynamic viewport height */,
-        maxHeight: "-webkit-fill-available" /* for iOS Safari */,
-        width: "100%",
-        overflow: "hidden",
+        height: '100dvh' /* dynamic viewport height */,
+        maxHeight: '-webkit-fill-available' /* for iOS Safari */,
+        width: '100%',
+        overflow: 'hidden',
       }}
     >
       <Suspense
@@ -250,12 +250,12 @@ const ExcalidrawWrapper = () => {
           <div
             className="excalidraw-loading"
             style={{
-              height: "100dvh",
-              maxHeight: "-webkit-fill-available",
-              width: "100%",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+              height: '100dvh',
+              maxHeight: '-webkit-fill-available',
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
             }}
           >
             Loading editor...
@@ -267,13 +267,13 @@ const ExcalidrawWrapper = () => {
           initialData={{
             elements: excalidrawData?.elements || [],
             appState: {
-              theme: "dark",
+              theme: 'dark',
               gridSize: null,
               activeTool: {
-                type: "hand",
+                type: 'hand',
                 locked: true,
               },
-              currentItemType: "hand",
+              currentItemType: 'hand',
               ...(excalidrawData?.appState || {}),
             },
             scrollToContent: true,
@@ -282,33 +282,33 @@ const ExcalidrawWrapper = () => {
           renderTopRightUI={() => {
             // Determine button style and text based on state
             const buttonText = updateAvailable
-              ? "Actualizare schema disponibilă"
+              ? 'Actualizare schema disponibilă'
               : hasUserChanges
-                ? "Resetează schema română"
-                : "Aceasta este schema initială";
+                ? 'Resetează schema română'
+                : 'Aceasta este schema initială';
 
             const buttonBackground = updateAvailable
-              ? "#4CAF50" // Green for update available
-              : "#70b1ec"; // Default blue
+              ? '#4CAF50' // Green for update available
+              : '#70b1ec'; // Default blue
 
             return (
               <button
                 style={{
                   background: buttonBackground,
-                  border: "none",
-                  color: "#fff",
-                  width: "max-content",
-                  fontWeight: "bold",
-                  borderRadius: "0.5rem",
-                  paddingLeft: "8px",
-                  paddingRight: "8px",
+                  border: 'none',
+                  color: '#fff',
+                  width: 'max-content',
+                  fontWeight: 'bold',
+                  borderRadius: '0.5rem',
+                  paddingLeft: '8px',
+                  paddingRight: '8px',
                   // Use isSmallScreen state for responsive positioning
-                  paddingTop: "4px",
-                  paddingBottom: "4px",
-                  position: isSmallScreen ? "fixed" : "relative",
-                  bottom: isSmallScreen ? "70px" : "auto",
-                  right: isSmallScreen ? "15px" : "auto",
-                  zIndex: isSmallScreen ? "100" : "auto",
+                  paddingTop: '4px',
+                  paddingBottom: '4px',
+                  position: isSmallScreen ? 'fixed' : 'relative',
+                  bottom: isSmallScreen ? '70px' : 'auto',
+                  right: isSmallScreen ? '15px' : 'auto',
+                  zIndex: isSmallScreen ? '100' : 'auto',
                 }}
                 onClick={handleUpdateSchema}
               >

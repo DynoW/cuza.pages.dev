@@ -1,6 +1,6 @@
 ---
-title: "Curs-vectori-2"
-description: "Ordonare (Sortare)"
+title: 'Curs-vectori-2'
+description: 'Ordonare (Sortare)'
 ---
 
 ## Varianta I

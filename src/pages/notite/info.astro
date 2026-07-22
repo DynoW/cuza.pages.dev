@@ -1,12 +1,12 @@
 ---
-import Layout from "../../layouts/Layout.astro";
-import NewNavbar from "../../components/NewNavbar.astro";
-import Footer from "../../components/Footer.astro";
-import ContentContainer from "../../layouts/ContentContainer.astro";
-import Curs from "../../components/Curs.astro";
-import { getCollection } from "astro:content";
-const infoCourses = (await getCollection("info")).sort((a, b) =>
-  a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: "base" }),
+import Layout from '../../layouts/Layout.astro';
+import NewNavbar from '../../components/NewNavbar.astro';
+import Footer from '../../components/Footer.astro';
+import ContentContainer from '../../layouts/ContentContainer.astro';
+import Curs from '../../components/Curs.astro';
+import { getCollection } from 'astro:content';
+const infoCourses = (await getCollection('info')).sort((a, b) =>
+  a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' }),
 );
 ---
 

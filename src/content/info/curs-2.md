@@ -1,6 +1,6 @@
 ---
-title: "Curs-2"
-description: "Oglinditul/Inversul/Răsturnatul"
+title: 'Curs-2'
+description: 'Oglinditul/Inversul/Răsturnatul'
 ---
 
 ## Idee

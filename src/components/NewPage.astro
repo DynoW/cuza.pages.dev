@@ -1,14 +1,14 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import ContentContainer from "../layouts/ContentContainer.astro";
-import NewNavbar from "../components/NewNavbar.astro";
-import List from "./List.astro";
-import Extra from "../components/Extra.astro";
-import Footer from "../components/Footer.astro";
-import CountdownTimer from "./CountdownTimer.astro";
-import { apiService } from "../api";
-import { getDisplayName, PAGE_DISPLAY_NAMES } from "../config/labels";
-import type { FileStructure } from "../types";
+import Layout from '../layouts/Layout.astro';
+import ContentContainer from '../layouts/ContentContainer.astro';
+import NewNavbar from '../components/NewNavbar.astro';
+import List from './List.astro';
+import Extra from '../components/Extra.astro';
+import Footer from '../components/Footer.astro';
+import CountdownTimer from './CountdownTimer.astro';
+import { apiService } from '../api';
+import { getDisplayName, PAGE_DISPLAY_NAMES } from '../config/labels';
+import type { FileStructure } from '../types';
 
 // Props for the component
 interface Props {
@@ -26,26 +26,26 @@ const extra: FileStructure = pageData.extra;
 
 // ── SEO helpers ──────────────────────────────────────────────────────────────
 const subjectLabel =
-  subject === "admitere" ? "Admitere UPB" : getDisplayName(subject);
+  subject === 'admitere' ? 'Admitere UPB' : getDisplayName(subject);
 const pageLabel = PAGE_DISPLAY_NAMES[page] ?? getDisplayName(page);
-const isHome = subject === "fizica" && page === "bac";
+const isHome = subject === 'fizica' && page === 'bac';
 
 const pageTitle = isHome
-  ? "Mate-Fizică BAC | cuza.pages.dev"
+  ? 'Mate-Fizică BAC | cuza.pages.dev'
   : `${subjectLabel} - ${pageLabel} | cuza.pages.dev`;
 const pageDescription = `Subiecte oficiale, variante și simulări ${pageLabel} la ${subjectLabel}. Descarcă gratuit PDF-uri pentru pregătire BAC și admitere. Liceul Teoretic Alexandru Ioan Cuza, București.`;
 const pageKeywords = `${subjectLabel.toLowerCase()}, ${pageLabel.toLowerCase()}, bacalaureat, subiecte, variante, bareme, simulare, cuza, LTAIC, UPB`;
 
 const subjectBaseUrl =
-  subject === "fizica"
-    ? "https://cuza.pages.dev"
+  subject === 'fizica'
+    ? 'https://cuza.pages.dev'
     : `https://cuza.pages.dev/${subject}`;
 const canonicalUrl =
-  page === "bac" ? subjectBaseUrl : `https://cuza.pages.dev/${subject}/${page}`;
+  page === 'bac' ? subjectBaseUrl : `https://cuza.pages.dev/${subject}/${page}`;
 
 const breadcrumbs = [
   { name: subjectLabel, url: subjectBaseUrl },
-  ...(page !== "bac" ? [{ name: pageLabel, url: canonicalUrl }] : []),
+  ...(page !== 'bac' ? [{ name: pageLabel, url: canonicalUrl }] : []),
 ];
 ---
 

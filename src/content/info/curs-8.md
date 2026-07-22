@@ -1,6 +1,6 @@
 ---
-title: "Curs-8"
-description: "Transformări"
+title: 'Curs-8'
+description: 'Transformări'
 ---
 
 ## a) Din baza 10 în baza 2

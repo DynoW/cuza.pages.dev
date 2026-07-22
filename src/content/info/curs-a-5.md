@@ -1,6 +1,6 @@
 ---
-title: "Curs-vectori-5"
-description: "Interclasare"
+title: 'Curs-vectori-5'
+description: 'Interclasare'
 ---
 
 ## Implementare (pentru șiruri ordonate)

@@ -1,6 +1,6 @@
 ---
-title: "Curs-vectori-3"
-description: "Eliminare / Adăugare în vector"
+title: 'Curs-vectori-3'
+description: 'Eliminare / Adăugare în vector'
 ---
 
 ## Eliminare
