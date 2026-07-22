@@ -38,9 +38,7 @@ self.addEventListener('activate', function (event) {
 self.addEventListener('fetch', function (event) {
   var url = new URL(event.request.url);
 
-  const workerUrl =
-    import.meta.env.PUBLIC_WORKER_URL.replace(/\/$/, '') ||
-    'https://api.my-lab.ro';
+  const workerUrl = 'https://api.my-lab.ro';
 
   if (url.origin === workerUrl) {
     return;
