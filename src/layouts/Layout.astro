@@ -280,11 +280,15 @@ if (isWinterTheme) {
         });
       </script>
     </div>
-    <script is:inline>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sws.js');
-      }
-    </script>
+    {
+      import.meta.env.PROD && (
+        <script is:inline>
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+          }
+        </script>
+      )
+    }
     {
       // <script>
       //   // Tab visibility title change
