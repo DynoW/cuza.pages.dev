@@ -41,6 +41,8 @@ const {
   isExtra: isExtraProp
 } = Astro.props as Props;
 
+const workerUrl = (import.meta.env.PUBLIC_WORKER_URL || "https://api.my-lab.ro").replace(/\/$/, "");
+
 // Use explicit prop in recursive calls, derive from page name at root.
 const isExtra = isExtraProp ?? (page === "extra" || page.endsWith("/extra"));
 const cx = isExtra ? "extra" : "content";
@@ -105,7 +107,7 @@ const sortedEntries = Object.entries(content).sort(
                   <li>
                   <a
                     class={`${cx}-link flex items-center break-normal`}
-                    href={`https://cuza.pages.dev/api/file/${value}`}
+                    href={`${workerUrl}/file/${value}`}
                     target="_blank"
                     rel="noopener"
                     aria-label={`Open ${key} in new tab`}

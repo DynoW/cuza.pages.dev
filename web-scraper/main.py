@@ -38,9 +38,9 @@ class BacExamScraper:
         self.set_archive = self.current_year if self.archive_on else ""
 
         self.urls = [
-            f"http://subiecte{self.set_archive}.edu.ro/{self.current_year}/bacalaureat/modeledesubiecte/probescrise/",
-            f"http://subiecte{self.set_archive}.edu.ro/{self.current_year}/simulare/simulare_bac_XII/",
-            f"http://subiecte{self.set_archive}.edu.ro/{self.current_year}/bacalaureat/Subiecte_si_bareme/"
+            f"https://subiecte{self.set_archive}.edu.ro/{self.current_year}/bacalaureat/modeledesubiecte/probescrise/",
+            f"https://subiecte{self.set_archive}.edu.ro/{self.current_year}/simulare/simulare_bac_XII/",
+            f"https://subiecte{self.set_archive}.edu.ro/{self.current_year}/bacalaureat/Subiecte_si_bareme/"
         ]
         
         # Load previously seen URLs
@@ -61,14 +61,24 @@ class BacExamScraper:
     
     def fetch_page(self, url: str) -> str:
         """Fetch webpage content."""
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
         try:
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            }
             response = self.session.get(url, headers=headers, timeout=30)
             response.raise_for_status()
             return response.text
         except requests.RequestException as e:
+            if url.startswith('https://'):
+                http_url = url.replace('https://', 'http://', 1)
+                print(f"HTTPS failed, trying HTTP: {http_url}")
+                try:
+                    response = self.session.get(http_url, headers=headers, timeout=30)
+                    response.raise_for_status()
+                    return response.text
+                except requests.RequestException as e2:
+                    print(f"Error fetching {http_url}: {e2}")
+                    return ""
             print(f"Error fetching {url}: {e}")
             return ""
     
@@ -79,9 +89,9 @@ class BacExamScraper:
         # 2. Model: Bac_2025_E_[acd]_...zip  
         # 3. Various other formats with year
         patterns = [
-            rf'href=\"([^\"]*E_[acd]_[^\"]*{self.current_year}[^\"]*\.zip)\"',
-            rf'href=\"([^\"]*Bac_{self.current_year}_E_[acd]_[^\"]*\.zip)\"',
-            rf'href=\"([^\"]*{self.current_year}[^\"]*E_[acd][^\"]*\.zip)\"',
+            rf'href=\"([^\"]*E_?[acd]_[^\"]*{self.current_year}[^\"]*\.zip)\"',
+            rf'href=\"([^\"]*Bac_{self.current_year}_E_?[acd]_[^\"]*\.zip)\"',
+            rf'href=\"([^\"]*{self.current_year}[^\"]*E_?[acd][^\"]*\.zip)\"',
         ]
         
         all_matches = []

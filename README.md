@@ -58,6 +58,16 @@ pnpm build
 pnpm preview   # serve the built output locally
 ```
 
+### Local preview with scraper files
+
+From `web-scraper/`, you can build and preview the site against the local snapshot produced by `main.py`:
+
+```bash
+./run.sh preview
+```
+
+The preview runner uses the local files tree under `web-scraper/files/` by default and serves file links through a local API shim while `pnpm preview` is running.
+
 ### Cloudflare Worker (backend)
 
 ```bash
