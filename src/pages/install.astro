@@ -2,64 +2,167 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout
-  title="install | cuza.pages.dev"
-  extendLink={[
-    {
-      rel: 'preconnect',
-      href: 'https://fonts.googleapis.com',
-    },
-    {
-      rel: 'preconnect',
-      href: 'https://fonts.gstatic.com',
-      crossorigin: '',
-    },
-    {
-      rel: 'stylesheet',
-      href: 'https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@1,700&display=swap',
-    },
-  ]}
-  nofollow
-  noindex
->
-  <div class="installBtnDiv">
-    <button id="installBtn" class="blue-button" onclick="install()" disabled>
-      Add to home <br /> screen &#128512;
-    </button>
+<Layout title="Instalează | cuza.pages.dev" nofollow noindex>
+  <div class="flex items-center justify-center h-svh px-5 py-8">
+    <div
+      class="bg-[rgba(10,13,16,.85)] text-white rounded-3xl p-8 md:p-10 shadow-2xl backdrop-blur-sm border border-white/10 max-w-sm w-full text-center relative overflow-hidden"
+    >
+      <div
+        class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 bg-blue-500/20 blur-[50px] rounded-full pointer-events-none"
+      >
+      </div>
+
+      <div class="relative flex justify-center mb-5">
+        <div
+          class="w-20 h-20 rounded-2xl bg-white/10 p-3 shadow-lg ring-1 ring-white/10 flex items-center justify-center"
+        >
+          <img
+            src="/assets/img/logo/atoms_192px.png"
+            alt="CuzaPages"
+            class="w-full h-full rounded-xl"
+            width="56"
+            height="56"
+          />
+        </div>
+      </div>
+
+      <h1 class="text-2xl font-bold mb-1 text-white">CuzaPages</h1>
+
+      <p class="text-sm text-gray-400 mb-6">Subiecte de bac și admitere</p>
+
+      <ul
+        class="text-left text-sm text-gray-300 mb-7 space-y-3 mx-auto max-w-[240px]"
+      >
+        <li class="flex items-start gap-3">
+          <svg
+            class="w-5 h-5 text-blue-400 mt-0.5 shrink-0"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <span>Acces rapid din ecranul principal</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <svg
+            class="w-5 h-5 text-blue-400 mt-0.5 shrink-0"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <span>Functionează și fară conexiune</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <svg
+            class="w-5 h-5 text-blue-400 mt-0.5 shrink-0"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <span>Experientă full-screen, fară bara de navigare</span>
+        </li>
+      </ul>
+
+      <button
+        id="installBtn"
+        class="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-semibold py-3.5 px-6 rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed text-base"
+        disabled
+      >
+        <span id="installBtnText">Instalează aplicația</span>
+      </button>
+
+      <p
+        id="iosInstructions"
+        class="mt-5 text-sm text-gray-500 leading-relaxed"
+        style="display: none;"
+      >
+        Deschide meniul
+        <span class="text-white font-medium"> Share </span>
+        in Safari si apasa
+        <span class="text-white font-medium">
+          Adauga la ecranul principal
+        </span>.
+      </p>
+
+      <div
+        id="desktopInstructions"
+        class="mt-5 text-sm text-gray-500"
+        style="display: none;"
+      >
+        <p class="mb-5">
+          Scaneaza codul QR de pe telefon pentru a instala aplicatia:
+        </p>
+        <img
+          src="/assets/img/QR-code.png"
+          alt="QR Code pentru CuzaPages"
+          class="mx-auto w-36 h-36 rounded-xl"
+          width="144"
+          height="144"
+          loading="lazy"
+        />
+      </div>
+    </div>
   </div>
-  <script is:inline>
-    var beforeInstallPrompt = null;
-
-    window.addEventListener('beforeinstallprompt', eventHandler);
-
-    function eventHandler(event) {
-      beforeInstallPrompt = event;
-      document.getElementById('installBtn').removeAttribute('disabled');
-    }
-
-    function install() {
-      if (beforeInstallPrompt) beforeInstallPrompt.prompt();
-    }
-  </script>
-  <style>
-    .installBtnDiv {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 90vh;
-      margin: 0;
-    }
-
-    .blue-button {
-      background-color: blue;
-      color: white;
-      padding: 30px;
-      border: none;
-      border-radius: 50%;
-      aspect-ratio: 1 / 1;
-      font-size: 50px;
-      font-family: 'Chakra Petch';
-      cursor: pointer;
-    }
-  </style>
 </Layout>
+
+<script is:inline>
+  var beforeInstallPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', function (event) {
+    beforeInstallPrompt = event;
+    var btn = document.getElementById('installBtn');
+    if (btn) {
+      btn.removeAttribute('disabled');
+      btn.onclick = function () {
+        beforeInstallPrompt.prompt();
+        beforeInstallPrompt.userChoice.then(function () {
+          beforeInstallPrompt = null;
+          if (btn) btn.setAttribute('disabled', '');
+        });
+      };
+    }
+  });
+
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+  if (isIOS) {
+    var iosEl = document.getElementById('iosInstructions');
+    if (iosEl) iosEl.style.display = 'block';
+  } else {
+    var isMobile = /Mobi|Android/.test(navigator.userAgent);
+    if (!isMobile) {
+      var desktopEl = document.getElementById('desktopInstructions');
+      if (desktopEl) desktopEl.style.display = 'block';
+      var btn = document.getElementById('installBtn');
+      if (btn && !beforeInstallPrompt) {
+        btn.style.display = 'none';
+      }
+    }
+  }
+</script>

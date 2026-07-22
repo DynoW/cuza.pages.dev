@@ -15,7 +15,7 @@ const infoCourses = (await getCollection('info')).sort((a, b) =>
     <aside slot="left" class="flex flex-col gap-2 lg:ml-2 lg:mt-2">
       <NewNavbar />
     </aside>
-    <div slot="middle" class="flex flex-col gap-2 text-white">
+    <div slot="middle" class="flex flex-col gap-2 text-white mx-2 md:mx-0">
       <h1 class="bg-[#0d1117] rounded-3xl p-5 pr-4 mb-1">
         Notițe din liceu (2022-2025) by Daniel: <a
           href="https://github.com/DynoW/CS-files-storage"
@@ -34,7 +34,7 @@ const infoCourses = (await getCollection('info')).sort((a, b) =>
         {
           infoCourses.map((course) => {
             return (
-              <li class="bg-[#0d1117] rounded-3xl p-5 pr-4 mb-2 max-w-[95vw] select-text">
+              <li class="bg-[#0d1117] rounded-3xl p-5 pr-4 mb-2 select-text">
                 <Curs entry={course} />
               </li>
             );

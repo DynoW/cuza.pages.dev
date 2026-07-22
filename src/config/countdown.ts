@@ -43,12 +43,32 @@ export const countdownConfig = {
   },
 } as const;
 
-const currentExam = 'bac_2';
-
-// Default config type
 export type ExamType = keyof typeof countdownConfig;
 
-// Helper function to get config by exam type
-export function getCountdownConfig(examType: ExamType = currentExam) {
-  return countdownConfig[examType];
+export function getCountdownConfig() {
+  const now = Date.now();
+  const entries = (Object.keys(countdownConfig) as ExamType[])
+    .map((key) => ({ key, ...countdownConfig[key] }))
+    .map((e) => ({
+      ...e,
+      startTime: new Date(e.startDate).getTime(),
+      endTime: new Date(e.endDate).getTime(),
+    }));
+
+  const inProgress = entries.find(
+    (e) => now >= e.startTime && now <= e.endTime,
+  );
+  if (inProgress) return countdownConfig[inProgress.key];
+
+  const upcoming = entries
+    .filter((e) => e.startTime > now)
+    .sort((a, b) => a.startTime - b.startTime);
+  if (upcoming.length > 0) return countdownConfig[upcoming[0].key];
+
+  const last = entries.sort((a, b) => a.endTime - b.endTime).pop();
+  return last;
+}
+
+export function getForcedCountdownConfig() {
+  return countdownConfig['bac_1'];
 }

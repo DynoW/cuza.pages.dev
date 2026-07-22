@@ -66,7 +66,7 @@ function isPageActive(subject: string, page: string | null = null): boolean {
   <!-- Mobile overlay -->
   <div
     id="mobile-overlay"
-    class="fixed inset-0 bg-black/70 opacity-0 pointer-events-none transition-opacity duration-300 z-98 backdrop-blur-sm lg:hidden"
+    class="fixed inset-0 bg-black/70 opacity-0 pointer-events-none transition-opacity duration-200 z-98 lg:hidden"
     aria-hidden="true"
   >
   </div>
@@ -74,7 +74,7 @@ function isPageActive(subject: string, page: string | null = null): boolean {
   <!-- Side Navigation -->
   <div
     id="side-nav"
-    class="fixed top-0 left-0 bottom-0 w-70 lg:w-auto lg:basis-3/12 lg:static /*bg-zinc-950/90*/ bg-[rgba(10,13,16,0.98)] border-r border-white/10 flex flex-col z-99 overflow-hidden transition-transform duration-300 ease-in-out backdrop-blur-xl -translate-x-full lg:translate-x-0 text-[#e6edff] rounded-r-2xl lg:rounded-3xl"
+    class="fixed top-0 left-0 bottom-0 w-70 lg:w-auto lg:basis-3/12 lg:static /*bg-zinc-950/90*/ bg-[rgba(10,13,16,0.98)] border-r border-white/10 flex flex-col z-99 overflow-hidden transition-transform duration-200 backdrop-blur-md will-change-transform -translate-x-full lg:translate-x-0 text-[#e6edff] rounded-r-2xl lg:rounded-3xl"
     aria-label="Navigare principală"
   >
     <!-- Brand Header -->

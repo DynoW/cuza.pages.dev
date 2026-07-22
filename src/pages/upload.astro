@@ -225,7 +225,7 @@ const isUploadEnabled = !!workerUrl;
 
   <style is:global>
     input[type='file']::-webkit-file-upload-button {
-      background-color: rgb(59 130 246);
+      background-color: rgb(59, 130, 246);
       color: white;
       border: none;
       padding: 0.5rem 0.75rem;
@@ -235,7 +235,7 @@ const isUploadEnabled = !!workerUrl;
     }
 
     input[type='file']::file-selector-button {
-      background-color: rgb(59 130 246);
+      background-color: rgb(59, 130, 246);
       color: white;
       border: none;
       padding: 0.5rem 0.75rem;
@@ -285,25 +285,35 @@ const isUploadEnabled = !!workerUrl;
     )
   }
 
-  <script lang="js">
-    const pageSelect = document.getElementById('page');
+  <script>
+    const pageSelect = document.getElementById(
+      'page',
+    ) as HTMLSelectElement | null;
     let page = pageSelect ? pageSelect.value : '';
-    const simulationSelect = document.getElementById('simulation');
+    const simulationSelect = document.getElementById(
+      'simulation',
+    ) as HTMLSelectElement | null;
     let simulation = simulationSelect ? simulationSelect.value : '';
-    const titleSelect = document.getElementById('title');
-    let title = titleSelect ? titleSelect.value : '';
     const simulationField = document.getElementById('simulationField');
     const countyField = document.getElementById('countyField');
     const localField = document.getElementById('localField');
     const testNumberField = document.getElementById('testNumberField');
     const titleField = document.getElementById('titleField');
     const reserveField = document.getElementById('reserveField');
-    const reserveInput = document.getElementById('reserve');
-    const testNumberInput = document.getElementById('testNumber');
-    const type2Toggle = document.getElementById('type2Toggle');
-    const type2Input = document.getElementById('type2');
+    const reserveInput = document.getElementById(
+      'reserve',
+    ) as HTMLInputElement | null;
+    const testNumberInput = document.getElementById(
+      'testNumber',
+    ) as HTMLInputElement | null;
+    const type2Toggle = document.getElementById(
+      'type2Toggle',
+    ) as HTMLInputElement | null;
+    const type2Input = document.getElementById(
+      'type2',
+    ) as HTMLInputElement | null;
 
-    function toggleFields(page, simulation) {
+    function toggleFields(page: string, simulation: string) {
       if (page === 'bac') {
         titleField?.classList.remove('hidden');
         titleField?.querySelector('select')?.setAttribute('required', 'true');
@@ -376,7 +386,9 @@ const isUploadEnabled = !!workerUrl;
     }
 
     function onDOMContentLoaded() {
-      const yearInput = document.getElementById('year');
+      const yearInput = document.getElementById(
+        'year',
+      ) as HTMLInputElement | null;
       if (yearInput && !yearInput.value) {
         yearInput.value = new Date().getFullYear().toString();
       }
@@ -389,8 +401,8 @@ const isUploadEnabled = !!workerUrl;
     }
     document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
 
-    function onPageChange(event) {
-      const target = event.target;
+    function onPageChange(event: Event) {
+      const target = event.target as HTMLSelectElement;
       page = target.value;
       toggleFields(page, simulation);
       if (page === 'teste' && testNumberInput && !testNumberInput.value) {
@@ -398,12 +410,6 @@ const isUploadEnabled = !!workerUrl;
       }
     }
     pageSelect?.addEventListener('change', onPageChange);
-
-    function onTitleChange(event) {
-      const target = event.target;
-      title = target.value;
-    }
-    titleSelect?.addEventListener('change', onTitleChange);
 
     function onTestNumberInput() {
       if (
@@ -424,8 +430,8 @@ const isUploadEnabled = !!workerUrl;
 
     type2Toggle?.addEventListener('change', syncType2Value);
 
-    function onSimulationChange(event) {
-      const target = event.target;
+    function onSimulationChange(event: Event) {
+      const target = event.target as HTMLSelectElement;
       simulation = target.value;
       toggleFields(page, simulation);
     }
@@ -438,12 +444,14 @@ const isUploadEnabled = !!workerUrl;
     const submitPasswordBtn = document.getElementById('submitPassword');
 
     if (form && messageDiv && modal && closeModal && submitPasswordBtn) {
-      const passwordInput = document.getElementById('passwordInput');
-      const submitPasswordButton = submitPasswordBtn;
+      const passwordInput = document.getElementById(
+        'passwordInput',
+      ) as HTMLInputElement | null;
+      const submitPasswordButton = submitPasswordBtn as HTMLButtonElement;
       const defaultSubmitPasswordLabel =
         submitPasswordButton.textContent || 'Trimite';
 
-      const setSubmitPasswordLoading = (isLoading) => {
+      const setSubmitPasswordLoading = (isLoading: boolean) => {
         submitPasswordButton.disabled = isLoading;
         submitPasswordButton.textContent = isLoading
           ? 'Se trimite...'
@@ -471,7 +479,7 @@ const isUploadEnabled = !!workerUrl;
         }
       });
 
-      closeModal.onclick = function () {
+      (closeModal as HTMLElement).onclick = function () {
         hideModalAndClearPassword();
       };
 
@@ -509,7 +517,7 @@ const isUploadEnabled = !!workerUrl;
         messageDiv.textContent = 'Se încarcă...';
         messageDiv.className = 'text-blue-500';
 
-        const formData = new FormData(form);
+        const formData = new FormData(form as HTMLFormElement);
 
         if (page === 'bac') {
           formData.delete('simulation');
@@ -534,7 +542,7 @@ const isUploadEnabled = !!workerUrl;
         }
 
         const username = 'admin';
-        const toBase64 = (value) => {
+        const toBase64 = (value: string) => {
           const bytes = new TextEncoder().encode(value);
           let binary = '';
           bytes.forEach((b) => {

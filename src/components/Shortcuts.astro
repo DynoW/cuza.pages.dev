@@ -1,21 +1,18 @@
 ---
 interface Props {
-  subject: string;
-  page: string;
-  /** Pre-fetched years – skips an API call when provided. */
   years?: number[];
 }
 
-const { subject, page, years: availableYears = [] } = Astro.props;
+const { years = [] } = Astro.props;
 ---
 
 <div class="shortcuts-container">
   <p class="text-lg font-bold text-white">Accesare rapidă</p>
 
   {
-    availableYears.length > 0 ? (
+    years.length > 0 ? (
       <div class="shortcuts-grid">
-        {availableYears.map((year) => (
+        {years.map((year) => (
           <a
             href={`#${year}`}
             class="shortcut-button"

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ---------------------------------------------------------------------------
-# cuza.pages.dev — BAC tools runner
+# cuza.pages.dev — Cuza Pages tools runner
 #
 # Architecture:
 #   run.sh is the single user entry point. It handles environment setup,
@@ -652,7 +652,7 @@ done
 # Dispatch
 # ---------------------------------------------------------------------------
 
-echo "BAC tools runner"
+echo "Cuza Pages tools runner"
 
 if [[ "$MODE" == "interactive" ]]; then
   interactive_select_mode

@@ -1,8 +1,119 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import NotFound from '../components/NotFound';
 ---
 
 <Layout title="404 - Pagină negăsită">
-  <NotFound client:load />
+  <div class="flex flex-col items-center justify-center h-svh px-4 w-full">
+    <div
+      id="not-found-card"
+      class="rounded-3xl bg-[rgba(10,13,16,.8)] text-white p-8 md:p-12 shadow-2xl backdrop-blur-sm border border-white/10 max-w-lg w-full text-center relative overflow-hidden"
+    >
+      <div
+        class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-amber-500/20 blur-[50px] rounded-full pointer-events-none"
+      >
+      </div>
+
+      <div
+        class="flex justify-center mb-6 not-found-item"
+        style="opacity:0; transform: translateY(20px)"
+      >
+        <div class="p-4 bg-white/5 rounded-full">
+          <svg
+            class="w-12 h-12 text-amber-300"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 10h.01"></path>
+            <path d="M15 10h.01"></path>
+            <path
+              d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"
+            ></path>
+          </svg>
+        </div>
+      </div>
+
+      <div
+        class="not-found-item"
+        style="opacity:0; transform: translateY(20px)"
+      >
+        <h1 class="text-6xl md:text-8xl font-black mb-2 tracking-tighter">
+          <span class="text-white">Eroare </span>
+          <span id="not-found-404" class="inline-block text-amber-400">404</span
+          >
+        </h1>
+      </div>
+
+      <h2
+        class="text-2xl md:text-3xl font-semibold mb-4 text-gray-200 not-found-item"
+        style="opacity:0; transform: translateY(20px)"
+      >
+        Pagină negăsită
+      </h2>
+
+      <p
+        class="text-lg text-gray-400 mb-8 leading-relaxed not-found-item"
+        style="opacity:0; transform: translateY(20px)"
+      >
+        Ne pare rău, pagina pe care o cauți s-a rătăcit în spațiu sau nu mai
+        există.
+      </p>
+
+      <div
+        class="not-found-item"
+        style="opacity:0; transform: translateY(20px)"
+      >
+        <a href="/">
+          <button
+            id="not-found-btn"
+            class="group flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-medium text-lg py-3 px-5 rounded-xl transition-colors mx-auto w-full sm:w-auto cursor-pointer transition-transform active:scale-95 hover:scale-105"
+          >
+            <svg
+              class="w-5 h-5 group-hover:-translate-x-1 transition-transform"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Înapoi la pagina principală</span>
+          </button>
+        </a>
+      </div>
+    </div>
+  </div>
 </Layout>
+
+<script>
+  import gsap from 'gsap';
+
+  gsap.to('.not-found-item', {
+    y: 0,
+    opacity: 1,
+    stagger: 0.1,
+    delay: 0.2,
+    duration: 0.5,
+    ease: 'back.out(1.7)',
+  });
+
+  gsap.to('#not-found-404', {
+    y: -10,
+    duration: 2,
+    repeat: -1,
+    yoyo: true,
+    ease: 'sine.inOut',
+  });
+</script>

@@ -1,7 +1,11 @@
 ---
 import { getCountdownConfig } from '../config/countdown';
 
-const config = getCountdownConfig();
+const config = getCountdownConfig() ?? {
+  title: 'Examen',
+  startDate: new Date().toISOString(),
+  endDate: new Date().toISOString(),
+};
 ---
 
 <div

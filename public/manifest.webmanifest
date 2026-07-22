@@ -1,7 +1,7 @@
 {
-  "name": "CuzaPages - Subiecte BAC",
+  "name": "CuzaPages",
   "short_name": "CuzaPages",
-  "description": "Subiecte de bac și admitere UPB la fizică, matematică și informatică.",
+  "description": "Subiecte de bac si admitere",
   "categories": ["education"],
   "icons": [
     {
