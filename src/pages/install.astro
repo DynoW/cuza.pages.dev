@@ -93,7 +93,7 @@ import Layout from '../layouts/Layout.astro';
         id="installBtn"
         class="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-semibold py-3.5 px-6 rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed text-base"
         onclick="install()"
-        disabled="disabled"
+        disabled
       >
         <span id="installBtnText">Instalează aplicația</span>
       </button>
@@ -130,8 +130,7 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
   </div>
-<script is:inline>
-    var beforeInstallPrompt = null;
+  <script is:inline>
     var installBtn = document.getElementById('installBtn');
     var installBtnText = document.getElementById('installBtnText');
     var iosEl = document.getElementById('iosInstructions');
@@ -143,31 +142,37 @@ import Layout from '../layouts/Layout.astro';
       /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
     var isMobile = /Mobi|Android/.test(navigator.userAgent);
-
-    window.addEventListener('beforeinstallprompt', function (event) {
-      beforeInstallPrompt = event;
-      installBtn.removeAttribute('disabled');
-    });
+    var isFirefox = /Firefox/.test(navigator.userAgent);
+    var deferredPrompt = null;
 
     if (isStandalone) {
       installBtnText.textContent = 'Aplicația este deja instalată';
-      installBtn.classList.remove('bg-blue-600', 'hover:bg-blue-500');
-      installBtn.classList.add('bg-gray-700', 'text-gray-400');
       installBtn.disabled = true;
-    }
-
-    if (isIOS) {
-      installBtn.style.display = 'none';
-      if (iosEl) iosEl.style.display = 'block';
     }
 
     if (!isMobile) {
       installBtn.style.display = 'none';
       if (desktopEl) desktopEl.style.display = 'block';
+    } else if (isIOS) {
+      installBtn.style.display = 'none';
+      if (iosEl) iosEl.style.display = 'block';
+    } else if (isFirefox) {
+      installBtn.style.display = 'none';
+      if (iosEl) {
+        iosEl.innerHTML =
+          'Deschide meniul browserului și apasă<br/><span class="text-white font-medium">Adaugă la ecranul principal</span>.';
+        iosEl.style.display = 'block';
+      }
+    } else {
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.disabled = false;
+      });
     }
 
     function install() {
-      if (beforeInstallPrompt) beforeInstallPrompt.prompt();
+      if (deferredPrompt) deferredPrompt.prompt();
     }
   </script>
 </Layout>
