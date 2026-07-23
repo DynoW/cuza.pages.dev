@@ -283,8 +283,8 @@ if (isWinterTheme) {
     {
       import.meta.env.PROD && (
         <script is:inline>
-          if ('serviceWorker' in navigator){' '}
-          {navigator.serviceWorker.register('/sw.js')}
+          if ('serviceWorker' in navigator)
+          navigator.serviceWorker.register('/sw.js')
         </script>
       )
     }

@@ -67,7 +67,7 @@ import Layout from '../layouts/Layout.astro';
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
-          <span>Functionează și fară conexiune</span>
+          <span>Funcționează și fără conexiune</span>
         </li>
         <li class="flex items-start gap-3">
           <svg
@@ -85,14 +85,15 @@ import Layout from '../layouts/Layout.astro';
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
-          <span>Experientă full-screen, fară bara de navigare</span>
+          <span>Experiență full-screen, fără bara de navigare</span>
         </li>
       </ul>
 
       <button
         id="installBtn"
         class="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-semibold py-3.5 px-6 rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed text-base"
-        disabled
+        onclick="install()"
+        disabled="disabled"
       >
         <span id="installBtnText">Instalează aplicația</span>
       </button>
@@ -104,9 +105,9 @@ import Layout from '../layouts/Layout.astro';
       >
         Deschide meniul
         <span class="text-white font-medium"> Share </span>
-        in Safari si apasa
+        în Safari și apasă<br />
         <span class="text-white font-medium">
-          Adauga la ecranul principal
+          Adaugă la ecranul principal
         </span>.
       </p>
 
@@ -116,7 +117,7 @@ import Layout from '../layouts/Layout.astro';
         style="display: none;"
       >
         <p class="mb-5">
-          Scaneaza codul QR de pe telefon pentru a instala aplicatia:
+          Scanează codul QR de pe telefon pentru a instala aplicația:
         </p>
         <img
           src="/assets/img/QR-code.png"
@@ -129,35 +130,44 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
   </div>
-  <script is:inline>
+<script is:inline>
+    var beforeInstallPrompt = null;
     var installBtn = document.getElementById('installBtn');
-    var deferredPrompt = null;
+    var installBtnText = document.getElementById('installBtnText');
+    var iosEl = document.getElementById('iosInstructions');
+    var desktopEl = document.getElementById('desktopInstructions');
+    var isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      navigator.standalone;
     var isIOS =
-      /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.userAgent));
     var isMobile = /Mobi|Android/.test(navigator.userAgent);
+
+    window.addEventListener('beforeinstallprompt', function (event) {
+      beforeInstallPrompt = event;
+      installBtn.removeAttribute('disabled');
+    });
+
+    if (isStandalone) {
+      installBtnText.textContent = 'Aplicația este deja instalată';
+      installBtn.classList.remove('bg-blue-600', 'hover:bg-blue-500');
+      installBtn.classList.add('bg-gray-700', 'text-gray-400');
+      installBtn.disabled = true;
+    }
 
     if (isIOS) {
       installBtn.style.display = 'none';
-      var iosEl = document.getElementById('iosInstructions');
       if (iosEl) iosEl.style.display = 'block';
-    } else if (!isMobile) {
+    }
+
+    if (!isMobile) {
       installBtn.style.display = 'none';
-      var desktopEl = document.getElementById('desktopInstructions');
       if (desktopEl) desktopEl.style.display = 'block';
     }
 
-    window.addEventListener('beforeinstallprompt', function (e) {
-      e.preventDefault();
-      deferredPrompt = e;
-      installBtn.removeAttribute('disabled');
-      installBtn.style.display = '';
-      installBtn.onclick = function () {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(function () {
-          deferredPrompt = null;
-          installBtn.setAttribute('disabled', '');
-        });
-      };
-    });
+    function install() {
+      if (beforeInstallPrompt) beforeInstallPrompt.prompt();
+    }
   </script>
 </Layout>
