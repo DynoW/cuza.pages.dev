@@ -16,6 +16,15 @@ app.use('*', async (c, next) => {
   return next();
 });
 
+app.use('*', async (c, next) => {
+  await next();
+  c.res.headers.set('X-Robots-Tag', 'noindex');
+});
+
+app.get('/robots.txt', (c) => {
+  return c.text('User-agent: *\nDisallow: /\n');
+});
+
 app.use(
   '*',
   cors({

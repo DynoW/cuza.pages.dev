@@ -12,7 +12,13 @@ const infoCourses = (await getCollection('info')).sort((a, b) =>
 );
 ---
 
-<Layout title="informatica | cuza.pages.dev" markdown>
+<Layout
+  title="informatica | cuza.pages.dev"
+  description="Notițe de informatică din liceu (2022-2025) - C++, algoritmi, structuri de date, programare. Subiecte bac și probleme recapitulative. Liceul Teoretic Alexandru Ioan Cuza, București."
+  keywords="informatica, notite, liceu, C++, algoritmi, structuri de date, bacalaureat, programare, cuza, LTAIC"
+  canonicalUrl="https://cuza.pages.dev/notite/info"
+  markdown
+>
   <ContentContainer>
     <aside slot="left" class="flex flex-col gap-2 lg:ml-2 lg:mt-2">
       <NewNavbar />

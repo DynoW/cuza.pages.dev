@@ -7,23 +7,11 @@ import playformCompress from '@playform/compress';
 export default defineConfig({
   site: 'https://cuza.pages.dev',
   trailingSlash: 'never',
-  redirects: {
-    '/fizica': '/',
-  },
   build: {
     format: 'file',
     inlineStylesheets: 'always',
-    assets: 'file',
   },
   vite: {
-    build: {
-      chunkSizeWarningLimit: 2000,
-      rollupOptions: {
-        output: {
-          assetFileNames: `file/[name][extname]`,
-        },
-      },
-    },
     plugins: [tailwindcss()],
   },
   markdown: {
@@ -33,7 +21,10 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
-      filter: (page) => !page.includes('/install') && !page.includes('/upload'),
+      filter: (page) =>
+        !page.includes('/install') &&
+        !page.includes('/upload') &&
+        !page.includes('/contribute'),
     }),
     react(),
     playformCompress(),

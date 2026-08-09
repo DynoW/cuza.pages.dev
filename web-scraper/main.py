@@ -19,8 +19,13 @@ import requests
 from utils import build_bearer_auth_header, create_retry_session, load_local_env
 
 
+_RE_IUN = re.compile(r'(?:^|[_-])iun')
+_RE_IUL = re.compile(r'(?:^|[_-])iul')
+_RE_AUG = re.compile(r'(?:^|[_-])aug')
+
+
 class BacExamScraper:
-    def __init__(self, worker_url: str, upload_password: str, year: int | None = None, upload_enabled: bool = False):
+    def __init__(self, worker_url: str, upload_password: str, year: int | None = None, upload_enabled: bool = False, force_archive: bool | None = None):
         self.worker_url = worker_url.rstrip('/')
         self.upload_password = upload_password
         self.upload_enabled = upload_enabled
@@ -32,15 +37,19 @@ class BacExamScraper:
         self.session = create_retry_session()
         
         self.current_year = str(year) if year else str(datetime.now().year)
-        
-        # URL patterns for the current year
-        self.archive_on = False
-        self.set_archive = self.current_year if self.archive_on else ""
+
+        now_year = str(datetime.now().year)
+        if force_archive is True:
+            self.archive = self.current_year
+        elif force_archive is False:
+            self.archive = ""
+        else:
+            self.archive = self.current_year if self.current_year != now_year else ""
 
         self.urls = [
-            f"https://subiecte{self.set_archive}.edu.ro/{self.current_year}/bacalaureat/modeledesubiecte/probescrise/",
-            f"https://subiecte{self.set_archive}.edu.ro/{self.current_year}/simulare/simulare_bac_XII/",
-            f"https://subiecte{self.set_archive}.edu.ro/{self.current_year}/bacalaureat/Subiecte_si_bareme/"
+            f"https://subiecte{self.archive}.edu.ro/{self.current_year}/bacalaureat/modeledesubiecte/probescrise/",
+            f"https://subiecte{self.archive}.edu.ro/{self.current_year}/simulare/simulare_bac_XII/",
+            f"https://subiecte{self.archive}.edu.ro/{self.current_year}/bacalaureat/Subiecte_si_bareme/"
         ]
         
         # Load previously seen URLs
@@ -59,15 +68,15 @@ class BacExamScraper:
             for url in sorted(self.seen_urls):
                 f.write(url + '\n')
     
-    def fetch_page(self, url: str) -> str:
-        """Fetch webpage content."""
+    def fetch_page(self, url: str) -> tuple[str, str]:
+        """Fetch webpage content. Returns (html_content, actual_url)."""
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
         try:
             response = self.session.get(url, headers=headers, timeout=30)
             response.raise_for_status()
-            return response.text
+            return response.text, url
         except requests.RequestException as e:
             if url.startswith('https://'):
                 http_url = url.replace('https://', 'http://', 1)
@@ -75,12 +84,12 @@ class BacExamScraper:
                 try:
                     response = self.session.get(http_url, headers=headers, timeout=30)
                     response.raise_for_status()
-                    return response.text
+                    return response.text, http_url
                 except requests.RequestException as e2:
                     print(f"Error fetching {http_url}: {e2}")
-                    return ""
+                    return "", url
             print(f"Error fetching {url}: {e}")
-            return ""
+            return "", url
     
     def extract_links(self, html_content: str, base_url: str) -> list:
         """Extract ZIP file links matching the exam pattern."""
@@ -114,29 +123,27 @@ class BacExamScraper:
         url_lower = url.lower()
         filename_lower = zip_filename.lower()
         
-        # Check url for exam type indicators first
-        if 'simulare' in url_lower or 'sim' in filename_lower:
-            return 'Simulare'
+        if 'rezerv' in filename_lower:
+            if 'speciala' in filename_lower:
+                return 'Sesiunea-speciala-rezerva'
+            if _RE_IUN.search(filename_lower) or _RE_IUL.search(filename_lower):
+                return 'Sesiunea-I-rezerva'
+            if _RE_AUG.search(filename_lower):
+                return 'Sesiunea-II-rezerva'
+        if 'speciala' in filename_lower:
+            return 'Sesiunea-speciala'
+        if _RE_IUN.search(filename_lower) or _RE_IUL.search(filename_lower):
+            return 'Sesiunea-I'
+        if _RE_AUG.search(filename_lower):
+            return 'Sesiunea-II'
         
+        if 'simulare' in url_lower or 'sim' in filename_lower:
+            if 'simulare_ii' in filename_lower:
+                return '-'
+            return 'Simulare'
         if 'modeledesubiecte' in url_lower or 'model' in filename_lower:
             return 'Model'
         
-        # For regular bac URL, determine based on filename patterns
-        if 'rezerva' in filename_lower:
-            if 'speciala' in filename_lower:
-                return 'Sesiune-olimpici-rezerva'
-            if 'iun' in filename_lower or 'iul' in filename_lower:
-                return 'Sesiunea-I-rezerva'
-            if 'aug' in filename_lower:
-                return 'Sesiunea-II-rezerva'
-        if 'speciala' in filename_lower:
-            return 'Sesiune-olimpici'
-        if '_iun' in filename_lower or '_iul' in filename_lower:
-            return 'Sesiunea-I'  # June session
-        if '_aug' in filename_lower:
-            return 'Sesiunea-II'  # August session
-        
-        # Default fallback
         return '-'
     
     def download_file(self, url: str, target_path: Path) -> bool:
@@ -209,12 +216,10 @@ class BacExamScraper:
             'organica': 'organica',
             'tehnologic': 'tehnologic',
             'teoretic_vocational': 'teoretic',
-            'sp_mi_c': 'mate-info-C',
-            'sp_mi_p': 'mate-info-Pascal',
-            'sp_mi_pascal': 'mate-info-Pascal',
-            'sp_sn_c': 'st-nat-C',
-            'sp_sn_p': 'st-nat-Pascal',
-            'sp_sn_pascal': 'st-nat-Pascal',
+            'sp_mi_c': 'mate-info-c',
+            'sp_mi_p': 'mate-info-pascal',
+            'sp_sn_c': 'st-nat-c',
+            'sp_sn_p': 'st-nat-pascal',
             'sp_mi_bar': 'mate-info-bareme',
             'sp_sn_bar': 'st-nat-bareme',
         }
@@ -232,7 +237,7 @@ class BacExamScraper:
         filename = pdf_filename
         # Clean up filename by removing language suffixes
         clean_filename = filename
-        language_suffixes = ['_LRO', '_LMA', '_LGE', '_LSK', '_LSR', '_LUA']
+        language_suffixes = ['_LRO', '_LMA', '_LGE', '_LSK', '_LSR', '_LUA', '_LIT', '_GER']
         for suffix in language_suffixes:
             if suffix + '.pdf' in clean_filename:
                 clean_filename = clean_filename.replace(suffix + '.pdf', '.pdf')
@@ -297,8 +302,8 @@ class BacExamScraper:
         # Handle bareme files that need to go to both C and Pascal
         if subcategory in ('mate-info-bareme', 'st-nat-bareme'):
             new_sub = subcategory.replace('bareme', '')
-            c_key = r2_key.replace(subcategory, new_sub + 'C')
-            pascal_key = r2_key.replace(subcategory, new_sub + 'Pascal')
+            c_key = r2_key.replace(subcategory, new_sub + 'c')
+            pascal_key = r2_key.replace(subcategory, new_sub + 'pascal')
             if self.upload_enabled:
                 ok_c = self.upload_to_r2(pdf_path, c_key)
                 ok_p = self.upload_to_r2(pdf_path, pascal_key)
@@ -338,7 +343,7 @@ class BacExamScraper:
                 
                 # Filter for LRO (Romanian) files only
                 lro_files = [f for f in pdf_files if 
-                           ('_LRO.pdf' in f.name or (not any(lang in f.name for lang in ['_LMA', '_LGE', '_LSK', '_LSR', '_LUA']) and f.name.endswith('.pdf'))) 
+                           ('_LRO.pdf' in f.name or (not any(lang in f.name for lang in ['_LMA', '_LGE', '_LSK', '_LSR', '_LUA', '_LIT', '_GER']) and f.name.endswith('.pdf'))) 
                            and 'pentru_minoritatea' not in f.name.lower() 
                            and 'minoritatea' not in f.name.lower()]
                 print(f"Processing {len(lro_files)} LRO files")
@@ -403,12 +408,12 @@ class BacExamScraper:
             print(f"\nProcessing URL: {url}")
             
             # Fetch webpage
-            html_content = self.fetch_page(url)
+            html_content, actual_url = self.fetch_page(url)
             if not html_content:
                 continue
-            
-            # Extract ZIP links
-            zip_links = self.extract_links(html_content, url)
+
+            # Extract ZIP links using the actual URL (may be HTTP fallback)
+            zip_links = self.extract_links(html_content, actual_url)
             print(f"Found {len(zip_links)} ZIP files")
             
             # Process each ZIP link
@@ -463,6 +468,18 @@ def main():
         action='store_true',
         help='Upload files to R2 (default: save files locally in ./files)'
     )
+    parser.add_argument(
+        '--force-archive',
+        action='store_true',
+        default=None,
+        help='Force archive subdomain (subiecte{year}.edu.ro) even for current year'
+    )
+    parser.add_argument(
+        '--no-archive',
+        action='store_true',
+        default=None,
+        help='Force no archive subdomain (subiecte.edu.ro) even for past years'
+    )
     
     args = parser.parse_args()
     
@@ -471,12 +488,24 @@ def main():
         import sys
         sys.exit(1)
     
+    if args.force_archive and args.no_archive:
+        print("Error: --force-archive and --no-archive cannot be used together.")
+        import sys
+        sys.exit(1)
+    
+    force_archive: bool | None = None
+    if args.force_archive:
+        force_archive = True
+    elif args.no_archive:
+        force_archive = False
+    
     try:
         scraper = BacExamScraper(
             worker_url=args.worker_url,
             upload_password=args.password,
             year=args.year,
             upload_enabled=args.upload,
+            force_archive=force_archive,
         )
         zips_count = scraper.run()
         

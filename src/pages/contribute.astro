@@ -6,13 +6,20 @@ import ContentContainer from '../layouts/ContentContainer.astro';
 import Content from '../../CONTRIBUTE.md';
 ---
 
-<Layout title="contribuie | cuza.pages.dev" markdown>
+<Layout
+  title="contribuie | cuza.pages.dev"
+  description="Proiect open-source — contribuie cu cursuri, subiecte și resurse pentru bacalaureat și admitere în cea mai mare arhivă pentru liceeni."
+  keywords="contribuie, open source, arhivă subiecte bac, cursuri informatică, LTAIC, cuza, GitHub"
+  nofollow
+  noindex
+  markdown
+>
   <ContentContainer>
     <aside slot="left" class="flex flex-col gap-2 lg:ml-2 lg:mt-2">
       <NewNavbar />
     </aside>
     <div slot="middle" class="flex flex-col gap-2">
-      <div class="bg-[#0d1117] rounded-3xl p-5 pr-2.5 mb-12">
+      <div class="bg-[#0d1117] rounded-3xl py-5 px-2.5 mb-12">
         <article class="markdown-body">
           <Content />
         </article>

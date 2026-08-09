@@ -35,5 +35,4 @@ pnpm-debug.log*
 
 # temporary files
 web-scraper/temp/
-web-scraper/files/
-web-scraper/files2/
+web-scraper/files*

@@ -109,6 +109,17 @@ function getSubtree(
 }
 
 /**
+ * Get a subtree as an object, returning {} if the path doesn't exist or is a leaf.
+ */
+function getSubtreeAsObject(
+  index: FileStructure,
+  segments: string[],
+): FileStructure {
+  const subtree = getSubtree(index, segments);
+  return subtree !== null && typeof subtree !== 'string' ? subtree : {};
+}
+
+/**
  * Set a value at a nested path, creating intermediate objects as needed.
  */
 function setInIndex(
@@ -270,18 +281,34 @@ function pruneMissingIndexLeaves(
   return cleaned;
 }
 
-const VALID_PAGES = new Set(['bac', 'teste', 'sim']);
+const VALID_PAGES = new Set(['bac', 'sim']);
 const VALID_SIMULATIONS = new Set(['judetene', 'locale']);
 const VALID_TYPE2 = new Set(['var', 'bar']);
-const BAC_TITLE_TO_CODE: Record<string, string> = {
-  Model: 'SM',
-  Simulare: 'sim',
-  'Sesiunea-I': 'S1',
-  'Sesiunea-II': 'S2',
-  'Sesiune-speciala': 'SS',
-};
+const VALID_VARIANTS = new Set([
+  '01',
+  '02',
+  '03',
+  '04',
+  '05',
+  '06',
+  '07',
+  '08',
+  '09',
+  '10',
+]);
+const VARIANT_REQUIRED_TITLES = new Set([
+  'Sesiunea-I',
+  'Sesiunea-II',
+  'Sesiunea-speciala',
+]);
+const BAC_TITLES = [
+  'Model',
+  'Simulare',
+  'Sesiunea-I',
+  'Sesiunea-II',
+  'Sesiunea-speciala',
+] as const;
 const YEAR_RE = /^20[1-3]\d$/;
-const TEST_NUMBER_RE = /^\d{1,2}$/;
 const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 MB
 
 /**
@@ -319,20 +346,14 @@ function validateFormData(formData: FormData): string | null {
   // ── Page-specific validation ───────────────────────────────────────────────
   if (page === 'bac') {
     const title = formData.get('title') as string | null;
-    if (!title) {
-      return 'Lipsă titlu';
+    if (!title || !(BAC_TITLES as readonly string[]).includes(title)) {
+      return 'Lipsă tip sau tip invalid';
     }
-    if (!(title in BAC_TITLE_TO_CODE)) {
-      return 'Titlu BAC invalid';
-    }
-  }
-  if (page === 'teste') {
-    const testNumber = formData.get('testNumber') as string | null;
-    if (!testNumber) {
-      return 'Lipsă număr test';
-    }
-    if (!TEST_NUMBER_RE.test(testNumber)) {
-      return 'Număr test invalid';
+    if (VARIANT_REQUIRED_TITLES.has(title)) {
+      const variant = formData.get('variant') as string | null;
+      if (!variant || !VALID_VARIANTS.has(variant)) {
+        return 'Lipsă variantă sau variantă invalidă (01-10)';
+      }
     }
   }
   if (page === 'sim') {
@@ -358,32 +379,25 @@ interface UploadPathData {
   page: string;
   year: string;
   title: string | null;
+  variant: string | null;
   type2: string;
   reserve: boolean;
-  testNumber: string | null;
   simulation: string | null;
   county: string | null;
   local: string | null;
 }
 
 function generateUploadPath(data: UploadPathData): { r2Key: string } {
-  const { page, year, type2, testNumber, simulation, reserve } = data;
+  const { page, year, variant, simulation, reserve, type2 } = data;
   const title = sanitizePathSegment(data.title);
   const county = sanitizePathSegment(data.county);
   const local = sanitizePathSegment(data.local);
 
   if (page === 'bac') {
-    const baseCode = BAC_TITLE_TO_CODE[data.title ?? ''];
-    const code = reserve ? `${baseCode}R` : baseCode;
+    const folderName = reserve ? `${title}-rezerva` : title;
+    const varSuffix = variant ? `_${variant}` : '_00';
     return {
-      r2Key: `fizica/pages/teoretic/${year}/${title}/E_d_fizica_${year}_${code}_${type2}.pdf`,
-    };
-  }
-  if (page === 'teste') {
-    const testNumberNormalized = (testNumber ?? '').padStart(2, '0');
-    const testType = type2 === 'bar' ? 'Bar' : 'Test';
-    return {
-      r2Key: `fizica/pages/teoretic/teste-de-antrenament/${year}/E_d_fizica_${year}_${testType}_${testNumberNormalized}.pdf`,
+      r2Key: `fizica/pages/teoretic/bac/${year}/${folderName}/E_d_fizica_teoretic_vocational_${year}_${type2}${varSuffix}.pdf`,
     };
   }
   const location = simulation === 'judetene' ? county : local;
@@ -410,23 +424,14 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
 
     const index = await getIndex(c.env.FILES);
     const segments = resolvePathSegments(subject, page);
-    const subtree = getSubtree(index, segments);
-    const content: FileStructure =
-      subtree !== null && typeof subtree !== 'string'
-        ? (subtree as FileStructure)
-        : {};
+    const content = getSubtreeAsObject(index, segments);
     const years = extractYears(content);
 
-    // Extra content
     const extraSegments = resolvePathSegments(
       subject,
       subject.toLowerCase() === 'admitere' ? `${page}/extra` : 'extra',
     );
-    const extraSubtree = getSubtree(index, extraSegments);
-    const extra: FileStructure =
-      extraSubtree !== null && typeof extraSubtree !== 'string'
-        ? (extraSubtree as FileStructure)
-        : {};
+    const extra = getSubtreeAsObject(index, extraSegments);
 
     return c.json({ content, extra, years });
   });
@@ -475,25 +480,25 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     const page = formData.get('page') as string;
     const year = formData.get('year') as string;
     const title = formData.get('title') as string | null;
-    const type2 = formData.get('type2') as string;
+    const variant = formData.get('variant') as string | null;
     const reserveRaw = formData.get('reserve') as string | null;
     const reserve = reserveRaw === 'on' || reserveRaw === 'true';
-    const testNumber = formData.get('testNumber') as string | null;
     const simulation = formData.get('simulation') as string | null;
     const county = formData.get('county') as string | null;
     const local = formData.get('local') as string | null;
+    const type2 = formData.get('type2') as string;
     const file = formData.get('file') as unknown as File;
 
     const { r2Key } = generateUploadPath({
       page,
       year,
       title,
-      type2,
+      variant,
       reserve,
-      testNumber,
       simulation,
       county,
       local,
+      type2,
     });
 
     await c.env.FILES.put(r2Key, file, {

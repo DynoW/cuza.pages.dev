@@ -220,7 +220,7 @@ if (isWinterTheme) {
     </script>
 
     {
-      import.meta.env.PROD === true ? (
+      import.meta.env.PROD ? (
         <>
           {/* Umami tag */}
           <script
@@ -264,16 +264,16 @@ if (isWinterTheme) {
         type="button"
         class="bg-white font-bold p-4 rounded-full transition ease-in-out hover:scale-105 duration-200 cursor-pointer"
         style="display: none;"
-        onclick="scrollToTop()"
       >
         <UpArrow />
       </button>
       <script is:inline>
+        const button = document.getElementById('scrollToTop');
         function scrollToTop() {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+        button.addEventListener('click', scrollToTop);
         window.addEventListener('scroll', function () {
-          const button = document.getElementById('scrollToTop');
           if (button) {
             button.style.display = window.scrollY > 0 ? 'block' : 'none';
           }

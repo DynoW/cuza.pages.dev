@@ -8,8 +8,15 @@ import Footer from '../components/Footer.astro';
 import CountdownTimer from './CountdownTimer.astro';
 import SiteLinks from './SiteLinks.astro';
 import { apiService } from '../api';
-import { getDisplayName, PAGE_DISPLAY_NAMES } from '../config/labels';
+import {
+  getDisplayName,
+  getFolderPriority,
+  PAGE_DISPLAY_NAMES,
+} from '../config/labels';
 import type { FileStructure } from '../types';
+
+// Helper to match List.astro folder display format
+const formatFolderKey = (key: string): string => key.replace(/_/g, '-');
 
 // Props for the component
 interface Props {
@@ -20,33 +27,79 @@ interface Props {
 const { subject, page } = Astro.props as Props;
 
 // Single request for all page data
-const pageData = await apiService.getPageData(subject, page);
+const [pageData, structure] = await Promise.all([
+  apiService.getPageData(subject, page),
+  apiService.getStructure(),
+]);
 const content: FileStructure = pageData.content;
 const years: number[] = pageData.years;
 const extra: FileStructure = pageData.extra;
 
+// Top-level non-year folder keys for sidebar shortcuts
+const contentFolders = Object.entries(content)
+  .filter(([, v]) => typeof v === 'object' && v !== null)
+  .filter(([k]) => !/^20\d{2}$/.test(k))
+  .map(([k]) => ({ key: k, label: formatFolderKey(k) }))
+  .sort((a, b) => getFolderPriority(a.key) - getFolderPriority(b.key));
+
 // ── SEO helpers ──────────────────────────────────────────────────────────────
+const school = 'Liceul Teoretic Alexandru Ioan Cuza, București';
 const subjectLabel =
   subject === 'admitere' ? 'Admitere UPB' : getDisplayName(subject);
 const pageLabel = PAGE_DISPLAY_NAMES[page] ?? getDisplayName(page);
-const isHome = subject === 'fizica' && page === 'bac';
+const isHome = subject === 'fizica' && page === 'teoretic';
+const isBac = page === 'bac';
+const isAdmitere = subject === 'admitere';
 
 const pageTitle = isHome
   ? 'Mate-Fizică BAC | cuza.pages.dev'
   : `${subjectLabel} - ${pageLabel} | cuza.pages.dev`;
-const pageDescription = `Subiecte oficiale, variante și simulări ${pageLabel} la ${subjectLabel}. Descarcă gratuit PDF-uri pentru pregătire BAC și admitere. Liceul Teoretic Alexandru Ioan Cuza, București.`;
-const pageKeywords = `${subjectLabel.toLowerCase()}, ${pageLabel.toLowerCase()}, bacalaureat, subiecte, variante, bareme, simulare, cuza, LTAIC, UPB`;
 
-const subjectBaseUrl =
-  subject === 'fizica'
-    ? 'https://cuza.pages.dev'
-    : `https://cuza.pages.dev/${subject}`;
-const canonicalUrl =
-  page === 'bac' ? subjectBaseUrl : `https://cuza.pages.dev/${subject}/${page}`;
+function buildDescription(): string {
+  if (isHome) {
+    return `Arhivă cu subiecte oficiale BAC, variante și simulări la Fizică pentru liceeni. Include bareme și rezolvări pentru bacalaureat și admiterea UPB. ${school}.`;
+  }
+  if (isAdmitere) {
+    return `Subiecte de admitere UPB și Politehnică la ${pageLabel} — variante din anii anteriori, bareme și modele de examen pentru pregătire. ${school}.`;
+  }
+  if (isBac) {
+    return `Subiecte oficiale și variante BAC la ${subjectLabel} din sesiunile anterioare. Arhivă cu bareme și rezolvări pentru pregătirea bacalaureatului. ${school}.`;
+  }
+  return `Subiecte și variante ${pageLabel} la ${subjectLabel} pentru BAC și admitere. Arhivă cu bareme și rezolvări. ${school}.`;
+}
+
+function buildKeywords(): string {
+  const base = `cuza, LTAIC, ${school.toLowerCase()}`;
+  if (isHome) {
+    return `fizică, bacalaureat, subiecte bac, variante bac, bareme, simulări, admitere UPB, pregătire bac, liceu, cuza, LTAIC`;
+  }
+  if (isAdmitere) {
+    return `${pageLabel.toLowerCase()}, admitere UPB, politehnica, variante admitere, bareme, pregătire admitere, ${base}`;
+  }
+  if (isBac) {
+    return `${subjectLabel.toLowerCase()}, subiecte bac, variante bac, bareme bac, bacalaureat, ${base}`;
+  }
+  return `${subjectLabel.toLowerCase()}, ${pageLabel.toLowerCase()}, bacalaureat, subiecte, variante, bareme, ${base}`;
+}
+
+const pageDescription = buildDescription();
+const pageKeywords = buildKeywords();
+
+const canonicalUrl = isHome
+  ? 'https://cuza.pages.dev'
+  : `https://cuza.pages.dev/${subject}/${page}`;
+
+const subjectPages = structure?.[subject] ?? [];
+const firstPage = subjectPages[0] ?? 'bac';
+const subjectBreadcrumbUrl = isHome
+  ? 'https://cuza.pages.dev'
+  : `https://cuza.pages.dev/${subject}/${firstPage}`;
 
 const breadcrumbs = [
-  { name: subjectLabel, url: subjectBaseUrl },
-  ...(page !== 'bac' ? [{ name: pageLabel, url: canonicalUrl }] : []),
+  { name: subjectLabel, url: subjectBreadcrumbUrl },
+  ...(isHome || page === firstPage
+    ? []
+    : [{ name: pageLabel, url: canonicalUrl }]),
 ];
 ---
 
@@ -63,7 +116,7 @@ const breadcrumbs = [
       <SiteLinks wrapperClass="hidden lg:flex" />
     </aside>
     <div slot="middle" class="flex flex-col gap-2">
-      <div class="bg-gray-100/90 rounded-3xl p-5 pr-2.5 font-bold">
+      <div class="bg-gray-100/90 rounded-3xl py-5 px-2.5 font-bold">
         <List subject={subject} page={page} content={content} />
       </div>
     </div>
@@ -71,9 +124,13 @@ const breadcrumbs = [
       slot="right"
       class="flex flex-col gap-2 md:mt-2 md:mr-2 md:sticky md:top-2 md:right-2"
     >
-      <div class="bg-zinc-950/90 rounded-3xl py-3 px-4">
-        <Extra subject={subject} page={page} extraData={extra} years={years} />
-      </div>
+      <Extra
+        subject={subject}
+        page={page}
+        extraData={extra}
+        years={years}
+        contentFolders={contentFolders}
+      />
       <CountdownTimer />
     </aside>
   </ContentContainer>

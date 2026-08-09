@@ -1,16 +1,44 @@
 ---
-interface Props {
-  years?: number[];
+interface FolderShortcut {
+  key: string;
+  label: string;
 }
 
-const { years = [] } = Astro.props;
+interface Props {
+  years?: number[];
+  folders?: FolderShortcut[];
+}
+
+const { years = [], folders = [] } = Astro.props;
+const hasYears = years.length > 0;
+const hasFolders = folders.length > 0;
+if (!hasYears && !hasFolders) return;
 ---
 
 <div class="shortcuts-container">
   <p class="text-lg font-bold text-slate-300">Accesare rapidă</p>
 
   {
-    years.length > 0 ? (
+    hasFolders && (
+      <>
+        <div class="shortcuts-grid">
+          {folders.map((f) => (
+            <a
+              href={`#${f.key}`}
+              class="shortcut-button"
+              title={`Salt la secțiunea ${f.label}`}
+            >
+              {f.label}
+            </a>
+          ))}
+        </div>
+        {hasYears && <hr class="border-white/10 my-2" />}
+      </>
+    )
+  }
+
+  {
+    hasYears && (
       <div class="shortcuts-grid">
         {years.map((year) => (
           <a
@@ -22,17 +50,11 @@ const { years = [] } = Astro.props;
           </a>
         ))}
       </div>
-    ) : (
-      <p class="text-slate-400">Niciun an disponibil</p>
     )
   }
 </div>
 
 <style>
-  .shortcuts-container {
-    margin-bottom: 1rem;
-  }
-
   .shortcuts-grid {
     display: flex;
     flex-wrap: wrap;

@@ -2,7 +2,13 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Instalează | cuza.pages.dev" nofollow noindex>
+<Layout
+  title="Instalează | cuza.pages.dev"
+  description="Instalează aplicația CuzaPages ca PWA — acces rapid la subiecte BAC și admitere direct din ecranul principal, inclusiv fără conexiune la internet."
+  keywords="instalează aplicația, PWA, cuza pages, subiecte bac offline, aplicație web, LTAIC"
+  nofollow
+  noindex
+>
   <div class="flex items-center justify-center h-svh px-5 py-8">
     <div
       class="bg-[rgba(10,13,16,.85)] text-white rounded-3xl p-8 md:p-10 shadow-2xl backdrop-blur-sm border border-white/10 max-w-sm w-full text-center relative overflow-hidden"
@@ -92,7 +98,6 @@ import Layout from '../layouts/Layout.astro';
       <button
         id="installBtn"
         class="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-gray-400 text-white font-semibold py-3.5 px-6 rounded-xl transition-colors cursor-pointer disabled:cursor-not-allowed text-base"
-        onclick="install()"
         disabled
       >
         <span id="installBtnText">Instalează aplicația</span>
@@ -174,5 +179,7 @@ import Layout from '../layouts/Layout.astro';
     function install() {
       if (deferredPrompt) deferredPrompt.prompt();
     }
+
+    installBtn.addEventListener('click', install);
   </script>
 </Layout>
