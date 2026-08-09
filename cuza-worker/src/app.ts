@@ -376,19 +376,19 @@ function generateUploadPath(data: UploadPathData): { r2Key: string } {
     const baseCode = BAC_TITLE_TO_CODE[data.title ?? ''];
     const code = reserve ? `${baseCode}R` : baseCode;
     return {
-      r2Key: `fizica/pages/bac/${year}/${title}/E_d_fizica_${year}_${code}_${type2}.pdf`,
+      r2Key: `fizica/pages/teoretic/${year}/${title}/E_d_fizica_${year}_${code}_${type2}.pdf`,
     };
   }
   if (page === 'teste') {
     const testNumberNormalized = (testNumber ?? '').padStart(2, '0');
     const testType = type2 === 'bar' ? 'Bar' : 'Test';
     return {
-      r2Key: `fizica/pages/teste-de-antrenament/${year}/E_d_fizica_${year}_${testType}_${testNumberNormalized}.pdf`,
+      r2Key: `fizica/pages/teoretic/teste-de-antrenament/${year}/E_d_fizica_${year}_${testType}_${testNumberNormalized}.pdf`,
     };
   }
   const location = simulation === 'judetene' ? county : local;
   return {
-    r2Key: `fizica/pages/simulari-judetene/${year}/E_d_fizica_${location}_${year}_${type2}.pdf`,
+    r2Key: `fizica/pages/teoretic/simulari-judetene/${year}/E_d_fizica_${location}_${year}_${type2}.pdf`,
   };
 }
 
