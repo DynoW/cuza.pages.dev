@@ -28,7 +28,8 @@ const shouldFilter2007 =
 const yearsfix = shouldFilter2007 ? years?.filter((y) => y !== 2007) : years;
 ---
 
-<div class="bg-zinc-950/90 rounded-3xl py-3 px-4">
+<div class="bg-zinc-950/90 rounded-3xl py-3 px-4 flex flex-col">
+  <div>
   {
     Object.keys(extraData).length > 0 && (
       <>
@@ -51,6 +52,7 @@ const yearsfix = shouldFilter2007 ? years?.filter((y) => y !== 2007) : years;
       </>
     )
   }
+  </div>
   <Shortcuts years={yearsfix} folders={contentFolders} />
   <ToggleExpansion />
 </div>

@@ -12,6 +12,7 @@ interface Props {
 const { years = [], folders = [] } = Astro.props;
 const hasYears = years.length > 0;
 const hasFolders = folders.length > 0;
+if (!hasYears && !hasFolders) return;
 ---
 
 <div class="shortcuts-container">
@@ -37,7 +38,7 @@ const hasFolders = folders.length > 0;
   }
 
   {
-    hasYears ? (
+    hasYears && (
       <div class="shortcuts-grid">
         {years.map((year) => (
           <a
@@ -49,17 +50,11 @@ const hasFolders = folders.length > 0;
           </a>
         ))}
       </div>
-    ) : (
-      !hasFolders && <p class="text-slate-400">Niciun an disponibil</p>
     )
   }
 </div>
 
 <style>
-  .shortcuts-container {
-    margin-bottom: 1rem;
-  }
-
   .shortcuts-grid {
     display: flex;
     flex-wrap: wrap;
