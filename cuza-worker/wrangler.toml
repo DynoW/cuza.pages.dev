@@ -2,7 +2,7 @@ name = "cuza-worker"
 
 account_id = "f23d89f989b552da46a4049cb843423d"
 workers_dev = true
-compatibility_date = "2025-10-04"
+compatibility_date = "2026-06-16"
 main = "src/index.ts"
 
 [[ratelimits]]
