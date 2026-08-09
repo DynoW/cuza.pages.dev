@@ -1,4 +1,4 @@
-var CACHE = 'cuza-pages-v3';
+var CACHE = 'cuza-pages-v4';
 
 self.addEventListener('install', function (_event) {
   self.skipWaiting();

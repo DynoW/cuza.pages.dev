@@ -420,7 +420,7 @@ interactive_upload_options() {
   local files_text="${input_files:-./files}"
   IFS=' ' read -r -a UPLOAD_FILES <<< "$files_text"
 
-  read -r -p "Base dir [./files]: " input_base_dir
+  read -r -p "Base dir in R2 [./files]: " input_base_dir
   UPLOAD_BASE_DIR="${input_base_dir:-./files}"
 
   read -r -p "Explicit key (optional): " input_key
@@ -721,5 +721,4 @@ case "$MODE" in
     ;;
 esac
 
-echo
 echo "Done."

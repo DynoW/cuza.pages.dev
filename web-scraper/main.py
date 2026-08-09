@@ -237,7 +237,7 @@ class BacExamScraper:
         filename = pdf_filename
         # Clean up filename by removing language suffixes
         clean_filename = filename
-        language_suffixes = ['_LRO', '_LMA', '_LGE', '_LSK', '_LSR', '_LUA', '_LIT']
+        language_suffixes = ['_LRO', '_LMA', '_LGE', '_LSK', '_LSR', '_LUA', '_LIT', '_GER']
         for suffix in language_suffixes:
             if suffix + '.pdf' in clean_filename:
                 clean_filename = clean_filename.replace(suffix + '.pdf', '.pdf')
@@ -343,7 +343,7 @@ class BacExamScraper:
                 
                 # Filter for LRO (Romanian) files only
                 lro_files = [f for f in pdf_files if 
-                           ('_LRO.pdf' in f.name or (not any(lang in f.name for lang in ['_LMA', '_LGE', '_LSK', '_LSR', '_LUA', '_LIT']) and f.name.endswith('.pdf'))) 
+                           ('_LRO.pdf' in f.name or (not any(lang in f.name for lang in ['_LMA', '_LGE', '_LSK', '_LSR', '_LUA', '_LIT', '_GER']) and f.name.endswith('.pdf'))) 
                            and 'pentru_minoritatea' not in f.name.lower() 
                            and 'minoritatea' not in f.name.lower()]
                 print(f"Processing {len(lro_files)} LRO files")
