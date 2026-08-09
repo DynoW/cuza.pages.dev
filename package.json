@@ -3,6 +3,7 @@
   "description": "Archive bac",
   "version": "1.0.0",
   "homepage": "https://cuza.pages.dev",
+  "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
     "dev": "astro dev --host",
