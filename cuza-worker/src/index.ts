@@ -29,7 +29,7 @@ app.use(
   '*',
   cors({
     origin: (origin) => {
-      const allowed = ['https://cuza.pages.dev', 'https://dev.cuza.pages.dev'];
+      const allowed = ['https://cuza.pages.dev', 'http://localhost:4321'];
       return allowed.includes(origin) ? origin : null;
     },
     allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
