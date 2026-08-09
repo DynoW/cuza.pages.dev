@@ -1,10 +1,15 @@
 ---
 import NewPage from '../../components/NewPage.astro';
-import { subjectIndexPaths } from '../../paths';
+import { apiService } from '../../api';
 
 export async function getStaticPaths() {
-  const excludedSubjects = ['fizica', 'admitere'];
-  return subjectIndexPaths(excludedSubjects);
+  const subjectPages = await apiService.getStructure();
+  return Object.entries(subjectPages)
+    .filter(([, pages]) => pages.length === 1)
+    .map(([subject, pages]) => ({
+      params: { subject },
+      props: { firstPage: pages[0] },
+    }));
 }
 
 const { subject } = Astro.params as { subject: string };

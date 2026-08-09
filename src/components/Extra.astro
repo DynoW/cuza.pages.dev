@@ -14,28 +14,36 @@ interface Props {
 const { subject, page, extraData, years } = Astro.props as Props;
 
 const isAdmitere = subject === 'admitere';
+
+const shouldFilter2007 =
+  (subject === 'fizica' && page === 'teoretic') ||
+  (subject === 'mate' && page === 'mate-info');
+const yearsfix = shouldFilter2007 ? years?.filter((y) => y !== 2007) : years;
 ---
 
-<p class="text-lg font-bold text-slate-300">Extra</p>
-{
-  (subject === 'admitere' && page === 'fizica') || subject === 'fizica' ? (
-    <a
-      class="extra-link"
-      href="https://drive.google.com/drive/folders/1RUHqNmCLyEN-FV3IXjw_aIpZEaE-qJWq?usp=sharing"
-      target="_blank"
-    >
-      Culegeri fizică
-    </a>
-  ) : null
-}
-{
-  isAdmitere ? (
-    <List subject="admitere" page={`${page}/extra`} content={extraData} />
-  ) : (
-    <List subject={subject} page="extra" content={extraData} />
-  )
-}
-
-<Shortcuts years={years} />
-
-<ToggleExpansion />
+<div class="bg-zinc-950/90 rounded-3xl py-3 px-4">
+  {
+    Object.keys(extraData).length > 0 && (
+      <>
+        <p class="text-lg font-bold text-slate-300">Extra</p>
+        {(subject === 'admitere' && page === 'fizica') ||
+        subject === 'fizica' ? (
+          <a
+            class="extra-link"
+            href="https://drive.google.com/drive/folders/1RUHqNmCLyEN-FV3IXjw_aIpZEaE-qJWq?usp=sharing"
+            target="_blank"
+          >
+            Culegeri fizică
+          </a>
+        ) : null}
+        {isAdmitere ? (
+          <List subject="admitere" page={`${page}/extra`} content={extraData} />
+        ) : (
+          <List subject={subject} page="extra" content={extraData} />
+        )}
+      </>
+    )
+  }
+  <Shortcuts years={yearsfix} />
+  <ToggleExpansion />
+</div>

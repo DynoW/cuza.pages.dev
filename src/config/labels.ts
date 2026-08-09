@@ -21,11 +21,10 @@ export const PAGE_DISPLAY_NAMES: Record<string, string> = {
   fizica: 'Fizică',
   info: 'Informatică',
   mate: 'Matematică',
-  'simulari-judetene': 'Simulări județene/locale',
-  'mate-info-C': 'Mate-Info (C)',
-  'mate-info-Pascal': 'Mate-Info (Pascal)',
-  'st-nat-C': 'Științe Ale Naturii (C)',
-  'st-nat-Pascal': 'Științe Ale Naturii (Pascal)',
+  'mate-info-c': 'Mate-Info (C)',
+  'mate-info-pascal': 'Mate-Info (Pascal)',
+  'st-nat-c': 'Științe Ale Naturii (C)',
+  'st-nat-pascal': 'Științe Ale Naturii (Pascal)',
 };
 
 export function formatSlugLabel(value: string): string {

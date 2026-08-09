@@ -22,7 +22,11 @@ const getFolderPriority = (key: string): number => {
     [/\bsesiunea\s*(ii|2)\b/, 3],
     [/\bsesiunea\s*(i|1)\b/, 4],
     [/(special|olimp)/, 5],
-    [/\bmodel\b/, 6],
+    [/\bbac\b/, 6],
+    [/\bmodel\b/, 7],
+    [/\bsimulari judetene\b/, 8],
+    [/\bteste de antrenament\b/, 9],
+    [/\b100 variante\b/, 10],
   ];
 
   for (const [pattern, priority] of priorityRules) {
@@ -41,52 +45,46 @@ const {
   isExtra: isExtraProp,
 } = Astro.props as Props;
 
-const workerUrl =
-  import.meta.env.PUBLIC_WORKER_URL.replace(/\/$/, '') ||
-  'https://api.my-lab.ro';
+const baseUrl = (
+  import.meta.env.PUBLIC_WORKER_URL ?? 'https://api.my-lab.ro'
+).replace(/\/$/, '');
 
 // Use explicit prop in recursive calls, derive from page name at root.
 const isExtra = isExtraProp ?? (page === 'extra' || page.endsWith('/extra'));
 const cx = isExtra ? 'extra' : 'content';
 
 const paddingLeft = `${depth}rem`;
-const sortedEntries = Object.entries(content).sort(
-  ([keyA, valA], [keyB, valB]) => {
-    const aIsYear = isYearFolder(keyA);
-    const bIsYear = isYearFolder(keyB);
-    const aIsFile = typeof valA === 'string';
-    const bIsFile = typeof valB === 'string';
+const entries = Object.entries(content);
+const sortedEntries = entries
+  .map(([key, value]) => ({
+    key,
+    value,
+    isYear: isYearFolder(key),
+    isFile: typeof value === 'string',
+    fileMatch:
+      typeof value === 'string' ? key.match(/_(var|bar)_(\d{2})/i) : null,
+    priority: typeof value === 'string' ? 100 : getFolderPriority(key),
+  }))
+  .sort((a, b) => {
+    if (a.isYear && b.isYear) return Number(b.key) - Number(a.key);
+    if (a.isYear !== b.isYear) return a.isYear ? -1 : 1;
 
-    if (aIsYear && bIsYear) {
-      return Number(keyB) - Number(keyA);
+    if (a.isFile && b.isFile && a.fileMatch && b.fileMatch) {
+      const numDiff = parseInt(a.fileMatch[2]) - parseInt(b.fileMatch[2]);
+      if (numDiff !== 0) return numDiff;
+      const typeA = a.fileMatch[1].toLowerCase() === 'var' ? 0 : 1;
+      const typeB = b.fileMatch[1].toLowerCase() === 'var' ? 0 : 1;
+      return typeA - typeB;
     }
 
-    if (aIsYear !== bIsYear) {
-      return aIsYear ? -1 : 1;
-    }
+    if (a.isFile !== b.isFile) return a.isFile ? 1 : -1;
 
-    if (aIsFile && bIsFile) {
-      const matchA = keyA.match(/_(var|bar)_(\d{2})/i);
-      const matchB = keyB.match(/_(var|bar)_(\d{2})/i);
-      if (matchA && matchB) {
-        const numDiff = parseInt(matchA[2]) - parseInt(matchB[2]);
-        if (numDiff !== 0) return numDiff;
-        const typeA = matchA[1].toLowerCase() === 'var' ? 0 : 1;
-        const typeB = matchB[1].toLowerCase() === 'var' ? 0 : 1;
-        return typeA - typeB;
-      }
-    }
-
-    if (aIsFile !== bIsFile) {
-      return aIsFile ? 1 : -1;
-    }
-
-    const priorityDiff = getFolderPriority(keyA) - getFolderPriority(keyB);
+    const priorityDiff = a.priority - b.priority;
     if (priorityDiff !== 0) return priorityDiff;
 
-    return keyB.localeCompare(keyA);
-  },
-);
+    return b.key.localeCompare(a.key);
+  })
+  .map(({ key, value }) => [key, value] as [string, FileStructure[string]]);
 ---
 
 <div class="w-full" id={`content-${subject}-${page.replace('/', '-')}`}>
@@ -95,7 +93,10 @@ const sortedEntries = Object.entries(content).sort(
       sortedEntries.length > 0 ? (
         <ul class={`${cx}-list`} style={`padding-left: ${paddingLeft}`}>
           {sortedEntries.map(([key, value], index) => {
-            const showDivider = depth === 1 && index === 0;
+            const showDivider =
+              isYearFolder(page) &&
+              index === 0 &&
+              ((depth === 2 && !isYearFolder(key)) || depth === 1);
 
             if (typeof value === 'string') {
               // It's a file
@@ -109,7 +110,7 @@ const sortedEntries = Object.entries(content).sort(
                   <li>
                     <a
                       class={`${cx}-link flex items-center break-normal`}
-                      href={`${workerUrl}/file/${value}`}
+                      href={`${baseUrl}/file/${value}`}
                       target="_blank"
                       rel="noopener"
                       aria-label={`Open ${key} in new tab`}
@@ -233,19 +234,19 @@ const sortedEntries = Object.entries(content).sort(
     eventName: string,
     eventData?: Record<string, unknown>,
   ): void {
-    if (!import.meta.env.PROD) return;
-    try {
-      const umami = (window as any).umami;
-      if (umami) {
-        if (typeof umami.track === 'function') {
-          umami.track(eventName, eventData);
-        } else if (typeof umami.trackEvent === 'function') {
-          umami.trackEvent(eventName, eventData);
+    if (import.meta.env.PROD)
+      try {
+        const umami = (window as any).umami;
+        if (umami) {
+          if (typeof umami.track === 'function') {
+            umami.track(eventName, eventData);
+          } else if (typeof umami.trackEvent === 'function') {
+            umami.trackEvent(eventName, eventData);
+          }
         }
+      } catch (e) {
+        // ignore
       }
-    } catch (e) {
-      // ignore
-    }
   }
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -314,7 +315,11 @@ const sortedEntries = Object.entries(content).sort(
         .querySelectorAll<HTMLElement>('.folder-toggle')
         .forEach((toggle) => {
           const isYear = toggle.getAttribute('data-folder-type') === 'year';
-          const open = mode === 'all' || (mode === 'years' && isYear);
+          const isBac = toggle.textContent === 'bac';
+          const open =
+            mode === 'all' ||
+            (mode === 'years' && isYear) ||
+            (mode !== 'none' && isBac);
           setFolder(toggle, open);
         });
     }

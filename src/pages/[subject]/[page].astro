@@ -1,8 +1,19 @@
 ---
 import NewPage from '../../components/NewPage.astro';
-import { subjectPagePaths } from '../../paths';
+import { apiService } from '../../api';
 
-export const getStaticPaths = subjectPagePaths;
+export async function getStaticPaths() {
+  const subjectPages = await apiService.getStructure();
+  const paths: { params: { subject: string; page: string } }[] = [];
+  for (const [subject, pages] of Object.entries(subjectPages)) {
+    for (const page of pages) {
+      // fizica/teoretic is served at /, not at its own URL
+      if (subject === 'fizica' && page === 'teoretic') continue;
+      paths.push({ params: { subject, page } });
+    }
+  }
+  return paths;
+}
 
 const subject = Astro.params?.subject;
 const page = Astro.params?.page;

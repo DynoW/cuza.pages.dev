@@ -36,6 +36,8 @@ Scrape options:
     -u, --upload                       Upload to R2 (default: save in ./files)
     -w, --worker-url URL               Override worker URL
     -p, --password PASS                Override upload password
+    --force-archive                    Force archive subdomain (subiecte{year}.edu.ro)
+    --no-archive                       Force no archive subdomain (subiecte.edu.ro)
 
 Upload options:
     --files PATH [PATH...]             Files or folders to upload (default: ./files)
@@ -129,6 +131,12 @@ run_scrape() {
   local cmd=(python main.py --year "$SCRAPE_YEAR")
   if [[ "$SCRAPE_UPLOAD" -eq 1 ]]; then
     cmd+=(--upload)
+  fi
+  if [[ "$SCRAPE_FORCE_ARCHIVE" -eq 1 ]]; then
+    cmd+=(--force-archive)
+  fi
+  if [[ "$SCRAPE_NO_ARCHIVE" -eq 1 ]]; then
+    cmd+=(--no-archive)
   fi
   if [[ -n "$SCRAPE_WORKER_URL" ]]; then
     cmd+=(--worker-url "$SCRAPE_WORKER_URL")
@@ -298,11 +306,8 @@ run_preview() {
 
   export PUBLIC_WORKER_URL="http://127.0.0.1:$api_port"
 
-  echo "Building site with local preview data..."
-  (cd "$project_root" && pnpm build)
-
-  echo "Starting site preview..."
-  (cd "$project_root" && pnpm preview)
+  echo "Starting site preview (dev mode)..."
+  (cd "$project_root" && pnpm dev)
 }
 
 run_download() {
@@ -381,12 +386,30 @@ interactive_scrape_options() {
   local current_year
   current_year="$(date +%Y)"
 
+  SCRAPE_FORCE_ARCHIVE=0
+  SCRAPE_NO_ARCHIVE=0
+
   read -r -p "Year [$current_year]: " input_year
   SCRAPE_YEAR="${input_year:-$current_year}"
 
   read -r -p "Upload to R2? [y/N]: " input_upload
   if [[ "${input_upload,,}" =~ ^(y|yes)$ ]]; then
     SCRAPE_UPLOAD=1
+  fi
+
+  read -r -p "Force archive subdomain? (subiecte{year}.edu.ro) [y/N]: " input_force
+  if [[ "${input_force,,}" =~ ^(y|yes)$ ]]; then
+    SCRAPE_FORCE_ARCHIVE=1
+  fi
+
+  read -r -p "Force no archive subdomain? (subiecte.edu.ro) [y/N]: " input_no_archive
+  if [[ "${input_no_archive,,}" =~ ^(y|yes)$ ]]; then
+    SCRAPE_NO_ARCHIVE=1
+  fi
+
+  if [[ "$SCRAPE_FORCE_ARCHIVE" -eq 1 && "$SCRAPE_NO_ARCHIVE" -eq 1 ]]; then
+    echo "Error: --force-archive and --no-archive cannot be used together."
+    exit 1
   fi
 
   interactive_worker_and_password SCRAPE_WORKER_URL SCRAPE_PASSWORD
@@ -465,6 +488,8 @@ SKIP_INSTALL=0
 
 SCRAPE_YEAR="$(date +%Y)"
 SCRAPE_UPLOAD=0
+SCRAPE_FORCE_ARCHIVE=0
+SCRAPE_NO_ARCHIVE=0
 SCRAPE_WORKER_URL=""
 SCRAPE_PASSWORD=""
 
@@ -540,6 +565,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     -u | --upload)
       SCRAPE_UPLOAD=1
+      shift
+      ;;
+    --force-archive)
+      SCRAPE_FORCE_ARCHIVE=1
+      shift
+      ;;
+    --no-archive)
+      SCRAPE_NO_ARCHIVE=1
       shift
       ;;
 
@@ -673,6 +706,8 @@ fi
 case "$MODE" in
   scrape)
     echo "Year: $SCRAPE_YEAR"
+    echo "Force archive: $([ "$SCRAPE_FORCE_ARCHIVE" -eq 1 ] && echo yes || echo no)"
+    echo "No archive: $([ "$SCRAPE_NO_ARCHIVE" -eq 1 ] && echo yes || echo no)"
     run_scrape
     ;;
   upload) run_upload ;;

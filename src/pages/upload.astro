@@ -5,7 +5,14 @@ const workerUrl = import.meta.env.PUBLIC_WORKER_URL;
 const isUploadEnabled = !!workerUrl;
 ---
 
-<Layout title="Încarcă PDF by @Daniel C." nofollow noindex bodyClass="mx-4">
+<Layout
+  title="Încarcă PDF | cuza.pages.dev"
+  description="Formular pentru încărcarea de documente PDF în arhiva de subiecte BAC și admitere — variante, bareme și simulări de la elevi pentru elevi."
+  keywords="încarcă PDF, subiecte bac, contribuie, upload variante, arhivă subiecte, cuza"
+  nofollow
+  noindex
+  bodyClass="mx-4"
+>
   <div
     class="max-w-sm md:max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/3"
   >
@@ -36,50 +43,76 @@ const isUploadEnabled = !!workerUrl;
           enctype="multipart/form-data"
           class="flex flex-col gap-4 mt-4"
         >
-          <label for="page" class="font-bold">
-            Pagina:
-          </label>
-          <select
-            id="page"
-            name="page"
-            required
-            class="p-2 border border-gray-300 rounded"
-          >
-            <option value="bac">Bac</option>
-            <option value="teste">Teste de antrenament</option>
-            <option value="sim">Simulări județene</option>
-          </select>
+          <div class="flex items-center gap-2">
+            <label for="page" class="font-bold whitespace-nowrap">
+              Pagina:
+            </label>
+            <select
+              id="page"
+              name="page"
+              required
+              class="p-2 border border-gray-300 rounded"
+            >
+              <option value="bac">Bac</option>
+              <option value="sim">Simulări județene</option>
+            </select>
+          </div>
 
-          <label for="year" class="font-bold">
-            An:
-          </label>
-          <input
-            type="number"
-            id="year"
-            name="year"
-            required
-            class="p-2 border border-gray-300 rounded"
-          />
+          <div class="flex items-center gap-2">
+            <label for="year" class="font-bold whitespace-nowrap">
+              An:
+            </label>
+            <input
+              type="number"
+              id="year"
+              name="year"
+              required
+              class="w-20 p-2 border border-gray-300 rounded"
+            />
+          </div>
 
-          <div id="titleField" class="hidden">
-            <label for="title" class="font-bold">
+          <div id="titleField" class="hidden items-center gap-2">
+            <label for="title" class="font-bold whitespace-nowrap">
               Tip:
             </label>
             <select
               id="title"
               name="title"
+              required
               class="p-2 border border-gray-300 rounded"
             >
-              <option value="Simulare">Simulare</option>
               <option value="Model">Model</option>
+              <option value="Simulare">Simulare</option>
               <option value="Sesiunea-I">Sesiunea I</option>
               <option value="Sesiunea-II">Sesiunea II</option>
-              <option value="Sesiune-speciala">Sesiunea speciala</option>
+              <option value="Sesiunea-speciala">Sesiunea Specială</option>
+            </select>
+          </div>
+
+          <div id="variantField" class="hidden items-center gap-2">
+            <label for="variant" class="font-bold whitespace-nowrap">
+              Variant:
+            </label>
+            <select
+              id="variant"
+              name="variant"
+              class="p-2 border border-gray-300 rounded"
+            >
+              <option value="01">01</option>
+              <option value="02">02</option>
+              <option value="03">03</option>
+              <option value="04">04</option>
+              <option value="05">05</option>
+              <option value="06">06</option>
+              <option value="07">07</option>
+              <option value="08">08</option>
+              <option value="09">09</option>
+              <option value="10">10</option>
             </select>
           </div>
 
           <div id="reserveField" class="hidden items-center gap-2">
-            <label for="reserve" class="font-bold">
+            <label for="reserve" class="font-bold whitespace-nowrap">
               Este rezervă?
             </label>
             <input
@@ -90,8 +123,8 @@ const isUploadEnabled = !!workerUrl;
             />
           </div>
 
-          <div id="simulationField" class="hidden">
-            <label for="simulation" class="font-bold">
+          <div id="simulationField" class="hidden items-center gap-2">
+            <label for="simulation" class="font-bold whitespace-nowrap">
               Tip simulare:
             </label>
             <select
@@ -104,8 +137,8 @@ const isUploadEnabled = !!workerUrl;
             </select>
           </div>
 
-          <div id="countyField" class="hidden">
-            <label for="county" class="font-bold">
+          <div id="countyField" class="hidden items-center gap-2">
+            <label for="county" class="font-bold whitespace-nowrap">
               Județ:
             </label>
             <select
@@ -158,33 +191,19 @@ const isUploadEnabled = !!workerUrl;
             </select>
           </div>
 
-          <div id="localField" class="hidden">
-            <label for="local" class="font-bold">
-              Localitate/Liceu (poate fi LAICUZA):
+          <div id="localField" class="hidden flex-wrap items-center gap-2">
+            <label for="local" class="font-bold whitespace-nowrap">
+              Localitate/Liceu (poate fi: LAICUZA):
             </label>
             <input
               type="text"
               id="local"
               name="local"
-              class="p-2 border border-gray-300 rounded"
+              class="p-2 border border-gray-300 rounded w-40"
             />
           </div>
 
-          <div id="testNumberField" class="hidden">
-            <label for="testNumber" class="font-bold">
-              Număr Test:
-            </label>
-            <input
-              type="number"
-              id="testNumber"
-              name="testNumber"
-              min="1"
-              max="99"
-              class="p-2 border border-gray-300 rounded"
-            />
-          </div>
-
-          <div class="flex items-center gap-1">
+          <div class="flex items-center gap-2">
             <label class="font-bold whitespace-nowrap">Variantă/Barem:</label>
             <input type="hidden" id="type2" name="type2" value="var" />
             <label class="relative inline-flex h-9.5 w-36 cursor-pointer select-none items-center rounded border border-gray-300 p-1">
@@ -199,17 +218,19 @@ const isUploadEnabled = !!workerUrl;
             </label>
           </div>
 
-          <label for="file" class="font-bold">
-            Selectează PDF:
-          </label>
-          <input
-            type="file"
-            id="file"
-            name="file"
-            accept="application/pdf"
-            required
-            class="p-2 border border-gray-300 rounded"
-          />
+          <div>
+            <label for="file" class="font-bold">
+              Selectează PDF:
+            </label>
+            <input
+              type="file"
+              id="file"
+              name="file"
+              accept="application/pdf"
+              required
+              class="w-full p-2 border border-gray-300 rounded mt-1"
+            />
+          </div>
 
           <button
             type="submit"
@@ -258,10 +279,13 @@ const isUploadEnabled = !!workerUrl;
       >
         <div class="modal-content bg-white p-6 rounded-lg shadow-lg w-80">
           <div class="modal-content-heading flex justify-between items-center">
-            <label for="passwordInput" class="passwordInputText font-bold">
+            <label for="passwordInput" class="font-bold">
               Introdu parola
             </label>
-            <span class="close cursor-pointer text-gray-500 text-2xl font-bold">
+            <span
+              id="closeModalBtn"
+              class="cursor-pointer text-gray-500 text-2xl font-bold"
+            >
               &times;
             </span>
           </div>
@@ -286,181 +310,121 @@ const isUploadEnabled = !!workerUrl;
   }
 
   <script>
-    const pageSelect = document.getElementById(
-      'page',
-    ) as HTMLSelectElement | null;
-    let page = pageSelect ? pageSelect.value : '';
-    const simulationSelect = document.getElementById(
-      'simulation',
-    ) as HTMLSelectElement | null;
-    let simulation = simulationSelect ? simulationSelect.value : '';
-    const simulationField = document.getElementById('simulationField');
-    const countyField = document.getElementById('countyField');
-    const localField = document.getElementById('localField');
-    const testNumberField = document.getElementById('testNumberField');
-    const titleField = document.getElementById('titleField');
-    const reserveField = document.getElementById('reserveField');
-    const reserveInput = document.getElementById(
-      'reserve',
-    ) as HTMLInputElement | null;
-    const testNumberInput = document.getElementById(
-      'testNumber',
-    ) as HTMLInputElement | null;
-    const type2Toggle = document.getElementById(
-      'type2Toggle',
-    ) as HTMLInputElement | null;
-    const type2Input = document.getElementById(
-      'type2',
-    ) as HTMLInputElement | null;
+    const $ = (id: string): HTMLElement | null => document.getElementById(id);
 
-    function toggleFields(page: string, simulation: string) {
+    const setField = (container: HTMLElement | null, show: boolean): void => {
+      if (!container) return;
+      container.classList.toggle('hidden', !show);
+      container.classList.toggle('flex', show);
+    };
+
+    const pageSelect = $('page') as HTMLSelectElement | null;
+    let page = pageSelect?.value ?? '';
+    const simulationSelect = $('simulation') as HTMLSelectElement | null;
+    let simulation = simulationSelect?.value ?? '';
+    const titleSelect = $('title') as HTMLSelectElement | null;
+    let title = titleSelect?.value ?? '';
+
+    const simulationField = $('simulationField');
+    const countyField = $('countyField');
+    const localField = $('localField');
+    const titleField = $('titleField');
+    const variantField = $('variantField');
+    const reserveField = $('reserveField');
+    const reserveInput = $('reserve') as HTMLInputElement | null;
+    const type2Toggle = $('type2Toggle') as HTMLInputElement | null;
+    const type2Input = $('type2') as HTMLInputElement | null;
+    const yearInput = $('year') as HTMLInputElement | null;
+
+    const VARIANT_TITLES = new Set([
+      'Sesiunea-I',
+      'Sesiunea-II',
+      'Sesiunea-speciala',
+    ]);
+
+    function toggleFields(
+      page: string,
+      simulation: string,
+      title?: string,
+    ): void {
       if (page === 'bac') {
-        titleField?.classList.remove('hidden');
-        titleField?.querySelector('select')?.setAttribute('required', 'true');
-        reserveField?.classList.remove('hidden');
-        reserveField?.classList.add('flex');
-        simulationField?.classList.add('hidden');
-        simulationField?.querySelector('select')?.removeAttribute('required');
-        testNumberField?.classList.add('hidden');
-        testNumberField?.querySelector('input')?.removeAttribute('required');
-        countyField?.classList.add('hidden');
-        countyField?.querySelector('select')?.removeAttribute('required');
-        localField?.classList.add('hidden');
-        localField?.querySelector('input')?.removeAttribute('required');
-      } else if (page === 'teste') {
-        titleField?.classList.add('hidden');
-        titleField?.querySelector('select')?.removeAttribute('required');
-        reserveField?.classList.add('hidden');
-        reserveField?.classList.remove('flex');
-        if (reserveInput) reserveInput.checked = false;
-        simulationField?.classList.add('hidden');
-        simulationField?.querySelector('select')?.removeAttribute('required');
-        testNumberField?.classList.remove('hidden');
-        testNumberField
-          ?.querySelector('input')
-          ?.setAttribute('required', 'true');
-        countyField?.classList.add('hidden');
-        countyField?.querySelector('select')?.removeAttribute('required');
-        localField?.classList.add('hidden');
-        localField?.querySelector('input')?.removeAttribute('required');
-      } else if (page === 'sim') {
-        titleField?.classList.add('hidden');
-        titleField?.querySelector('select')?.removeAttribute('required');
-        reserveField?.classList.add('hidden');
-        reserveField?.classList.remove('flex');
-        if (reserveInput) reserveInput.checked = false;
-        simulationField?.classList.remove('hidden');
-        simulationField
-          ?.querySelector('select')
-          ?.setAttribute('required', 'true');
-        testNumberField?.classList.add('hidden');
-        testNumberField?.querySelector('input')?.removeAttribute('required');
-        if (simulation === 'judetene') {
-          countyField?.classList.remove('hidden');
-          countyField
-            ?.querySelector('select')
-            ?.setAttribute('required', 'true');
-          localField?.classList.add('hidden');
-          localField?.querySelector('input')?.removeAttribute('required');
-        } else {
-          countyField?.classList.add('hidden');
-          countyField?.querySelector('select')?.removeAttribute('required');
-          localField?.classList.remove('hidden');
-          localField?.querySelector('input')?.setAttribute('required', 'true');
-        }
+        setField(titleField, true);
+        const showVariant = title ? VARIANT_TITLES.has(title) : false;
+        setField(variantField, showVariant);
+        setField(reserveField, true);
+        setField(simulationField, false);
+        setField(countyField, false);
+        setField(localField, false);
+        return;
+      }
+
+      setField(titleField, false);
+      setField(variantField, false);
+      setField(reserveField, false);
+      if (reserveInput) reserveInput.checked = false;
+      setField(simulationField, true);
+
+      if (simulation === 'judetene') {
+        setField(countyField, true);
+        setField(localField, false);
       } else {
-        titleField?.classList.add('hidden');
-        titleField?.querySelector('select')?.removeAttribute('required');
-        reserveField?.classList.add('hidden');
-        reserveField?.classList.remove('flex');
-        if (reserveInput) reserveInput.checked = false;
-        simulationField?.classList.add('hidden');
-        simulationField?.querySelector('select')?.removeAttribute('required');
-        testNumberField?.classList.add('hidden');
-        testNumberField?.querySelector('input')?.removeAttribute('required');
-        countyField?.classList.add('hidden');
-        countyField?.querySelector('select')?.removeAttribute('required');
-        localField?.classList.add('hidden');
-        localField?.querySelector('input')?.removeAttribute('required');
+        setField(countyField, false);
+        setField(localField, true);
+        localField?.querySelector('input')?.setAttribute('required', 'true');
       }
     }
 
-    function onDOMContentLoaded() {
-      const yearInput = document.getElementById(
-        'year',
-      ) as HTMLInputElement | null;
+    document.addEventListener('DOMContentLoaded', () => {
       if (yearInput && !yearInput.value) {
         yearInput.value = new Date().getFullYear().toString();
       }
-      if (testNumberInput && !testNumberInput.value) {
-        testNumberInput.value = '01';
+      if (type2Toggle && type2Input) {
+        type2Input.value = type2Toggle.checked ? 'bar' : 'var';
       }
+      toggleFields(page, simulation, title);
+    });
 
-      syncType2Value();
-      toggleFields(page, simulation);
-    }
-    document.addEventListener('DOMContentLoaded', onDOMContentLoaded);
+    pageSelect?.addEventListener('change', (e: Event) => {
+      page = (e.target as HTMLSelectElement).value;
+      toggleFields(page, simulation, title);
+    });
 
-    function onPageChange(event: Event) {
-      const target = event.target as HTMLSelectElement;
-      page = target.value;
-      toggleFields(page, simulation);
-      if (page === 'teste' && testNumberInput && !testNumberInput.value) {
-        testNumberInput.value = '01';
+    titleSelect?.addEventListener('change', (e: Event) => {
+      title = (e.target as HTMLSelectElement).value;
+      toggleFields(page, simulation, title);
+    });
+
+    type2Toggle?.addEventListener('change', () => {
+      if (type2Toggle && type2Input) {
+        type2Input.value = type2Toggle.checked ? 'bar' : 'var';
       }
-    }
-    pageSelect?.addEventListener('change', onPageChange);
+    });
 
-    function onTestNumberInput() {
-      if (
-        testNumberInput &&
-        testNumberInput.value &&
-        testNumberInput.value.length === 1
-      ) {
-        testNumberInput.value = testNumberInput.value.padStart(2, '0');
-      }
-    }
+    simulationSelect?.addEventListener('change', (e: Event) => {
+      simulation = (e.target as HTMLSelectElement).value;
+      toggleFields(page, simulation, title);
+    });
 
-    testNumberInput?.addEventListener('input', onTestNumberInput);
-
-    const syncType2Value = () => {
-      if (!type2Toggle || !type2Input) return;
-      type2Input.value = type2Toggle.checked ? 'bar' : 'var';
-    };
-
-    type2Toggle?.addEventListener('change', syncType2Value);
-
-    function onSimulationChange(event: Event) {
-      const target = event.target as HTMLSelectElement;
-      simulation = target.value;
-      toggleFields(page, simulation);
-    }
-    simulationSelect?.addEventListener('change', onSimulationChange);
-
-    const form = document.getElementById('uploadForm');
-    const messageDiv = document.getElementById('message');
-    const modal = document.getElementById('passwordModal');
-    const closeModal = document.getElementsByClassName('close')[0];
-    const submitPasswordBtn = document.getElementById('submitPassword');
+    const form = $('uploadForm') as HTMLFormElement | null;
+    const messageDiv = $('message');
+    const modal = $('passwordModal');
+    const closeModal = $('closeModalBtn');
+    const submitPasswordBtn = $('submitPassword') as HTMLButtonElement | null;
 
     if (form && messageDiv && modal && closeModal && submitPasswordBtn) {
-      const passwordInput = document.getElementById(
-        'passwordInput',
-      ) as HTMLInputElement | null;
-      const submitPasswordButton = submitPasswordBtn as HTMLButtonElement;
-      const defaultSubmitPasswordLabel =
-        submitPasswordButton.textContent || 'Trimite';
+      const passwordInput = $('passwordInput') as HTMLInputElement | null;
+      const defaultLabel = submitPasswordBtn.textContent || 'Trimite';
 
-      const setSubmitPasswordLoading = (isLoading: boolean) => {
-        submitPasswordButton.disabled = isLoading;
-        submitPasswordButton.textContent = isLoading
+      const setLoading = (loading: boolean): void => {
+        submitPasswordBtn.disabled = loading;
+        submitPasswordBtn.textContent = loading
           ? 'Se trimite...'
-          : defaultSubmitPasswordLabel;
-        submitPasswordButton.classList.toggle('opacity-60', isLoading);
-        submitPasswordButton.classList.toggle('cursor-not-allowed', isLoading);
+          : defaultLabel;
+        submitPasswordBtn.classList.toggle('opacity-60', loading);
+        submitPasswordBtn.classList.toggle('cursor-not-allowed', loading);
       };
 
-      const hideModalAndClearPassword = () => {
+      const hideModal = (): void => {
         if (passwordInput) {
           passwordInput.value = '';
           passwordInput.blur();
@@ -469,8 +433,8 @@ const isUploadEnabled = !!workerUrl;
         modal.classList.remove('flex');
       };
 
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
+      form.addEventListener('submit', async (e: Event) => {
+        e.preventDefault();
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         if (passwordInput) {
@@ -479,106 +443,74 @@ const isUploadEnabled = !!workerUrl;
         }
       });
 
-      (closeModal as HTMLElement).onclick = function () {
-        hideModalAndClearPassword();
-      };
+      closeModal.addEventListener('click', hideModal);
 
-      window.addEventListener('click', function (event) {
-        if (event.target == modal) {
-          hideModalAndClearPassword();
+      window.addEventListener('click', (e: MouseEvent) => {
+        if (e.target === modal) hideModal();
+      });
+
+      window.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+          hideModal();
         }
       });
 
-      window.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' && !modal.classList.contains('hidden')) {
-          hideModalAndClearPassword();
-        }
-      });
+      submitPasswordBtn.addEventListener('click', async () => {
+        if (submitPasswordBtn.disabled) return;
+        setLoading(true);
 
-      submitPasswordBtn.onclick = async function () {
-        if (submitPasswordButton.disabled) {
-          return;
-        }
-        setSubmitPasswordLoading(true);
-
-        let password = '';
-        if (passwordInput) {
-          password = passwordInput.value;
-        }
-        hideModalAndClearPassword();
+        const password = passwordInput?.value ?? '';
 
         if (!password) {
           messageDiv.textContent = 'Introdu parola pentru a continua.';
           messageDiv.className = 'text-red-500';
-          setSubmitPasswordLoading(false);
+          setLoading(false);
           return;
         }
+
+        hideModal();
 
         messageDiv.textContent = 'Se încarcă...';
         messageDiv.className = 'text-blue-500';
 
-        const formData = new FormData(form as HTMLFormElement);
-
+        const formData = new FormData(form);
         if (page === 'bac') {
           formData.delete('simulation');
           formData.delete('county');
           formData.delete('local');
-          formData.delete('testNumber');
-        } else if (page === 'teste') {
+        } else {
           formData.delete('title');
+          formData.delete('variant');
           formData.delete('reserve');
-          formData.delete('simulation');
-          formData.delete('county');
-          formData.delete('local');
-        } else if (page === 'sim') {
-          formData.delete('title');
-          formData.delete('reserve');
-          formData.delete('testNumber');
-          if (simulation === 'judetene') {
-            formData.delete('local');
-          } else {
-            formData.delete('county');
-          }
+          formData.delete(simulation === 'judetene' ? 'local' : 'county');
         }
 
-        const username = 'admin';
-        const toBase64 = (value: string) => {
-          const bytes = new TextEncoder().encode(value);
-          let binary = '';
-          bytes.forEach((b) => {
-            binary += String.fromCharCode(b);
-          });
-          return btoa(binary);
-        };
-        const authHeader = 'Bearer ' + toBase64(`${username}:${password}`);
-        const workerUrl =
-          import.meta.env.PUBLIC_WORKER_URL.replace(/\/$/, '') ||
-          'https://api.my-lab.ro';
+        const toBase64 = (s: string): string =>
+          btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+        const auth = 'Bearer ' + toBase64('admin:' + password);
+
+        const baseUrl = import.meta.env.PUBLIC_WORKER_URL.replace(/\/$/, '');
 
         try {
-          const response = await fetch(`${workerUrl}/upload`, {
+          const res = await fetch(baseUrl + '/upload', {
             method: 'POST',
-            headers: {
-              Authorization: authHeader,
-            },
+            headers: { Authorization: auth },
             body: formData,
           });
-
-          if (response.ok) {
+          if (res.ok) {
             messageDiv.textContent = 'Fișierul a fost încărcat cu succes!';
             messageDiv.className = 'text-green-500';
           } else {
-            const result = await response.text();
-            messageDiv.textContent = `Eroare: ${result}`;
+            messageDiv.textContent = 'Eroare: ' + (await res.text());
             messageDiv.className = 'text-red-500';
           }
-        } catch (error) {
+        } catch {
           messageDiv.textContent = 'A apărut o eroare în timpul încărcării.';
           messageDiv.className = 'text-red-500';
         } finally {
-          setSubmitPasswordLoading(false);
+          setLoading(false);
         }
-      };
+      });
     }
   </script>
 </Layout>

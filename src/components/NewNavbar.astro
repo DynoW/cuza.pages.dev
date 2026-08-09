@@ -28,8 +28,8 @@ const navEntries = Object.entries(navStructure).filter(
 );
 
 // Helper function to get the URL for a nav item
-function getNavUrl(subject: string, page: string | null): string {
-  if (page === 'bac') return subject === 'fizica' ? '/' : `/${subject}`;
+function getNavUrl(subject: string, page: string): string {
+  if (subject === 'fizica' && page === 'teoretic') return '/';
   return `/${subject}/${page}`;
 }
 
@@ -38,12 +38,9 @@ function isSubjectActive(subject: string): boolean {
   return currentPath[0] === subject || (subject === 'fizica' && isHome);
 }
 
-function isPageActive(subject: string, page: string | null = null): boolean {
-  if (page == 'bac') {
-    return (
-      (currentPath[0] === subject && currentPath.length === 1) ||
-      (subject === 'fizica' && isHome)
-    );
+function isPageActive(subject: string, page: string): boolean {
+  if (subject === 'fizica' && page === 'teoretic') {
+    return isHome;
   }
   return currentPath[0] === subject && currentPath[1] === page;
 }
