@@ -8,8 +8,15 @@ import Footer from '../components/Footer.astro';
 import CountdownTimer from './CountdownTimer.astro';
 import SiteLinks from './SiteLinks.astro';
 import { apiService } from '../api';
-import { getDisplayName, PAGE_DISPLAY_NAMES } from '../config/labels';
+import {
+  getDisplayName,
+  getFolderPriority,
+  PAGE_DISPLAY_NAMES,
+} from '../config/labels';
 import type { FileStructure } from '../types';
+
+// Helper to match List.astro folder display format
+const formatFolderKey = (key: string): string => key.replace(/_/g, '-');
 
 // Props for the component
 interface Props {
@@ -27,6 +34,13 @@ const [pageData, structure] = await Promise.all([
 const content: FileStructure = pageData.content;
 const years: number[] = pageData.years;
 const extra: FileStructure = pageData.extra;
+
+// Top-level non-year folder keys for sidebar shortcuts
+const contentFolders = Object.entries(content)
+  .filter(([, v]) => typeof v === 'object' && v !== null)
+  .filter(([k]) => !/^20\d{2}$/.test(k))
+  .map(([k]) => ({ key: k, label: formatFolderKey(k) }))
+  .sort((a, b) => getFolderPriority(a.key) - getFolderPriority(b.key));
 
 // ── SEO helpers ──────────────────────────────────────────────────────────────
 const school = 'Liceul Teoretic Alexandru Ioan Cuza, București';
@@ -110,7 +124,13 @@ const breadcrumbs = [
       slot="right"
       class="flex flex-col gap-2 md:mt-2 md:mr-2 md:sticky md:top-2 md:right-2"
     >
-      <Extra subject={subject} page={page} extraData={extra} years={years} />
+      <Extra
+        subject={subject}
+        page={page}
+        extraData={extra}
+        years={years}
+        contentFolders={contentFolders}
+      />
       <CountdownTimer />
     </aside>
   </ContentContainer>

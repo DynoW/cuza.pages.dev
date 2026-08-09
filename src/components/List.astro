@@ -1,5 +1,6 @@
 ---
 import type { FileStructure } from '../types';
+import { formatFileName, getFolderPriority } from '../config/labels';
 
 interface Props {
   subject: string;
@@ -11,30 +12,7 @@ interface Props {
 }
 
 const isYearFolder = (key: string): boolean => /^20\d{2}$/.test(key);
-const formatKey = (key: string): string => key.replace(/_/g, ' ');
-const getFolderPriority = (key: string): number => {
-  const normalized = key.toLowerCase().replace(/[-_]+/g, ' ');
-
-  const priorityRules: Array<[RegExp, number]> = [
-    [/\badmitere\b/, 0],
-    [/\bpreadmitere\b/, 1],
-    [/\bsimululare\b/, 2],
-    [/\bsesiunea\s*(ii|2)\b/, 3],
-    [/\bsesiunea\s*(i|1)\b/, 4],
-    [/(special|olimp)/, 5],
-    [/\bbac\b/, 6],
-    [/\bmodel\b/, 7],
-    [/\bsimulari judetene\b/, 8],
-    [/\bteste de antrenament\b/, 9],
-    [/\b100 variante\b/, 10],
-  ];
-
-  for (const [pattern, priority] of priorityRules) {
-    if (pattern.test(normalized)) return priority;
-  }
-
-  return 100;
-};
+const formatKey = (key: string): string => key.replace(/_/g, '-');
 
 const {
   subject,
@@ -69,12 +47,37 @@ const sortedEntries = entries
     if (a.isYear && b.isYear) return Number(b.key) - Number(a.key);
     if (a.isYear !== b.isYear) return a.isYear ? -1 : 1;
 
-    if (a.isFile && b.isFile && a.fileMatch && b.fileMatch) {
-      const numDiff = parseInt(a.fileMatch[2]) - parseInt(b.fileMatch[2]);
-      if (numDiff !== 0) return numDiff;
-      const typeA = a.fileMatch[1].toLowerCase() === 'var' ? 0 : 1;
-      const typeB = b.fileMatch[1].toLowerCase() === 'var' ? 0 : 1;
-      return typeA - typeB;
+    if (a.isFile && b.isFile) {
+      const aLow = /laicuza|hulubei/i.test(a.key);
+      const bLow = /laicuza|hulubei/i.test(b.key);
+      if (aLow !== bLow) return aLow ? 1 : -1;
+
+      const aBase = a.key.replace(/_rasp\.pdf$/, '.pdf');
+      const bBase = b.key.replace(/_rasp\.pdf$/, '.pdf');
+      if (aBase === b.key) return 1;
+      if (bBase === a.key) return -1;
+
+      const aParts = a.key.match(/^(.+?)_(var|bar|rasp)(.*)$/i);
+      const bParts = b.key.match(/^(.+?)_(var|bar|rasp)(.*)$/i);
+      if (
+        aParts &&
+        bParts &&
+        aParts[1].toLowerCase() === bParts[1].toLowerCase()
+      ) {
+        const order: Record<string, number> = { var: 0, bar: 1, rasp: 2 };
+        const aType = aParts[2].toLowerCase();
+        const bType = bParts[2].toLowerCase();
+        const diff = (order[aType] ?? 0) - (order[bType] ?? 0);
+        if (diff !== 0) return diff;
+      }
+
+      if (a.fileMatch && b.fileMatch) {
+        const numDiff = parseInt(a.fileMatch[2]) - parseInt(b.fileMatch[2]);
+        if (numDiff !== 0) return numDiff;
+        const typeA = a.fileMatch[1].toLowerCase() === 'var' ? 0 : 1;
+        const typeB = b.fileMatch[1].toLowerCase() === 'var' ? 0 : 1;
+        return typeA - typeB;
+      }
     }
 
     if (a.isFile !== b.isFile) return a.isFile ? 1 : -1;
@@ -82,7 +85,7 @@ const sortedEntries = entries
     const priorityDiff = a.priority - b.priority;
     if (priorityDiff !== 0) return priorityDiff;
 
-    return b.key.localeCompare(a.key);
+    return a.key.localeCompare(b.key);
   })
   .map(({ key, value }) => [key, value] as [string, FileStructure[string]]);
 ---
@@ -113,7 +116,7 @@ const sortedEntries = entries
                       href={`${baseUrl}/file/${value}`}
                       target="_blank"
                       rel="noopener"
-                      aria-label={`Open ${key} in new tab`}
+                      aria-label={`Open ${formatFileName(key)} in new tab`}
                       data-umami-event="download_file"
                       data-umami-file-path={value}
                       data-umami-subject={subject}
@@ -132,12 +135,7 @@ const sortedEntries = entries
                           />
                         </svg>
                       )}
-                      {key.split('_').map((part, i, arr) => (
-                        <Fragment>
-                          {part}
-                          {i < arr.length - 1 && <>&#8203;_</>}
-                        </Fragment>
-                      ))}
+                      {formatFileName(key)}
                     </a>
                   </li>
                 </Fragment>
@@ -165,7 +163,10 @@ const sortedEntries = entries
                       <hr class="border-black m-2" />
                     </li>
                   )}
-                  <li class="space-y-2" id={isYear ? key : undefined}>
+                  <li
+                    class="space-y-2"
+                    id={isYear || depth === 0 ? key : undefined}
+                  >
                     {/* dark-reader: border-zinc-400 */}
                     <div class="folder-container">
                       <div

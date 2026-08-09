@@ -9,9 +9,16 @@ interface Props {
   page: string;
   extraData: FileStructure;
   years?: number[];
+  contentFolders?: { key: string; label: string }[];
 }
 
-const { subject, page, extraData, years } = Astro.props as Props;
+const {
+  subject,
+  page,
+  extraData,
+  years,
+  contentFolders = [],
+} = Astro.props as Props;
 
 const isAdmitere = subject === 'admitere';
 
@@ -44,6 +51,6 @@ const yearsfix = shouldFilter2007 ? years?.filter((y) => y !== 2007) : years;
       </>
     )
   }
-  <Shortcuts years={yearsfix} />
+  <Shortcuts years={yearsfix} folders={contentFolders} />
   <ToggleExpansion />
 </div>
