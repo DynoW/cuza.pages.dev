@@ -30,28 +30,38 @@ const yearsfix = shouldFilter2007 ? years?.filter((y) => y !== 2007) : years;
 
 <div class="bg-zinc-950/90 rounded-3xl py-3 px-4 flex flex-col">
   <div>
-  {
-    Object.keys(extraData).length > 0 && (
-      <>
-        <p class="text-lg font-bold text-slate-300">Extra</p>
-        {(subject === 'admitere' && page === 'fizica') ||
-        subject === 'fizica' ? (
-          <a
-            class="extra-link"
-            href="https://drive.google.com/drive/folders/1RUHqNmCLyEN-FV3IXjw_aIpZEaE-qJWq?usp=sharing"
-            target="_blank"
-          >
-            Culegeri fizică
-          </a>
-        ) : null}
-        {isAdmitere ? (
-          <List subject="admitere" page={`${page}/extra`} content={extraData} />
-        ) : (
-          <List subject={subject} page="extra" content={extraData} />
-        )}
-      </>
-    )
-  }
+    {
+      Object.keys(extraData).length > 0 && (
+        <>
+          <p class="text-lg font-bold mb-1 text-slate-300">Extra</p>
+          {(subject === 'admitere' && page === 'fizica') ||
+          subject === 'fizica' ? (
+            <div class="leading-4 mb-1">
+              <a
+                class="extra-link"
+                href="https://drive.google.com/drive/folders/1RUHqNmCLyEN-FV3IXjw_aIpZEaE-qJWq?usp=sharing"
+                target="_blank"
+              >
+                Culegeri fizică
+              </a>
+              <br />
+              <span class="text-sm text-slate-600">
+                (accesibile doar pentru adrese @laicuza.ro)
+              </span>
+            </div>
+          ) : null}
+          {isAdmitere ? (
+            <List
+              subject="admitere"
+              page={`${page}/extra`}
+              content={extraData}
+            />
+          ) : (
+            <List subject={subject} page="extra" content={extraData} />
+          )}
+        </>
+      )
+    }
   </div>
   <Shortcuts years={yearsfix} folders={contentFolders} />
   <ToggleExpansion />
