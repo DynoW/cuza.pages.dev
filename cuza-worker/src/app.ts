@@ -397,7 +397,7 @@ function generateUploadPath(data: UploadPathData): { r2Key: string } {
     const folderName = reserve ? `${title}-rezerva` : title;
     const varSuffix = variant ? `_${variant}` : '_00';
     return {
-      r2Key: `fizica/pages/teoretic/bac/${year}/${folderName}/E_d_fizica_teoretic_vocational_${year}_${type2}${varSuffix}.pdf`,
+      r2Key: `fizica/pages/teoretic/${year}/${folderName}/E_d_fizica_teoretic_vocational_${year}_${type2}${varSuffix}.pdf`,
     };
   }
   const location = simulation === 'judetene' ? county : local;

@@ -289,7 +289,7 @@ class BacExamScraper:
             print(f"  Local save error: {e}")
             return False
 
-    def upload_pdf(self, pdf_path: Path, exam_type: str, year: str) -> bool:
+    def upload_pdf(self, pdf_path: Path, exam_type: str, year: str, pascal_subcats: set | None = None) -> bool:
         """Upload a single PDF to R2 or save it locally with the correct key."""
         filename = pdf_path.name
         r2_key, _clean_filename = self.build_r2_key(filename, exam_type, year)
@@ -304,12 +304,18 @@ class BacExamScraper:
             new_sub = subcategory.replace('bareme', '')
             c_key = r2_key.replace(subcategory, new_sub + 'c')
             pascal_key = r2_key.replace(subcategory, new_sub + 'pascal')
+            pascal_subcat = new_sub + 'pascal'
+            has_pascal = pascal_subcats is not None and pascal_subcat in pascal_subcats
             if self.upload_enabled:
                 ok_c = self.upload_to_r2(pdf_path, c_key)
-                ok_p = self.upload_to_r2(pdf_path, pascal_key)
+                ok_p = self.upload_to_r2(pdf_path, pascal_key) if has_pascal else True
+                if not has_pascal:
+                    print(f"  Skipping Pascal bar: no {pascal_subcat} file in batch")
             else:
                 ok_c = self.save_file_locally(pdf_path, c_key)
-                ok_p = self.save_file_locally(pdf_path, pascal_key)
+                ok_p = self.save_file_locally(pdf_path, pascal_key) if has_pascal else True
+                if not has_pascal:
+                    print(f"  Skipping Pascal bar: no {pascal_subcat} file in batch")
             return ok_c or ok_p
 
         if self.upload_enabled:
@@ -347,10 +353,17 @@ class BacExamScraper:
                            and 'pentru_minoritatea' not in f.name.lower() 
                            and 'minoritatea' not in f.name.lower()]
                 print(f"Processing {len(lro_files)} LRO files")
-                
+
+                # Collect Pascal subcategories present in this batch
+                pascal_subcats = set()
+                for f in lro_files:
+                    subcat = self.extract_subcategory_from_pdf_name(f.name)
+                    if 'pascal' in subcat:
+                        pascal_subcats.add(subcat)
+
                 for pdf_file in lro_files:
                     try:
-                        if self.upload_pdf(pdf_file, exam_type, self.current_year):
+                        if self.upload_pdf(pdf_file, exam_type, self.current_year, pascal_subcats=pascal_subcats):
                             uploaded_files.append(pdf_file)
                     except Exception as e:
                         print(f"Error processing PDF {pdf_file.name}: {e}")
