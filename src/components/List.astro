@@ -148,7 +148,7 @@ const sortedEntries = entries
               // Determine if folder should be expanded by default
               const shouldBeExpanded =
                 expansionMode === 'all' ||
-                (expansionMode === 'years' && isYear);
+                (expansionMode === 'years' && isYear && depth === 0);
               const arrowRotation = shouldBeExpanded
                 ? 'rotate(90deg)'
                 : 'rotate(0deg)';
@@ -173,6 +173,7 @@ const sortedEntries = entries
                         class={`${cx}-text flex items-center cursor-pointer folder-toggle`}
                         data-folder-id={folderId}
                         data-folder-type={isYear ? 'year' : 'folder'}
+                        data-depth={depth}
                         data-expanded={shouldBeExpanded ? 'true' : 'false'}
                       >
                         <svg
@@ -316,10 +317,12 @@ const sortedEntries = entries
         .querySelectorAll<HTMLElement>('.folder-toggle')
         .forEach((toggle) => {
           const isYear = toggle.getAttribute('data-folder-type') === 'year';
+          const isTopLevelYear =
+            isYear && toggle.getAttribute('data-depth') === '0';
           const isBac = toggle.textContent === 'bac';
           const open =
             mode === 'all' ||
-            (mode === 'years' && isYear) ||
+            (mode === 'years' && isTopLevelYear) ||
             (mode !== 'none' && isBac);
           setFolder(toggle, open);
         });
