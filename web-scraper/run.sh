@@ -41,7 +41,7 @@ Scrape options:
 
 Upload options:
     --files PATH [PATH...]             Files or folders to upload (default: ./files)
-    -b, --base-dir DIR                 Base dir for deriving R2 keys (default: ./files)
+    -b, --base-dir DIR                 Strip this prefix from file paths to derive R2 keys (default: ./files)
     -k, --key KEY                      Explicit R2 key (single file only)
     --deploy                           Trigger deploy after successful uploads
     --dry-run                          Print planned uploads, no API calls

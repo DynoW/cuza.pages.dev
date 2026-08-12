@@ -127,7 +127,7 @@ def main() -> int:
     parser.add_argument('files', nargs='+', help='One or more local files or directories to upload')
     parser.add_argument('--worker-url', '-w', default=os.environ.get('PUBLIC_WORKER_URL', 'https://api.my-lab.ro'))
     parser.add_argument('--password', '-p', default=default_password, help='Upload password for the worker API')
-    parser.add_argument('--base-dir', '-b', default=str(script_dir / 'files'), help='Base directory used to derive R2 keys (default: ./files)')
+    parser.add_argument('--base-dir', '-b', default=str(script_dir / 'files'), help='Strip this prefix from file paths to derive R2 keys (default: ./files)')
     parser.add_argument('--key', '-k', default=None, help='Explicit R2 key (allowed only when uploading one file)')
     parser.add_argument('--deploy', action='store_true', help='Trigger deploy after successful uploads')
     parser.add_argument('--dry-run', action='store_true', help='Show planned uploads without sending files')
