@@ -378,10 +378,7 @@ function isPageActive(subject: string, page: string): boolean {
         overlay.classList.toggle('pointer-events-none', !isOpen);
         sideNav.classList.toggle('translate-x-0', isOpen);
         sideNav.classList.toggle('-translate-x-full', !isOpen);
-        sideNav.classList.toggle(
-          'shadow-[4px_0_20px_rgba(0,0,0,0.5)]',
-          isOpen,
-        );
+        sideNav.classList.toggle('shadow-[4px_0_20px_rgba(0,0,0,0.5)]', isOpen);
         mobileToggle.style.display = isOpen ? 'none' : '';
         document.body.style.overflow = isOpen ? 'hidden' : '';
       };
