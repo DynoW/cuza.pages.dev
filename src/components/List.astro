@@ -262,9 +262,7 @@ const sortedEntries = entries
         const event = el.getAttribute('data-track-event')!;
         const subject = el.getAttribute('data-track-subject') ?? '';
         const page = el.getAttribute('data-track-page') ?? '';
-        const error = el.getAttribute('data-track-error');
         const data: Record<string, unknown> = { subject, page };
-        if (error) data.error = error;
         trackUmami(event, data);
       });
 
