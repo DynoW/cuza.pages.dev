@@ -21,7 +21,7 @@ export const countdownConfig = {
   bac_1: {
     title: 'BAC iunie-iulie 2027',
     startDate: 'June 28, 2027 09:00:00',
-    endDate: 'July 1, 2027 12:00:00',
+    endDate: 'June 30, 2027 12:00:00',
   },
 
   admitere: {
