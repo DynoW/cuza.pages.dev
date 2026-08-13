@@ -1,5 +1,5 @@
 ---
-title: 'Curs-matrici-3'
+title: 'Curs-matrice-3'
 description: 'Transpunerea unei matrice'
 ---
 

@@ -25,6 +25,7 @@ export default defineConfig({
         !page.includes('/install') &&
         !page.includes('/upload') &&
         !page.includes('/contribute'),
+      lastmod: new Date(),
     }),
     react(),
     playformCompress(),

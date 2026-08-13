@@ -1,5 +1,5 @@
 ---
-title: 'Curs-matrici-2'
+title: 'Curs-matrice-2'
 description: 'Suma și parcurgerea elementelor'
 ---
 

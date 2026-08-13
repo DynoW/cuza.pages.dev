@@ -1,6 +1,6 @@
 #!/bin/bash
 # ---------------------------------------------------------------------------
-# cuza.pages.dev — Cuza Pages tools runner
+# cuza.pages.dev — CuzaPages tools runner
 #
 # Architecture:
 #   run.sh is the single user entry point. It handles environment setup,

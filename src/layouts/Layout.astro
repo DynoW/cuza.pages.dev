@@ -6,7 +6,6 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description?: string;
-  keywords?: string;
   noindex?: boolean;
   nofollow?: boolean;
   canonicalUrl?: string;
@@ -20,8 +19,7 @@ interface Props {
 
 const {
   title,
-  description = 'Subiecte de bac și admitere UPB la fizică, matematică și informatică. Liceul Teoretic Alexandru Ioan Cuza, București',
-  keywords = 'bac, bacalaureat, subiecte, fizica, matematica, informatica, examen, admitere, upb, poli, programare, algoritmi, variante, teste, simulari, mate-fizica, mate-info, info, Liceul Teoretic Alexandru Ioan Cuza, București, LTAIC, cuza',
+  description = 'Subiecte de bac și admitere UPB – arhivă open-source de variante, bareme, simulări și notițe pentru bacalaureat. Fizică, matematică, informatică și toate materiile de liceu.',
   noindex,
   nofollow,
   canonicalUrl,
@@ -161,10 +159,6 @@ if (isWinterTheme) {
             content: 'width=device-width, initial-scale=1.0, shrink-to-fit=no',
           },
           {
-            name: 'keywords',
-            content: keywords,
-          },
-          {
             name: 'theme-color',
             content: '#0e1720',
           },
@@ -185,7 +179,7 @@ if (isWinterTheme) {
         name: 'Mate-fizica',
         url: 'https://cuza.pages.dev',
         description:
-          'Subiecte de bac și admitere UPB la fizică, matematică și informatică. Liceul Teoretic Alexandru Ioan Cuza, București',
+          'Subiecte de BAC și admitere UPB – arhivă open-source de variante, bareme, simulări și notițe pentru bacalaureat.',
         inLanguage: 'ro',
         publisher: {
           '@type': 'EducationalOrganization',
@@ -243,7 +237,7 @@ if (isWinterTheme) {
     }
   </head>
   <body
-    class={`font-sans select-none overflow-x-hidden relative min-h-svh p-0${backgroundImage ? ' backgroundImage' : ''}${bodyClass ? ` ${bodyClass}` : ''}`}
+    class={`font-sans overflow-x-hidden relative min-h-svh p-0${backgroundImage ? ' backgroundImage' : ''}${bodyClass ? ` ${bodyClass}` : ''}`}
     style={backgroundStyle}
   >
     <slot />

@@ -7,7 +7,8 @@ description: 'Contribuții open-source la acest proiect'
 
 > Puteți adauga chiar voi cursuri sau snippeturi de cod :) Mai jos sunt persoane care au ajutat ↓
 
-Contributori: [0xHansLanda](https://github.com/0xHansLanda)
+- [Cojocaru Tudor](https://www.instagram.com/extrem5pro/) a testat site-ul
+- [0xHansLanda](https://github.com/0xHansLanda) a postat tutorialul de contribuție
 
 Cheers 🍻
 

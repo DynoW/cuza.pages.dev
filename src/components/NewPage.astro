@@ -43,7 +43,6 @@ const contentFolders = Object.entries(content)
   .sort((a, b) => getFolderPriority(a.key) - getFolderPriority(b.key));
 
 // ── SEO helpers ──────────────────────────────────────────────────────────────
-const school = 'Liceul Teoretic Alexandru Ioan Cuza, București';
 const subjectLabel =
   subject === 'admitere' ? 'Admitere UPB' : getDisplayName(subject);
 const pageLabel = PAGE_DISPLAY_NAMES[page] ?? getDisplayName(page);
@@ -52,38 +51,35 @@ const isBac = page === 'bac';
 const isAdmitere = subject === 'admitere';
 
 const pageTitle = isHome
-  ? 'Mate-Fizică BAC | cuza.pages.dev'
-  : `${subjectLabel} - ${pageLabel} | cuza.pages.dev`;
+  ? 'Fizică – Subiecte + simulări județene BAC | CuzaPages'
+  : isAdmitere
+    ? `${pageLabel} – Subiecte Admitere UPB | CuzaPages`
+    : isBac
+      ? `${subjectLabel} – Subiecte BAC | CuzaPages`
+      : `${subjectLabel} ${pageLabel} – Subiecte BAC | CuzaPages`;
 
 function buildDescription(): string {
   if (isHome) {
-    return `Arhivă cu subiecte oficiale BAC, variante și simulări la Fizică pentru liceeni. Include bareme și rezolvări pentru bacalaureat și admiterea UPB. ${school}.`;
+    return `Cea mai mare arhivă open-source de subiecte de bacalaureat la la Fizică și alte materii – variante oficiale, simulări județene, bareme și rezolvări.`;
   }
   if (isAdmitere) {
-    return `Subiecte de admitere UPB și Politehnică la ${pageLabel} — variante din anii anteriori, bareme și modele de examen pentru pregătire. ${school}.`;
+    return `Subiecte de admitere UPB (Politehnică) la ${pageLabel} – variante din anii anteriori, bareme, culegeri și modele de examen. Gratuit, fără cont.`;
   }
   if (isBac) {
-    return `Subiecte oficiale și variante BAC la ${subjectLabel} din sesiunile anterioare. Arhivă cu bareme și rezolvări pentru pregătirea bacalaureatului. ${school}.`;
+    return `Subiecte oficiale și variante BAC la ${subjectLabel} din toate sesiunile – arhivă open-source cu bareme și rezolvări pentru pregătirea bacalaureatului.`;
   }
-  return `Subiecte și variante ${pageLabel} la ${subjectLabel} pentru BAC și admitere. Arhivă cu bareme și rezolvări. ${school}.`;
+  return `Subiecte și variante ${pageLabel} la ${subjectLabel} – arhivă open-source de subiecte BAC și admitere, cu bareme și rezolvări.`;
 }
 
-function buildKeywords(): string {
-  const base = `cuza, LTAIC, ${school.toLowerCase()}`;
-  if (isHome) {
-    return `fizică, bacalaureat, subiecte bac, variante bac, bareme, simulări, admitere UPB, pregătire bac, liceu, cuza, LTAIC`;
-  }
-  if (isAdmitere) {
-    return `${pageLabel.toLowerCase()}, admitere UPB, politehnica, variante admitere, bareme, pregătire admitere, ${base}`;
-  }
-  if (isBac) {
-    return `${subjectLabel.toLowerCase()}, subiecte bac, variante bac, bareme bac, bacalaureat, ${base}`;
-  }
-  return `${subjectLabel.toLowerCase()}, ${pageLabel.toLowerCase()}, bacalaureat, subiecte, variante, bareme, ${base}`;
-}
+const pageHeading = isHome
+  ? 'Subiecte + Simulări Județene BAC – Fizică'
+  : isAdmitere
+    ? `Subiecte Admitere UPB – ${pageLabel}`
+    : isBac
+      ? `Subiecte BAC – ${subjectLabel}`
+      : `Subiecte BAC – ${subjectLabel} ${pageLabel}`;
 
 const pageDescription = buildDescription();
-const pageKeywords = buildKeywords();
 
 const canonicalUrl = isHome
   ? 'https://cuza.pages.dev'
@@ -106,7 +102,6 @@ const breadcrumbs = [
 <Layout
   title={pageTitle}
   description={pageDescription}
-  keywords={pageKeywords}
   canonicalUrl={canonicalUrl}
   breadcrumbs={breadcrumbs}
 >
@@ -117,6 +112,11 @@ const breadcrumbs = [
     </aside>
     <div slot="middle" class="flex flex-col gap-2">
       <div class="bg-gray-100/90 rounded-3xl py-5 px-2.5 font-bold">
+        <h1
+          class="text-xl md:text-2xl font-extrabold px-4 pb-2 text-slate-800"
+        >
+          {pageHeading}
+        </h1>
         <List subject={subject} page={page} content={content} />
       </div>
     </div>

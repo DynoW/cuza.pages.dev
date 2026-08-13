@@ -52,16 +52,15 @@ and wait for our approval 👍:
 
 ## Important locations:
 
-`/public` - here are documents stored
+`/public` - here are static assets stored (images, fonts, icons)
 
 `/src` - here is the source code of the site and where pages are created
+
+`cuza-worker` + R2 - exam PDFs are stored on Cloudflare R2 and served through the worker API
 
 ## How to make a new page:
 
 To make a new page you can copy one of the avabile pages in `/src/pages` and rename it and put it in `/src/pages/{PATH}` where `PATH` is the location relative to the site's domain (cuza.pages.dev/{PATH}).
-
-You will probably need to change the navbar of the page so go to `src/components/Navbar.astro`
-and add the new link at the end of the `<ul>` respecting the same format, making necessary changes for your page's PATH.
 
 ## How to make a feature request or report bugs:
 

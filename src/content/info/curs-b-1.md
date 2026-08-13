@@ -1,5 +1,5 @@
 ---
-title: 'Curs-matrici-1'
+title: 'Curs-matrice-1'
 description: 'Declarare și citire de matrice'
 ---
 

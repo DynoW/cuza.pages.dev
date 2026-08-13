@@ -1,12 +1,12 @@
 # CuzaPages
 
-> The largest archive for the Romanian baccalaureate exam — by students, for students.
+> The largest archive for the Romanian baccalaureate exam and UPB admission — by students, for students.
 
 **Live site:** [cuza.pages.dev](https://cuza.pages.dev)
 
 ## Overview
 
-CuzaPages is an open-source study platform that aggregates courses, past exam papers, and notes for Romanian high school students preparing for the baccalaureate. The site covers multiple subjects including Physics, Romanian language, and more.
+CuzaPages is an open-source study platform that aggregates courses, past exam papers, and notes for Romanian high school students preparing for the baccalaureate (`bac`) and the Politehnica University of Bucharest admission exam (`admitere UPB`). The site covers multiple subjects including Physics, Mathematics, Computer Science, Romanian language, and more.
 
 ## Tech Stack
 
@@ -39,7 +39,7 @@ cuza.pages.dev/
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org) 18+
+- [Node.js](https://nodejs.org) 22+
 - [pnpm](https://pnpm.io) 10+
 
 ### Install & run locally

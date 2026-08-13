@@ -53,10 +53,10 @@ Build the site with the local scraper snapshot and serve the result locally:
 ./run.sh --preview --skip-install
 ```
 
-The preview flow uses the files already stored by `main.py` under `./files/` by default. You can override that snapshot and the preview API port if needed:
+The preview flow uses the files already stored by `main.py` under `~/web-scraper/files` by default (falling back to `./files`). You can override that snapshot and the preview API port if needed:
 
 ```bash
-./run.sh --preview --files-dir ~/web-scrapper/files --api-port 8788
+./run.sh --preview --files-dir ./web-scraper/files --api-port 8788
 ```
 
 This starts a tiny local API shim for the build and keeps it running while `pnpm preview` serves the generated site, so file links keep working without the remote worker.

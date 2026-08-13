@@ -1,5 +1,5 @@
 ---
-title: 'Curs-matrici-4'
+title: 'Curs-matrice-4'
 description: 'Înmulțirea a două matrice'
 ---
 
