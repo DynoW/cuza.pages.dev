@@ -170,7 +170,7 @@ const sortedEntries = entries
                     {/* dark-reader: border-zinc-400 */}
                     <div class="folder-container">
                       <div
-                        class={`${cx}-text flex items-center cursor-pointer folder-toggle`}
+                        class={`${cx}-text flex items-center cursor-pointer folder-toggle hover:opacity-80`}
                         data-folder-id={folderId}
                         data-folder-type={isYear ? 'year' : 'folder'}
                         data-depth={depth}
@@ -329,15 +329,3 @@ const sortedEntries = entries
     }
   });
 </script>
-
-<style>
-  /* Arrow rotation animation */
-  .folder-arrow {
-    transition: transform 0.2s ease;
-  }
-
-  /* Hover effect */
-  .folder-toggle:hover {
-    opacity: 0.8;
-  }
-</style>

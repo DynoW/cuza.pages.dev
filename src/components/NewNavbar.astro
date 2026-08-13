@@ -356,16 +356,6 @@ function isPageActive(subject: string, page: string): boolean {
       background: #d6f87a;
     }
 
-    /* Mobile overlay and side-nav open state */
-    #mobile-overlay.open {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    #side-nav.open {
-      transform: translateX(0);
-      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
-    }
-
     /* Hamburger hover effect */
     #mobile-menu-toggle:hover span {
       background: #d6f87a;
@@ -382,10 +372,16 @@ function isPageActive(subject: string, page: string): boolean {
       // Open/close mobile menu helpers
       const toggleMenu = (isOpen: boolean) => {
         if (!sideNav || !overlay || !mobileToggle) return;
-        sideNav.classList.toggle('open', isOpen);
+        overlay.classList.toggle('opacity-100', isOpen);
+        overlay.classList.toggle('pointer-events-auto', isOpen);
+        overlay.classList.toggle('opacity-0', !isOpen);
+        overlay.classList.toggle('pointer-events-none', !isOpen);
         sideNav.classList.toggle('translate-x-0', isOpen);
         sideNav.classList.toggle('-translate-x-full', !isOpen);
-        overlay.classList.toggle('open', isOpen);
+        sideNav.classList.toggle(
+          'shadow-[4px_0_20px_rgba(0,0,0,0.5)]',
+          isOpen,
+        );
         mobileToggle.style.display = isOpen ? 'none' : '';
         document.body.style.overflow = isOpen ? 'hidden' : '';
       };
@@ -428,7 +424,11 @@ function isPageActive(subject: string, page: string): boolean {
 
       // Handle escape key
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && sideNav && sideNav.classList.contains('open'))
+        if (
+          e.key === 'Escape' &&
+          sideNav &&
+          sideNav.classList.contains('translate-x-0')
+        )
           closeMenu();
       });
 

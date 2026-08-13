@@ -1,23 +1,12 @@
 @import 'tailwindcss';
 
 @layer base {
-  /* @font-face {
-		font-family: Poppins;
-		font-style: normal;
-		font-weight: 500;
-		font-display: swap;
-		src: url("/assets/fonts/poppins-medium.woff2") format("woff2")
-	} */
   @font-face {
     font-family: Inter;
     font-style: normal;
     font-weight: 500; /* medium */
     font-display: swap;
     src: url('/assets/fonts/inter-medium.woff2') format('woff2');
-  }
-  :root {
-    --bs-gutter-x: 1.5rem;
-    --bs-gutter-y: 0;
   }
   html {
     scroll-behavior: smooth;
@@ -47,26 +36,6 @@
 }
 
 @layer components {
-  .container {
-    width: 100%;
-    padding-right: calc(var(--bs-gutter-x) * 0.5);
-    padding-left: calc(var(--bs-gutter-x) * 0.5);
-  }
-  .row {
-    display: flex;
-    flex-wrap: wrap;
-  }
-  .row > * {
-    flex-shrink: 0;
-    width: 100%;
-    max-width: 100%;
-    padding-right: calc(var(--bs-gutter-x) * 0.5);
-    padding-left: calc(var(--bs-gutter-x) * 0.5);
-    margin-top: var(--bs-gutter-y);
-  }
-  .col {
-    flex: 1 0 0%;
-  }
   .backgroundImage {
     background:
       url('/assets/img/background/bg-pattern.webp'),
@@ -104,8 +73,7 @@
     background-repeat: no-repeat;
   }
   .astro-code {
-    border-radius: 5px;
-    padding: 10px;
+    @apply rounded-md p-2.5;
   }
 }
 
@@ -143,7 +111,6 @@
   --font-family-sans:
     Inter, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  /* --font-family-serif: Poppins, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; */
   --breakpoint-xxs: 320px;
   --breakpoint-xs: 400px;
 }

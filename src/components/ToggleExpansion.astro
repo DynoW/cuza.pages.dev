@@ -8,21 +8,21 @@
     <div class="flex gap-2 text-slate-200">
       <button
         id="collapse-all"
-        class="expansion-option text-xs px-2 py-1 rounded bg-slate-700 cursor-pointer"
+        class="expansion-option text-xs px-2 py-1 rounded bg-slate-700 cursor-pointer transition-all duration-200 hover:not-[.active]:bg-slate-600"
         title="Închide toate folderele"
       >
         Închise
       </button>
       <button
         id="expand-years"
-        class="expansion-option text-xs px-2 py-1 rounded bg-slate-700 cursor-pointer"
+        class="expansion-option text-xs px-2 py-1 rounded bg-slate-700 cursor-pointer transition-all duration-200 hover:not-[.active]:bg-slate-600"
         title="Deschide doar folderele de ani"
       >
         Ani
       </button>
       <button
         id="expand-all"
-        class="expansion-option text-xs px-2 py-1 rounded bg-slate-700 cursor-pointer"
+        class="expansion-option text-xs px-2 py-1 rounded bg-slate-700 cursor-pointer transition-all duration-200 hover:not-[.active]:bg-slate-600"
         title="Deschide toate folderele"
       >
         Toate
@@ -30,23 +30,6 @@
     </div>
   </div>
 </div>
-
-<style>
-  /* Style for non-active buttons */
-  .expansion-option:not(.active) {
-    transition: all 0.2s ease;
-  }
-
-  /* Hover styles only apply to non-active buttons */
-  .expansion-option:not(.active):hover {
-    background-color: #475569 !important; /* slate-600 */
-  }
-
-  /* Active button style */
-  .expansion-option.active {
-    background-color: #2563eb !important; /* blue-600 */
-  }
-</style>
 
 <script>
   // Client-side script to handle expansion preferences

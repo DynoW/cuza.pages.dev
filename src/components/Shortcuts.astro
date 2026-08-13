@@ -15,17 +15,17 @@ const hasFolders = folders.length > 0;
 if (!hasYears && !hasFolders) return;
 ---
 
-<div class="shortcuts-container">
+<div>
   <p class="text-lg font-bold text-slate-300">Accesare rapidă</p>
 
   {
     hasFolders && (
       <>
-        <div class="shortcuts-grid">
+        <div class="flex flex-wrap gap-2 mt-2">
           {folders.map((f) => (
             <a
               href={`#${f.key}`}
-              class="shortcut-button"
+              class="shortcut-button bg-slate-800 text-slate-400 px-2 py-1 rounded text-sm transition-all duration-200 text-center min-w-12 inline-flex items-center justify-center hover:bg-slate-700 hover:text-slate-200 hover:-translate-y-px"
               title={`Salt la secțiunea ${f.label}`}
             >
               {f.label}
@@ -39,11 +39,11 @@ if (!hasYears && !hasFolders) return;
 
   {
     hasYears && (
-      <div class="shortcuts-grid">
+      <div class="flex flex-wrap gap-2 mt-2">
         {years.map((year) => (
           <a
             href={`#${year}`}
-            class="shortcut-button"
+            class="shortcut-button bg-slate-800 text-slate-400 px-2 py-1 rounded text-sm transition-all duration-200 text-center min-w-12 inline-flex items-center justify-center hover:bg-slate-700 hover:text-slate-200 hover:-translate-y-px"
             title={`Salt la documentele din ${year}`}
           >
             {year}
@@ -53,32 +53,3 @@ if (!hasYears && !hasFolders) return;
     )
   }
 </div>
-
-<style>
-  .shortcuts-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-  }
-
-  .shortcut-button {
-    background-color: #1e293b;
-    color: #94a3b8;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.875rem;
-    transition: all 0.2s ease;
-    text-align: center;
-    min-width: 3rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .shortcut-button:hover {
-    background-color: #334155;
-    color: #e2e8f0;
-    transform: translateY(-1px);
-  }
-</style>
