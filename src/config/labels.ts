@@ -25,7 +25,7 @@ export const PAGE_DISPLAY_NAMES: Record<string, string> = {
   'mate-info-pascal': 'Mate-Info (Pascal)',
   'st-nat-c': 'Științe ale Naturii (C)',
   'st-nat-pascal': 'Științe ale Naturii (Pascal)',
-  'st-nat' : 'Științe ale Naturii',
+  'st-nat': 'Științe ale Naturii',
 };
 
 export const FOLDER_DISPLAY_NAMES: Record<string, string> = {
