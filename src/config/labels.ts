@@ -25,7 +25,24 @@ export const PAGE_DISPLAY_NAMES: Record<string, string> = {
   'mate-info-pascal': 'Mate-Info (Pascal)',
   'st-nat-c': 'Științe ale Naturii (C)',
   'st-nat-pascal': 'Științe ale Naturii (Pascal)',
+  'st-nat' : 'Științe ale Naturii',
 };
+
+export const FOLDER_DISPLAY_NAMES: Record<string, string> = {
+  sesiunea_1: 'Sesiunea I',
+  sesiunea_2: 'Sesiunea a II-a',
+  sesiunea_1_rezerva: 'Sesiunea I — Rezervă',
+  sesiunea_2_rezerva: 'Sesiunea a II-a — Rezervă',
+  simulare_judetene: 'Simulări Județene',
+  modele: 'Modele',
+  teste_de_antrenament: 'Teste de Antrenament',
+  bac: 'BAC',
+  diverse: 'Diverse',
+};
+
+export function getFolderDisplayName(key: string): string {
+  return FOLDER_DISPLAY_NAMES[key] ?? formatSlugLabel(key);
+}
 
 export function formatSlugLabel(value: string): string {
   const normalized = value.replace(/-/g, ' ');

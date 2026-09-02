@@ -7,7 +7,14 @@ import ExcalidrawWrapper from '../../components/ExcalidrawWrapper.jsx';
   title="Notițe vizuale pentru bac la română | CuzaPages"
   description="Schițe și scheme vizuale pentru bacalaureatul la limba română. Opere literare, structură subiecte, eseuri și recapitulări vizuale pentru pregătirea bacului."
   canonicalUrl="https://cuza.pages.dev/notite/romana"
+  ogImage="https://cuza.pages.dev/open-graph/notite/romana.png"
+  ogImageAlt="Notițe vizuale pentru bac la română"
   backgroundImage={false}
+  breadcrumbs={[
+    { name: 'Acasă', url: 'https://cuza.pages.dev' },
+    { name: 'Notițe', url: 'https://cuza.pages.dev/notite/romana' },
+  ]}
+  course
 >
   <ExcalidrawWrapper client:only="react" />
 </Layout>

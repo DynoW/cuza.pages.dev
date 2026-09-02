@@ -2,6 +2,7 @@
 import { SEO } from 'astro-seo';
 import UpArrow from '../icons/UpArrow.astro';
 import '../styles/global.css';
+import { getCollectionJsonLd } from '../config/seo';
 
 interface Props {
   title: string;
@@ -9,12 +10,18 @@ interface Props {
   noindex?: boolean;
   nofollow?: boolean;
   canonicalUrl?: string;
+  ogImage?: string;
+  ogImageAlt?: string;
+  ogType?: string;
   extendMeta?: object;
   extendLink?: object;
   backgroundImage?: boolean;
   bodyClass?: string;
   markdown?: boolean;
-  breadcrumbs?: Array<{ name: string; url: string }>;
+  breadcrumbs?: Array<{ name: string; url?: string }>;
+  subject?: string;
+  page?: string;
+  course?: boolean;
 }
 
 const {
@@ -23,15 +30,22 @@ const {
   noindex,
   nofollow,
   canonicalUrl,
+  ogImage = 'https://cuza.pages.dev/open-graph/index.png',
+  ogImageAlt,
+  ogType = 'website',
   extendMeta,
   extendLink,
   backgroundImage = true,
   bodyClass,
   markdown,
   breadcrumbs,
+  subject,
+  page,
+  course,
 } = Astro.props;
 
-// Determine background at build time
+const collectionJsonLd =
+  subject && page && !course ? getCollectionJsonLd(subject, page) : null;
 const month = new Date().getMonth();
 let backgroundStyle = '';
 const isWinterTheme = backgroundImage && month === 11;
@@ -59,8 +73,8 @@ if (isWinterTheme) {
       openGraph={{
         basic: {
           title: title,
-          type: 'website',
-          image: 'https://cuza.pages.dev/assets/img/site-img.png',
+          type: ogType,
+          image: ogImage,
           url: Astro.url.href,
         },
         optional: {
@@ -69,19 +83,18 @@ if (isWinterTheme) {
           siteName: 'Mate-fizica',
         },
         image: {
-          alt: 'Preview cuza.pages.dev',
+          alt: ogImageAlt,
           width: 1200,
           height: 630,
         },
       }}
       twitter={{
         card: 'summary_large_image',
-        site: 'https://cuza.pages.dev',
         creator: '@DynoW',
         title: title,
         description: description,
-        image: 'https://cuza.pages.dev/assets/img/site-img.png',
-        imageAlt: 'Preview cuza.pages.dev',
+        image: ogImage,
+        imageAlt: ogImageAlt,
       }}
       extend={{
         link: [
@@ -176,36 +189,93 @@ if (isWinterTheme) {
       set:html={JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'WebSite',
-        name: 'Mate-fizica',
+        '@id': 'https://cuza.pages.dev/#website',
+        name: 'CuzaPages',
         url: 'https://cuza.pages.dev',
         description:
-          'Subiecte de BAC și admitere UPB – arhivă open-source de variante, bareme, simulări și notițe pentru bacalaureat.',
+          'Arhivă cu subiecte BAC, simulări județene, bareme și notițe pentru bacalaureat.',
         inLanguage: 'ro',
-        publisher: {
-          '@type': 'EducationalOrganization',
-          name: 'Liceul Teoretic Alexandru Ioan Cuza, București',
-          url: 'https://laicuza.ro',
-        },
+        publisher: { '@id': 'https://cuza.pages.dev/#organization' },
+      })}
+    />
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'EducationalOrganization',
+        '@id': 'https://cuza.pages.dev/#organization',
+        name: 'Liceul Teoretic Alexandru Ioan Cuza, București',
+        url: 'https://laicuza.ro',
       })}
     />
     {
       breadcrumbs && (
-        <script
-          is:inline
-          type="application/ld+json"
-          set:html={JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'BreadcrumbList',
-            itemListElement: breadcrumbs.map(
-              (crumb: { name: string; url: string }, index: number) => ({
-                '@type': 'ListItem',
-                position: index + 1,
-                name: crumb.name,
-                item: crumb.url,
-              }),
-            ),
-          })}
-        />
+        <>
+          <script
+            is:inline
+            type="application/ld+json"
+            set:html={JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'BreadcrumbList',
+              '@id': 'https://cuza.pages.dev/#breadcrumb',
+              itemListElement: breadcrumbs.map(
+                (crumb: { name: string; url?: string }, index: number) => ({
+                  '@type': 'ListItem',
+                  position: index + 1,
+                  name: crumb.name,
+                  ...(crumb.url ? { item: crumb.url } : {}),
+                }),
+              ),
+            })}
+          />
+          <script
+            is:inline
+            type="application/ld+json"
+            set:html={JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebPage',
+              '@id': canonicalUrl || Astro.url.href,
+              name: title,
+              description: description,
+              url: canonicalUrl || Astro.url.href,
+              inLanguage: 'ro',
+              isPartOf: {
+                '@id': 'https://cuza.pages.dev/#website',
+              },
+              breadcrumb: {
+                '@id': 'https://cuza.pages.dev/#breadcrumb',
+              },
+              ...(collectionJsonLd
+                ? {
+                    mainEntity: { '@id': 'https://cuza.pages.dev/#collection' },
+                  }
+                : {}),
+            })}
+          />
+          {collectionJsonLd && (
+            <script
+              is:inline
+              type="application/ld+json"
+              set:html={JSON.stringify(collectionJsonLd)}
+            />
+          )}
+          {course && (
+            <script
+              is:inline
+              type="application/ld+json"
+              set:html={JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'Course',
+                name: title.replace(/\s*\|\s*CuzaPages$/, ''),
+                url: canonicalUrl || Astro.url.href,
+                description,
+                provider: { '@id': 'https://cuza.pages.dev/#organization' },
+                inLanguage: 'ro',
+              })}
+            />
+          )}
+        </>
       )
     }
     {/* Excalidraw asset path */}
@@ -240,6 +310,11 @@ if (isWinterTheme) {
     class={`font-sans overflow-x-hidden relative min-h-svh p-0${backgroundImage ? ' backgroundImage' : ''}${bodyClass ? ` ${bodyClass}` : ''}`}
     style={backgroundStyle}
   >
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-white focus:text-slate-900 focus:p-3 focus:rounded-lg"
+      >Sari la conținut</a
+    >
     <slot />
     {
       isSpringTheme && (

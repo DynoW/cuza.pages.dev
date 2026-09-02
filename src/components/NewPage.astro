@@ -8,11 +8,8 @@ import Footer from '../components/Footer.astro';
 import CountdownTimer from './CountdownTimer.astro';
 import SiteLinks from './SiteLinks.astro';
 import { apiService } from '../api';
-import {
-  getDisplayName,
-  getFolderPriority,
-  PAGE_DISPLAY_NAMES,
-} from '../config/labels';
+import { getFolderPriority } from '../config/labels';
+import { getPageMeta, getPageTitle, getBreadcrumbs } from '../config/seo';
 import type { FileStructure } from '../types';
 
 // Helper to match List.astro folder display format
@@ -27,10 +24,7 @@ interface Props {
 const { subject, page } = Astro.props as Props;
 
 // Single request for all page data
-const [pageData, structure] = await Promise.all([
-  apiService.getPageData(subject, page),
-  apiService.getStructure(),
-]);
+const pageData = await apiService.getPageData(subject, page);
 const content: FileStructure = pageData.content;
 const years: number[] = pageData.years;
 const extra: FileStructure = pageData.extra;
@@ -43,83 +37,36 @@ const contentFolders = Object.entries(content)
   .sort((a, b) => getFolderPriority(a.key) - getFolderPriority(b.key));
 
 // ── SEO helpers ──────────────────────────────────────────────────────────────
-const subjectLabel =
-  subject === 'admitere' ? 'Admitere UPB' : getDisplayName(subject);
-const pageLabel = PAGE_DISPLAY_NAMES[page] ?? getDisplayName(page);
-const isHome = subject === 'fizica' && page === 'teoretic';
-const isBac = page === 'bac';
-const isAdmitere = subject === 'admitere';
-
-const pageTitle = isHome
-  ? 'Fizică – Subiecte + simulări județene BAC | CuzaPages'
-  : isAdmitere
-    ? `${pageLabel} – Subiecte Admitere UPB | CuzaPages`
-    : isBac
-      ? `${subjectLabel} – Subiecte BAC | CuzaPages`
-      : `${subjectLabel} ${pageLabel} – Subiecte BAC | CuzaPages`;
-
-function buildDescription(): string {
-  if (isHome) {
-    return `Cea mai mare arhivă open-source de subiecte de bacalaureat la la Fizică și alte materii – variante oficiale, simulări județene, bareme și rezolvări.`;
-  }
-  if (isAdmitere) {
-    return `Subiecte de admitere UPB (Politehnică) la ${pageLabel} – variante din anii anteriori, bareme, culegeri și modele de examen. Gratuit, fără cont.`;
-  }
-  if (isBac) {
-    return `Subiecte oficiale și variante BAC la ${subjectLabel} din toate sesiunile – arhivă open-source cu bareme și rezolvări pentru pregătirea bacalaureatului.`;
-  }
-  return `Subiecte și variante ${pageLabel} la ${subjectLabel} – arhivă open-source de subiecte BAC și admitere, cu bareme și rezolvări.`;
-}
-
-const pageHeading = isHome
-  ? 'Subiecte + Simulări Județene BAC – Fizică'
-  : isAdmitere
-    ? `Subiecte Admitere UPB – ${pageLabel}`
-    : isBac
-      ? `Subiecte BAC – ${subjectLabel}`
-      : `Subiecte BAC – ${subjectLabel} ${pageLabel}`;
-
-const pageDescription = buildDescription();
-
-const canonicalUrl = isHome
-  ? 'https://cuza.pages.dev'
-  : `https://cuza.pages.dev/${subject}/${page}`;
-
-const subjectPages = structure?.[subject] ?? [];
-const firstPage = subjectPages[0] ?? 'bac';
-const subjectBreadcrumbUrl = isHome
-  ? 'https://cuza.pages.dev'
-  : `https://cuza.pages.dev/${subject}/${firstPage}`;
-
-const breadcrumbs = [
-  { name: subjectLabel, url: subjectBreadcrumbUrl },
-  ...(isHome || page === firstPage
-    ? []
-    : [{ name: pageLabel, url: canonicalUrl }]),
-];
+const meta = getPageMeta(subject, page);
+const pageTitle = getPageTitle(meta.title);
+const pageDescription = meta.description;
+const pageHeading = meta.heading;
+const breadcrumbs = getBreadcrumbs(subject, page);
 ---
 
 <Layout
   title={pageTitle}
   description={pageDescription}
-  canonicalUrl={canonicalUrl}
+  canonicalUrl={meta.canonicalUrl}
+  ogImage={meta.ogImage}
+  ogImageAlt={meta.title}
   breadcrumbs={breadcrumbs}
+  subject={subject}
+  page={page}
 >
   <ContentContainer>
     <aside slot="left" class="flex flex-col gap-2 lg:ml-2 lg:mt-2">
       <NewNavbar />
       <SiteLinks wrapperClass="hidden lg:flex" />
     </aside>
-    <div slot="middle" class="flex flex-col gap-2">
+    <article slot="middle" aria-label={pageHeading} class="flex flex-col gap-2">
       <div class="bg-gray-100/90 rounded-3xl py-5 px-2.5 font-bold">
-        <h1
-          class="text-xl md:text-2xl font-extrabold px-4 pb-2 text-slate-800"
-        >
+        <h1 class="text-xl md:text-2xl font-extrabold px-4 pb-2 text-slate-800">
           {pageHeading}
         </h1>
         <List subject={subject} page={page} content={content} />
       </div>
-    </div>
+    </article>
     <aside
       slot="right"
       class="flex flex-col gap-2 md:mt-2 md:mr-2 md:sticky md:top-2 md:right-2"

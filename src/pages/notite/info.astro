@@ -14,9 +14,16 @@ const infoCourses = (await getCollection('info')).sort((a, b) =>
 
 <Layout
   title="Notițe informatică liceu (C++, Algoritmi) | CuzaPages"
-  description="Notițe de informatică din liceu (2022-2025) - C++, algoritmi, structuri de date, programare. Subiecte bac și probleme recapitulative pentru pregătirea bacalaureatului. Liceul Teoretic Alexandru Ioan Cuza, București."
+  description="Notițe de informatică din liceu (2022-2025) - C++, algoritmi, structuri de date, programare. Cursuri recapitulative pentru pregătirea bacalaureatului. Liceul Teoretic Alexandru Ioan Cuza, București."
   canonicalUrl="https://cuza.pages.dev/notite/info"
+  ogImage="https://cuza.pages.dev/open-graph/notite/info.png"
+  ogImageAlt="Notițe informatică liceu (C++, Algoritmi)"
   markdown
+  breadcrumbs={[
+    { name: 'Acasă', url: 'https://cuza.pages.dev' },
+    { name: 'Notițe', url: 'https://cuza.pages.dev/notite/info' },
+  ]}
+  course
 >
   <ContentContainer>
     <aside slot="left" class="flex flex-col gap-2 lg:ml-2 lg:mt-2">
