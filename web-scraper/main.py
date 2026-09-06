@@ -16,7 +16,13 @@ from pathlib import Path
 from urllib.parse import urljoin, urlparse
 import requests
 
-from utils import build_bearer_auth_header, create_retry_session, load_local_env
+from utils import (
+    batch_upload_to_r2,
+    create_retry_session,
+    get_upload_password,
+    get_worker_url,
+    load_local_env,
+)
 
 
 _RE_IUN = re.compile(r'(?:^|[_-])iun')
@@ -252,10 +258,6 @@ class BacExamScraper:
         r2_key = f"{subject}/pages/{subcategory}/{year}/{exam_type}/{clean_filename}"
         return r2_key, clean_filename
 
-    def _auth_header(self) -> dict:
-        """Build a Bearer Authorization header using the upload password."""
-        return build_bearer_auth_header('scraper', self.upload_password)
-
     def build_upload_keys(self, pdf_path: Path, exam_type: str, year: str, pascal_subcats: set | None = None) -> list[tuple[Path, str]]:
         """Build all R2 keys for a PDF, handling Pascal bareme duplication."""
         filename = pdf_path.name
@@ -279,40 +281,6 @@ class BacExamScraper:
             return entries
 
         return [(pdf_path, r2_key)]
-
-    def batch_upload_to_r2(self, uploads: list[tuple[Path, str]]) -> list[bool]:
-        """Upload multiple files to R2 in a single request. Reads/writes index once."""
-        file_handles = []
-        try:
-            files = []
-            data = []
-            for pdf_path, r2_key in uploads:
-                fh = open(pdf_path, 'rb')
-                file_handles.append(fh)
-                files.append(('file', (pdf_path.name, fh, 'application/pdf')))
-                data.append(('key', r2_key))
-
-            response = self.session.post(
-                f"{self.worker_url}/upload-batch",
-                headers=self._auth_header(),
-                files=files,
-                data=data,
-                timeout=300,
-            )
-            if response.ok:
-                body = response.json()
-                count = body.get('count', len(uploads))
-                print(f"  Batch uploaded {count} file(s)")
-                return [True] * len(uploads)
-            else:
-                print(f"  Batch upload failed ({response.status_code}): {response.text}")
-                return [False] * len(uploads)
-        except requests.RequestException as e:
-            print(f"  Batch upload error: {e}")
-            return [False] * len(uploads)
-        finally:
-            for fh in file_handles:
-                fh.close()
 
     def save_file_locally(self, pdf_path: Path, r2_key: str) -> bool:
         """Save a PDF file to local files directory using the R2 key structure."""
@@ -372,7 +340,7 @@ class BacExamScraper:
 
                 if self.upload_enabled:
                     if uploads:
-                        results = self.batch_upload_to_r2(uploads)
+                        results = batch_upload_to_r2(self.session, self.worker_url, self.upload_password, uploads)
                         uploaded_set: set[Path] = set()
                         for i, (pdf_file, _) in enumerate(uploads):
                             if results[i]:
@@ -461,15 +429,9 @@ class BacExamScraper:
         return zips_count
 
 
-def main():
+def main() -> int:
     """Entry point for the scraper."""
     load_local_env(Path(__file__).parent / '.env')
-
-    default_password = (
-        os.environ.get('UPLOAD_PASSWORD')
-        or os.environ.get('WORKER_UPLOAD_PASSWORD')
-        or ''
-    )
 
     parser = argparse.ArgumentParser(
         description='Web scraper for Romanian Baccalaureate exam files from subiecte.edu.ro'
@@ -483,13 +445,13 @@ def main():
     parser.add_argument(
         '--worker-url', '-w',
         type=str,
-        default=os.environ.get('PUBLIC_WORKER_URL', 'https://api.my-lab.ro'),
+        default=get_worker_url(),
         help='Worker URL for R2 uploads'
     )
     parser.add_argument(
         '--password', '-p',
         type=str,
-        default=default_password,
+        default=get_upload_password(),
         help='Upload password for the worker API'
     )
     parser.add_argument(
@@ -514,13 +476,11 @@ def main():
     
     if args.upload and not args.password:
         print("Error: Upload password is required in upload mode. Set UPLOAD_PASSWORD env var or use --password.")
-        import sys
-        sys.exit(1)
-    
+        return 1
+
     if args.force_archive and args.no_archive:
         print("Error: --force-archive and --no-archive cannot be used together.")
-        import sys
-        sys.exit(1)
+        return 1
     
     force_archive: bool | None = None
     if args.force_archive:
@@ -545,13 +505,11 @@ def main():
             
     except KeyboardInterrupt:
         print("\nScraping interrupted by user.")
-        import sys
-        sys.exit(1)
+        return 1
     except Exception as e:
         print(f"Error during scraping: {e}")
-        import sys
-        sys.exit(1)
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

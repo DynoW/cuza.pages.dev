@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 import argparse
-import os
 import time
 from pathlib import Path
 
 import utils
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-worker_url = os.environ.get("PUBLIC_WORKER_URL", "https://api.my-lab.ro")
 
 
 def parse_args() -> argparse.Namespace:
@@ -16,7 +14,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--subject", default="")
     parser.add_argument("--page", default="")
     parser.add_argument("--year")
-    parser.add_argument("--worker-url", default=worker_url)
+    parser.add_argument(
+        "--worker-url",
+        default=utils.get_worker_url(),
+    )
     parser.add_argument("--output-dir", default="./files")
     parser.add_argument(
         "--dry-run", action="store_true", help="List files without downloading"
@@ -72,6 +73,7 @@ def download_file(
 
 
 def main() -> None:
+    utils.load_local_env(SCRIPT_DIR / '.env')
     args = parse_args()
 
     session = utils.create_retry_session()

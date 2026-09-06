@@ -2,28 +2,14 @@
 """Trigger Cloudflare Pages deploy via worker endpoint."""
 
 import argparse
-import json
-import os
 from pathlib import Path
 
-import requests
-
-from utils import build_bearer_auth_header, create_retry_session, load_local_env
-
-
-def build_auth_header(password: str) -> dict[str, str]:
-    return build_bearer_auth_header('scraper', password)
+from utils import create_retry_session, get_upload_password, get_worker_url, load_local_env, trigger_deploy
 
 
 def main() -> int:
     script_dir = Path(__file__).resolve().parent
     load_local_env(script_dir / '.env')
-
-    default_password = (
-        os.environ.get('UPLOAD_PASSWORD')
-        or os.environ.get('WORKER_UPLOAD_PASSWORD')
-        or ''
-    )
 
     parser = argparse.ArgumentParser(
         description='Trigger deploy through worker /trigger-deploy endpoint.',
@@ -31,13 +17,13 @@ def main() -> int:
     parser.add_argument(
         '--worker-url',
         '-w',
-        default=os.environ.get('PUBLIC_WORKER_URL', 'https://api.my-lab.ro'),
+        default=get_worker_url(),
         help='Worker base URL',
     )
     parser.add_argument(
         '--password',
         '-p',
-        default=default_password,
+        default=get_upload_password(),
         help='Upload password for authenticated worker routes',
     )
     parser.add_argument(
@@ -53,36 +39,10 @@ def main() -> int:
         print('Missing upload password. Provide --password or set UPLOAD_PASSWORD in env/.env.')
         return 1
 
-    worker_url = args.worker_url.rstrip('/')
-    endpoint = f"{worker_url}/trigger-deploy"
-
-    headers = {
-        **build_auth_header(args.password),
-        'Accept': 'application/json',
-    }
-
-    print(f"Calling {endpoint} ...")
-
-    try:
-        session = create_retry_session()
-        response = session.post(endpoint, headers=headers, timeout=args.timeout)
-    except requests.RequestException as exc:
-        print(f'Deploy request failed: {exc}')
-        return 1
-
-    if response.status_code != 200:
-        print(f'Deploy failed with status {response.status_code}: {response.text}')
-        return 1
-
-    try:
-        payload = response.json()
-    except ValueError:
-        print('Deploy response is not valid JSON:')
-        print(response.text)
-        return 1
-
-    print(json.dumps(payload, indent=2, ensure_ascii=False))
-    return 0
+    session = create_retry_session()
+    if trigger_deploy(session, args.worker_url, args.password, timeout=args.timeout):
+        return 0
+    return 1
 
 
 if __name__ == '__main__':

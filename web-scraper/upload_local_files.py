@@ -3,7 +3,6 @@
 """Manual uploader for local files -> cuza worker /upload-batch endpoint."""
 
 import argparse
-import os
 from pathlib import Path
 import sys
 
@@ -11,8 +10,6 @@ try:
     import requests
 except ModuleNotFoundError:
     requests = None
-
-from utils import build_bearer_auth_header, create_retry_session, load_local_env
 
 
 def ensure_requests_installed() -> None:
@@ -24,29 +21,6 @@ def ensure_requests_installed() -> None:
     print("  python3 -m pip install -r requirements.txt")
     print("  source venv/bin/activate && python -m pip install -r requirements.txt")
     raise SystemExit(1)
-
-
-def auth_header(password: str) -> dict:
-    return build_bearer_auth_header('scraper', password)
-
-
-def trigger_deploy(session, worker_url: str, password: str) -> bool:
-    try:
-        response = session.post(
-            f"{worker_url.rstrip('/')}/trigger-deploy",
-            headers=auth_header(password),
-            timeout=30,
-        )
-    except requests.RequestException as error:
-        print(f"Deploy trigger error: {error}")
-        return False
-
-    if response.ok:
-        print("Deploy triggered successfully.")
-        return True
-
-    print(f"Deploy trigger failed ({response.status_code}): {response.text}")
-    return False
 
 
 def derive_key(file_path: Path, base_dir: Path, explicit_key: str | None) -> str:
@@ -91,19 +65,25 @@ def collect_pdf_files(inputs: list[str]) -> list[Path]:
 
 def main() -> int:
     script_dir = Path(__file__).parent
-    load_local_env(script_dir / '.env')
     ensure_requests_installed()
+
+    from utils import (
+        batch_upload_to_r2,
+        create_retry_session,
+        get_upload_password,
+        get_worker_url,
+        load_local_env,
+        trigger_deploy,
+    )
+
+    load_local_env(script_dir / '.env')
     session = create_retry_session()
 
-    default_password = (
-        os.environ.get('UPLOAD_PASSWORD')
-        or os.environ.get('WORKER_UPLOAD_PASSWORD')
-        or ''
-    )
+    default_password = get_upload_password()
 
     parser = argparse.ArgumentParser(description='Manually upload selected local PDF files to R2 via worker')
     parser.add_argument('files', nargs='+', help='One or more local files or directories to upload')
-    parser.add_argument('--worker-url', '-w', default=os.environ.get('PUBLIC_WORKER_URL', 'https://api.my-lab.ro'))
+    parser.add_argument('--worker-url', '-w', default=get_worker_url())
     parser.add_argument('--password', '-p', default=default_password, help='Upload password for the worker API')
     parser.add_argument('--base-dir', '-b', default=str(script_dir / 'files'), help='Strip this prefix from file paths to derive R2 keys (default: ./files)')
     parser.add_argument('--key', '-k', default=None, help='Explicit R2 key (allowed only when uploading one file)')
@@ -144,8 +124,6 @@ def main() -> int:
             print('  Deploy trigger would run after successful uploads.')
         return 0
 
-    success_count = 0
-    total = len(file_paths)
     batch: list[tuple[Path, str]] = []
 
     for path in file_paths:
@@ -156,39 +134,9 @@ def main() -> int:
             return 1
         batch.append((path, key))
 
-    # Batch upload all files in one request
-    file_handles = []
-    try:
-        files = []
-        data = []
-        for path, key in batch:
-            fh = path.open('rb')
-            file_handles.append(fh)
-            files.append(('file', (path.name, fh, 'application/pdf')))
-            data.append(('key', key))
+    results = batch_upload_to_r2(session, args.worker_url, args.password, batch)
 
-        response = session.post(
-            f"{args.worker_url.rstrip('/')}/upload-batch",
-            headers=auth_header(args.password),
-            files=files,
-            data=data,
-            timeout=300,
-        )
-
-        if response.ok:
-            body = response.json()
-            success_count = body.get('count', 0)
-            print(f'Uploaded {success_count}/{total} files')
-        else:
-            print(f"Batch upload failed ({response.status_code}): {response.text}")
-            return 1
-    except requests.RequestException as error:
-        print(f'Batch upload error: {error}')
-        return 1
-    finally:
-        for fh in file_handles:
-            fh.close()
-
+    success_count = sum(results)
     print(f'Completed uploads: {success_count}/{len(file_paths)}')
 
     if success_count > 0 and args.deploy:

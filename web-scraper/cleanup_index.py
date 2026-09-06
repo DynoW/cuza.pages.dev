@@ -3,16 +3,11 @@
 
 import argparse
 import json
-import os
 from pathlib import Path
 
 import requests
 
-from utils import build_bearer_auth_header, create_retry_session, load_local_env
-
-
-def build_auth_header(password: str) -> dict[str, str]:
-    return build_bearer_auth_header('scraper', password)
+from utils import build_auth_header, create_retry_session, get_upload_password, get_worker_url, load_local_env
 
 
 def main() -> int:
@@ -25,13 +20,13 @@ def main() -> int:
     parser.add_argument(
         '--worker-url',
         '-w',
-        default=os.environ.get('PUBLIC_WORKER_URL', 'https://api.my-lab.ro'),
+        default=get_worker_url(),
         help='Worker base URL',
     )
     parser.add_argument(
         '--password',
         '-p',
-        default=os.environ.get('UPLOAD_PASSWORD', ''),
+        default=get_upload_password(),
         help='Upload password for authenticated worker routes',
     )
     parser.add_argument(
@@ -57,10 +52,7 @@ def main() -> int:
     if args.dry_run:
         endpoint = f"{endpoint}?dryRun=true"
 
-    headers = {
-        **build_auth_header(args.password),
-        'Accept': 'application/json',
-    }
+    headers = build_auth_header(args.password)
 
     print(f"Calling {endpoint} ...")
 
