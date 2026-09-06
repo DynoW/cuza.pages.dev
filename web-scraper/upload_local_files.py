@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: MIT
-"""Manual uploader for local files -> cuza worker /upload-scraper endpoint."""
+"""Manual uploader for local files -> cuza worker /upload-batch endpoint."""
 
 import argparse
 import os
@@ -28,28 +28,6 @@ def ensure_requests_installed() -> None:
 
 def auth_header(password: str) -> dict:
     return build_bearer_auth_header('scraper', password)
-
-
-def upload_file(session, worker_url: str, password: str, file_path: Path, key: str) -> bool:
-    try:
-        with file_path.open('rb') as file_handle:
-            response = session.post(
-                f"{worker_url.rstrip('/')}/upload-scraper",
-                headers=auth_header(password),
-                files={'file': (file_path.name, file_handle, 'application/pdf')},
-                data={'key': key},
-                timeout=120,
-            )
-    except requests.RequestException as error:
-        print(f"Upload error for {file_path}: {error}")
-        return False
-
-    if response.ok:
-        print(f"Uploaded: {file_path} -> {key}")
-        return True
-
-    print(f"Upload failed for {file_path} ({response.status_code}): {response.text}")
-    return False
 
 
 def trigger_deploy(session, worker_url: str, password: str) -> bool:
@@ -167,15 +145,49 @@ def main() -> int:
         return 0
 
     success_count = 0
+    total = len(file_paths)
+    batch: list[tuple[Path, str]] = []
+
     for path in file_paths:
         try:
             key = derive_key(path, base_dir, args.key)
         except ValueError as error:
             print(f'Error: {error}')
             return 1
+        batch.append((path, key))
 
-        if upload_file(session, args.worker_url, args.password, path, key):
-            success_count += 1
+    # Batch upload all files in one request
+    file_handles = []
+    try:
+        files = []
+        data = []
+        for path, key in batch:
+            fh = path.open('rb')
+            file_handles.append(fh)
+            files.append(('file', (path.name, fh, 'application/pdf')))
+            data.append(('key', key))
+
+        response = session.post(
+            f"{args.worker_url.rstrip('/')}/upload-batch",
+            headers=auth_header(args.password),
+            files=files,
+            data=data,
+            timeout=300,
+        )
+
+        if response.ok:
+            body = response.json()
+            success_count = body.get('count', 0)
+            print(f'Uploaded {success_count}/{total} files')
+        else:
+            print(f"Batch upload failed ({response.status_code}): {response.text}")
+            return 1
+    except requests.RequestException as error:
+        print(f'Batch upload error: {error}')
+        return 1
+    finally:
+        for fh in file_handles:
+            fh.close()
 
     print(f'Completed uploads: {success_count}/{len(file_paths)}')
 

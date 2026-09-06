@@ -122,11 +122,8 @@ function getSubtreeAsObject(
 /**
  * Set a value at a nested path, creating intermediate objects as needed.
  */
-function setInIndex(
-  index: FileStructure,
-  segments: string[],
-  value: string,
-): void {
+function setInIndex(index: FileStructure, key: string): void {
+  const segments = key.split('/');
   let current = index;
   for (let i = 0; i < segments.length - 1; i++) {
     const seg = segments[i];
@@ -135,7 +132,7 @@ function setInIndex(
     }
     current = current[seg] as FileStructure;
   }
-  current[segments[segments.length - 1]] = value;
+  current[segments[segments.length - 1]] = key;
 }
 
 /**
@@ -506,7 +503,7 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
     });
 
     const index = await getIndex(c.env.FILES);
-    setInIndex(index, r2Key.split('/'), r2Key);
+    setInIndex(index, r2Key);
     await putIndex(c.env.FILES, index);
 
     await appendRecentChange(c.env.FILES, {
@@ -523,10 +520,14 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
   });
 
   /**
-   * POST /upload-scraper — Bulk upload from the watchtower/scraper.
+   * POST /upload-batch — Batch upload from the watchtower/scraper.
    * Accepts multipart with: password, key (R2 path), file (PDF blob).
+   * (can be repeated key/file pairs)
    */
-  app.post('/upload-scraper', async (c) => {
+  app.post('/upload-batch', async (c) => {
+    const authError = await enforceUploadAuth(c);
+    if (authError) return authError;
+
     const contentType = c.req.header('Content-Type') || '';
     if (!contentType.includes('multipart/form-data'))
       return c.text('Unsupported content type', 415);
@@ -538,36 +539,52 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
       return c.text('Failed to parse form data', 400);
     }
 
-    const authError = await enforceUploadAuth(c);
-    if (authError) {
-      return authError;
+    const keys = formData.getAll('key') as string[];
+    const files = formData.getAll('file') as unknown as File[];
+
+    if (keys.length === 0) return c.text('No files provided', 400);
+    if (keys.length !== files.length)
+      return c.text('Mismatched keys and files count', 400);
+
+    for (const key of keys) {
+      if (!key) return c.text('Empty key in batch', 400);
+      if (key.includes('..') || key.startsWith('/'))
+        return c.text(`Invalid key: ${key}`, 400);
     }
 
-    const key = formData.get('key') as string;
-    const file = formData.get('file') as unknown as File;
-
-    if (!key || !file) return c.text('Missing key or file', 400);
-
-    // Reject path traversal attempts
-    if (key.includes('..') || key.startsWith('/'))
-      return c.text('Invalid key', 400);
-
-    await c.env.FILES.put(key, file, {
-      httpMetadata: { contentType: 'application/pdf' },
-    });
-
+    // Read the index exactly once
     const index = await getIndex(c.env.FILES);
-    setInIndex(index, key.split('/'), key);
+    const changes: RecentChange[] = [];
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const file = files[i];
+
+      await c.env.FILES.put(key, file, {
+        httpMetadata: { contentType: 'application/pdf' },
+      });
+
+      setInIndex(index, key);
+
+      changes.push({
+        key,
+        filename: key.split('/').at(-1) ?? key,
+        uploadedAt: new Date().toISOString(),
+        source: 'scraper',
+      });
+    }
+
+    // Write the index exactly once
     await putIndex(c.env.FILES, index);
 
-    await appendRecentChange(c.env.FILES, {
-      key,
-      filename: key.split('/').at(-1) ?? key,
-      uploadedAt: new Date().toISOString(),
-      source: 'scraper',
+    // Append all recent changes
+    const currentChanges = await getRecentChanges(c.env.FILES);
+    const next = [...changes, ...currentChanges].slice(0, MAX_RECENT_CHANGES);
+    await c.env.FILES.put(RECENT_CHANGES_KEY, JSON.stringify(next, null, 2), {
+      httpMetadata: { contentType: 'application/json' },
     });
 
-    return c.json({ success: true, key });
+    return c.json({ success: true, count: keys.length });
   });
 
   /**
@@ -575,10 +592,8 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
    * Called by the scraper after all files have been uploaded.
    */
   app.post('/trigger-deploy', async (c) => {
-    const authHeader = c.req.header('Authorization');
-    if (!authHeader || !isValidBearerAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
-      return c.text('Unauthorized', 401);
-    }
+    const authError = await enforceUploadAuth(c);
+    if (authError) return authError;
     await triggerDeploy(c.env.DEPLOY_HOOK_URL);
     return c.json({ success: true });
   });
@@ -588,10 +603,8 @@ export function registerRoutes(app: Hono<{ Bindings: Bindings }>): void {
    * Remove stale index leaves that no longer exist as R2 objects.
    */
   app.post('/cleanup-index', async (c) => {
-    const authHeader = c.req.header('Authorization');
-    if (!authHeader || !isValidBearerAuth(authHeader, c.env.UPLOAD_PASSWORD)) {
-      return c.text('Unauthorized', 401);
-    }
+    const authError = await enforceUploadAuth(c);
+    if (authError) return authError;
 
     const dryRun = c.req.query('dryRun') === 'true';
     const index = await getIndex(c.env.FILES);

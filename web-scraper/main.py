@@ -256,26 +256,63 @@ class BacExamScraper:
         """Build a Bearer Authorization header using the upload password."""
         return build_bearer_auth_header('scraper', self.upload_password)
 
-    def upload_to_r2(self, pdf_path: Path, r2_key: str) -> bool:
-        """Upload a PDF file to R2 via the worker API."""
+    def build_upload_keys(self, pdf_path: Path, exam_type: str, year: str, pascal_subcats: set | None = None) -> list[tuple[Path, str]]:
+        """Build all R2 keys for a PDF, handling Pascal bareme duplication."""
+        filename = pdf_path.name
+        r2_key, _clean_filename = self.build_r2_key(filename, exam_type, year)
+        if not r2_key:
+            return []
+
+        subcategory = self.extract_subcategory_from_pdf_name(filename)
+
+        if subcategory in ('mate-info-bareme', 'st-nat-bareme'):
+            new_sub = subcategory.replace('bareme', '')
+            c_key = r2_key.replace(subcategory, new_sub + 'c')
+            pascal_key = r2_key.replace(subcategory, new_sub + 'pascal')
+            pascal_subcat = new_sub + 'pascal'
+            has_pascal = pascal_subcats is not None and pascal_subcat in pascal_subcats
+            entries = [(pdf_path, c_key)]
+            if has_pascal:
+                entries.append((pdf_path, pascal_key))
+            if not has_pascal:
+                print(f"  Skipping Pascal bar: no {pascal_subcat} file in batch")
+            return entries
+
+        return [(pdf_path, r2_key)]
+
+    def batch_upload_to_r2(self, uploads: list[tuple[Path, str]]) -> list[bool]:
+        """Upload multiple files to R2 in a single request. Reads/writes index once."""
+        file_handles = []
         try:
-            with open(pdf_path, 'rb') as f:
-                response = self.session.post(
-                    f"{self.worker_url}/upload-scraper",
-                    headers=self._auth_header(),
-                    files={'file': (pdf_path.name, f, 'application/pdf')},
-                    data={'key': r2_key},
-                    timeout=120,
-                )
+            files = []
+            data = []
+            for pdf_path, r2_key in uploads:
+                fh = open(pdf_path, 'rb')
+                file_handles.append(fh)
+                files.append(('file', (pdf_path.name, fh, 'application/pdf')))
+                data.append(('key', r2_key))
+
+            response = self.session.post(
+                f"{self.worker_url}/upload-batch",
+                headers=self._auth_header(),
+                files=files,
+                data=data,
+                timeout=300,
+            )
             if response.ok:
-                print(f"  Uploaded to R2: {r2_key}")
-                return True
+                body = response.json()
+                count = body.get('count', len(uploads))
+                print(f"  Batch uploaded {count} file(s)")
+                return [True] * len(uploads)
             else:
-                print(f"  Upload failed ({response.status_code}): {response.text}")
-                return False
+                print(f"  Batch upload failed ({response.status_code}): {response.text}")
+                return [False] * len(uploads)
         except requests.RequestException as e:
-            print(f"  Upload error: {e}")
-            return False
+            print(f"  Batch upload error: {e}")
+            return [False] * len(uploads)
+        finally:
+            for fh in file_handles:
+                fh.close()
 
     def save_file_locally(self, pdf_path: Path, r2_key: str) -> bool:
         """Save a PDF file to local files directory using the R2 key structure."""
@@ -288,39 +325,6 @@ class BacExamScraper:
         except OSError as e:
             print(f"  Local save error: {e}")
             return False
-
-    def upload_pdf(self, pdf_path: Path, exam_type: str, year: str, pascal_subcats: set | None = None) -> bool:
-        """Upload a single PDF to R2 or save it locally with the correct key."""
-        filename = pdf_path.name
-        r2_key, _clean_filename = self.build_r2_key(filename, exam_type, year)
-        if not r2_key:
-            print(f"Warning: Could not determine subject for: {filename}")
-            return False
-
-        subcategory = self.extract_subcategory_from_pdf_name(filename)
-
-        # Handle bareme files that need to go to both C and Pascal
-        if subcategory in ('mate-info-bareme', 'st-nat-bareme'):
-            new_sub = subcategory.replace('bareme', '')
-            c_key = r2_key.replace(subcategory, new_sub + 'c')
-            pascal_key = r2_key.replace(subcategory, new_sub + 'pascal')
-            pascal_subcat = new_sub + 'pascal'
-            has_pascal = pascal_subcats is not None and pascal_subcat in pascal_subcats
-            if self.upload_enabled:
-                ok_c = self.upload_to_r2(pdf_path, c_key)
-                ok_p = self.upload_to_r2(pdf_path, pascal_key) if has_pascal else True
-                if not has_pascal:
-                    print(f"  Skipping Pascal bar: no {pascal_subcat} file in batch")
-            else:
-                ok_c = self.save_file_locally(pdf_path, c_key)
-                ok_p = self.save_file_locally(pdf_path, pascal_key) if has_pascal else True
-                if not has_pascal:
-                    print(f"  Skipping Pascal bar: no {pascal_subcat} file in batch")
-            return ok_c or ok_p
-
-        if self.upload_enabled:
-            return self.upload_to_r2(pdf_path, r2_key)
-        return self.save_file_locally(pdf_path, r2_key)
 
     # ── ZIP processing ───────────────────────────────────────────────────────────
 
@@ -361,13 +365,25 @@ class BacExamScraper:
                     if 'pascal' in subcat:
                         pascal_subcats.add(subcat)
 
+                # Collect all upload entries for batch
+                uploads: list[tuple[Path, str]] = []
                 for pdf_file in lro_files:
-                    try:
-                        if self.upload_pdf(pdf_file, exam_type, self.current_year, pascal_subcats=pascal_subcats):
-                            uploaded_files.append(pdf_file)
-                    except Exception as e:
-                        print(f"Error processing PDF {pdf_file.name}: {e}")
-                        continue
+                    uploads.extend(self.build_upload_keys(pdf_file, exam_type, self.current_year, pascal_subcats=pascal_subcats))
+
+                if self.upload_enabled:
+                    if uploads:
+                        results = self.batch_upload_to_r2(uploads)
+                        uploaded_set: set[Path] = set()
+                        for i, (pdf_file, _) in enumerate(uploads):
+                            if results[i]:
+                                uploaded_set.add(pdf_file)
+                        uploaded_files = list(uploaded_set)
+                else:
+                    seen: set[Path] = set()
+                    for pdf_file, r2_key in uploads:
+                        if self.save_file_locally(pdf_file, r2_key):
+                            seen.add(pdf_file)
+                    uploaded_files = list(seen)
             
         except zipfile.BadZipFile as e:
             print(f"Error extracting {zip_path}: {e}")

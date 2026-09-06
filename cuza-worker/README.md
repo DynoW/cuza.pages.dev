@@ -15,12 +15,12 @@ Recent uploads
 GET /recent-changes?limit=20
 ```
 
-Returns the latest uploaded files (newest first) from both `/upload` and `/upload-scraper`.
+Returns the latest uploaded files (newest first) from both `/upload` and `/upload-batch`.
 `limit` is optional and clamped between 1 and 100.
 
 Auth
 
-Protected POST routes (`/upload`, `/upload-scraper`, `/cleanup-index`, `/trigger-deploy`) use:
+Protected POST routes (`/upload`, `/upload-batch`, `/cleanup-index`, `/trigger-deploy`) use:
 
 `Authorization: Bearer <base64(username:UPLOAD_PASSWORD)>`
 
