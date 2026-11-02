@@ -392,7 +392,7 @@ function generateUploadPath(data: UploadPathData): { r2Key: string } {
 
   if (page === 'bac') {
     const folderName = reserve ? `${title}-rezerva` : title;
-    const varSuffix = variant ? `_${variant}` : '_00';
+    const varSuffix = variant ? `_${variant}` : `_${title.toLowerCase()}`;
     return {
       r2Key: `fizica/pages/teoretic/${year}/${folderName}/E_d_fizica_teoretic_vocational_${year}_${type2}${varSuffix}.pdf`,
     };
