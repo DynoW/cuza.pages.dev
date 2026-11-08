@@ -19,7 +19,7 @@ export type Bindings = {
  * Recursive file structure stored in R2 as index.json.
  * Leaves are string URLs (R2 keys), branches are nested objects.
  */
-interface FileStructure {
+export interface FileStructure {
   [key: string]: FileStructure | string;
 }
 
@@ -29,7 +29,7 @@ const INDEX_KEY = 'index.json';
 const RECENT_CHANGES_KEY = 'recent-changes.json';
 const MAX_RECENT_CHANGES = 100;
 
-interface RecentChange {
+export interface RecentChange {
   key: string;
   filename: string;
   uploadedAt: string;
@@ -47,7 +47,7 @@ interface CleanupStats {
   listCalls: number;
 }
 
-async function getIndex(bucket: R2Bucket): Promise<FileStructure> {
+export async function getIndex(bucket: R2Bucket): Promise<FileStructure> {
   const obj = await bucket.get(INDEX_KEY);
   if (!obj) return {};
   return obj.json<FileStructure>();
@@ -59,7 +59,7 @@ async function putIndex(bucket: R2Bucket, index: FileStructure): Promise<void> {
   });
 }
 
-async function getRecentChanges(bucket: R2Bucket): Promise<RecentChange[]> {
+export async function getRecentChanges(bucket: R2Bucket): Promise<RecentChange[]> {
   const obj = await bucket.get(RECENT_CHANGES_KEY);
   if (!obj) return [];
 

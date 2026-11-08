@@ -1,0 +1,56 @@
+# CuzaPages — arhivă bac & admitere (Mate-Fizica)
+
+> Arhivă open-source (AGPL-3.0) cu subiecte, bareme, simulări județene și notițe pentru bacalaureat și admitere (Fizică, Matematică, Informatică și alte materii de liceu), în limba română. Fișierele sunt PDF-uri; metadatele sunt expuse și ca JSON.
+
+Site: https://cuza.pages.dev
+Sursă: https://github.com/DynoW/cuza.pages.dev
+Licență: AGPL-3.0-only
+
+## Pagini principale
+
+- [Acasă](https://cuza.pages.dev/): catalog pe materii și secțiuni
+- [Admitere](https://cuza.pages.dev/admitere/fizica): subiecte de admitere (fizică, info, mate)
+- [Notițe](https://cuza.pages.dev/notite/info): notițe și materiale teoretice
+
+## Materii și secțiuni
+
+- [admitere/fizica](https://cuza.pages.dev/admitere/fizica)
+- [admitere/info](https://cuza.pages.dev/admitere/info)
+- [admitere/mate](https://cuza.pages.dev/admitere/mate)
+- [anat/bac](https://cuza.pages.dev/anat/bac)
+- [bio/bac](https://cuza.pages.dev/bio/bac)
+- [chimie/anorganica](https://cuza.pages.dev/chimie/anorganica)
+- [chimie/organica](https://cuza.pages.dev/chimie/organica)
+- [economie/bac](https://cuza.pages.dev/economie/bac)
+- [filosofie/bac](https://cuza.pages.dev/filosofie/bac)
+- [fizica/tehnologic](https://cuza.pages.dev/fizica/tehnologic)
+- [fizica/teoretic](https://cuza.pages.dev/fizica/teoretic)
+- [geo/bac](https://cuza.pages.dev/geo/bac)
+- [info/mate-info-c](https://cuza.pages.dev/info/mate-info-c)
+- [info/mate-info-pascal](https://cuza.pages.dev/info/mate-info-pascal)
+- [info/st-nat-c](https://cuza.pages.dev/info/st-nat-c)
+- [info/st-nat-pascal](https://cuza.pages.dev/info/st-nat-pascal)
+- [istorie/bac](https://cuza.pages.dev/istorie/bac)
+- [logica/bac](https://cuza.pages.dev/logica/bac)
+- [mate/mate-info](https://cuza.pages.dev/mate/mate-info)
+- [mate/pedagogic](https://cuza.pages.dev/mate/pedagogic)
+- [mate/st-nat](https://cuza.pages.dev/mate/st-nat)
+- [mate/tehnologic](https://cuza.pages.dev/mate/tehnologic)
+- [psihologie/bac](https://cuza.pages.dev/psihologie/bac)
+- [romana/real](https://cuza.pages.dev/romana/real)
+- [romana/uman](https://cuza.pages.dev/romana/uman)
+- [sociologie/bac](https://cuza.pages.dev/sociologie/bac)
+
+## API JSON (public, read-only)
+
+- `GET https://api.my-lab.ro/structure` — materii → secțiuni
+- `GET https://api.my-lab.ro/index` — arborele complet al fișierelor
+- `GET https://api.my-lab.ro/files?subject=<materie>&page=<secțiune>` — fișierele pentru o secțiune
+- `GET https://api.my-lab.ro/file/<cheie>` — descarcă un fișier din arhivă
+- `GET https://api.my-lab.ro/recent-changes` — cele mai recente adăugări
+- `GET https://api.my-lab.ro/ping` — health check
+
+## Utilizare permisă
+
+Conținutul poate fi indexat pentru căutare și citat de asistenți AI, cu atribuire și link către sursă. Antrenarea modelelor pe acest conținut nu este permisă fără acord.
+

@@ -4,6 +4,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { type Bindings, registerRoutes } from './app';
+import { registerMcp } from './mcp';
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -41,5 +42,6 @@ app.use(
 );
 
 registerRoutes(app);
+registerMcp(app);
 
 export default app;
